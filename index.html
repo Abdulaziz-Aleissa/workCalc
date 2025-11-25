@@ -38,7 +38,7 @@
       background: var(--select-bg);
       color: var(--select-text);
       border: 1px solid var(--select-border);
-      
+     
     }
     
     .pill {
@@ -130,18 +130,53 @@
     const col = document.createElement('div');
     col.className = 'col-sm-6';
     col.innerHTML = `
-      <div class="card h-100">
-        <div class="card-header">${d}</div>
-        <div class="card-body">
-          ${buildSelect(id+"-in","Entry")}
-          ${buildSelect(id+"-out","Leave")}
-          ${buildSelect(id+"-dur","Or total work (hh:mm)")}
-          <div class="small" id="${id}-hint"></div>
-        </div>
+  <div class="card h-100">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      ${d}
+      <div class="btn-group btn-group-sm">
+        <button class="btn btn-outline-light entry-btn" data-day="${id}">Entry Now</button>
+        <button class="btn btn-outline-light leave-btn" data-day="${id}">Leave Now</button>
       </div>
-    `;
+    </div>
+    <div class="card-body">
+      ${buildSelect(id+"-in","Entry")}
+      ${buildSelect(id+"-out","Leave")}
+      ${buildSelect(id+"-dur","Or total work (hh:mm)")}
+      <div class="small" id="${id}-hint"></div>
+    </div>
+  </div>
+`;
+
     elCards.appendChild(col);
   });
+
+
+  function setNow(prefix, type){
+  const now = new Date();
+  const hh = String(now.getHours()).padStart(2,'0');
+  const mm = String(now.getMinutes()).padStart(2,'0');
+
+  document.getElementById(`${prefix}-${type}-hour`).value = hh;
+  document.getElementById(`${prefix}-${type}-min`).value = mm;
+
+  saveData();
+  recalc();
+}
+
+document.querySelectorAll('.entry-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const day = btn.dataset.day;
+    setNow(day, "in");
+  });
+});
+
+document.querySelectorAll('.leave-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const day = btn.dataset.day;
+    setNow(day, "out");
+  });
+});
+
 
   const selects = Array.from(document.querySelectorAll('select'));
 
@@ -264,7 +299,7 @@
     sunsetOrange: { "--bg":"#2c0a0a","--card":"#661111","--text":"#ffcc99","--accent":"#ff6600","--warn":"#ffcc00","--error":"#ff3300","--muted":"#ff9966","--select-bg":"#441111","--select-text":"#ffcc99","--select-border":"#ff6600" },
     minimalLight: { "--bg":"#f9f9f9","--card":"#ffffff","--text":"#222","--accent":"#2e8b57","--warn":"#cc8800","--error":"#cc0000","--muted":"#666","--select-bg":"#ffffff","--select-text":"#222","--select-border":"#ccc" },
     redTheme: { "--bg":"#100000","--card":"#780000","--text":"#ffcccc","--accent":"#ff0000","--warn":"#ff6600","--error":"#cc0000","--muted":"#ff9999","--select-bg":"#330000","--select-text":"#ffcccc","--select-border":"#ff0000" },
-    pinkTheme: { "--bg":"#ffd6e7","--card":"#ffe6f0","--text":"#5a3d47","--accent":"#ff80ab","--warn":"#ffb3c6","--error":"#ff4d6d","--muted":"#c48fb3","--select-bg":"#ffe6f0","--select-text":"#5a3d47","--select-border":"#ff80ab" }
+    pinkTheme: { "--bg":"#ffd6e7","--card":"#ffe6f0","--text":"#5a3d47","--accent":"#ff80ab","--warn":"#ff5680","--error":"#ff4d6d","--muted":"#c48fb3","--select-bg":"#ffe6f0","--select-text":"#5a3d47","--select-border":"#ff80ab" }
   };
 
   // Font selector
@@ -312,4 +347,3 @@
 
 </body>
 </html>
-
