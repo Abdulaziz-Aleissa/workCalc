@@ -26,7 +26,7 @@
       color: var(--text);
       border: 1px solid rgba(255,255,255,0.1);
       box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
       opacity: 0;
       transform: translateY(10px);
       animation: fadeInUp 0.4s ease forwards;
@@ -43,14 +43,26 @@
       transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
     }
     .pill {
-      display:inline-block; padding:4px 10px; border-radius:999px;
-      font-size:12px; border:1px solid rgba(148,163,184,0.2);
+      display:inline-block;
+      padding:4px 10px;
+      border-radius:999px;
+      font-size:12px;
+      border:1px solid var(--muted);
+      color: var(--muted);
       transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
     }
-    .good { color: var(--accent); border-color: rgba(34,197,94,0.4); }
-    .warn { color: var(--warn); border-color: rgba(245,158,11,0.4); }
-    .bad  { color: var(--error); border-color: rgba(239,68,68,0.4); }
-
+    .good {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+    .warn {
+      color: var(--warn);
+      border-color: var(--warn);
+    }
+    .bad  {
+      color: var(--error);
+      border-color: var(--error);
+    }
     .pill-bump {
       animation: pillBump 0.25s ease;
     }
@@ -58,10 +70,19 @@
     .progress {
       background-color: rgba(148,163,184,0.25);
       transition: background-color 0.3s ease;
+      position: relative;
+      overflow: visible;
     }
     .progress-bar {
       background-color: var(--accent);
-      transition: width 0.3s ease, background-color 0.3s ease;
+      transition: width 0.3s ease, background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+    }
+
+    /* Slight pulse on progress when day fills (kept) */
+    .progress-firework {
+      animation: progressPulse 0.45s ease-out;
+      box-shadow: 0 0 10px rgba(34,197,94,0.5);
     }
 
     .day-toggle.btn-link {
@@ -83,6 +104,12 @@
       0%   { transform: scale(1); }
       50%  { transform: scale(1.08); }
       100% { transform: scale(1); }
+    }
+
+    @keyframes progressPulse {
+      0%   { transform: scaleX(1);   box-shadow: 0 0 0 rgba(34,197,94,0); }
+      50%  { transform: scaleX(1.06); box-shadow: 0 0 14px rgba(34,197,94,0.8); }
+      100% { transform: scaleX(1);   box-shadow: 0 0 0 rgba(34,197,94,0); }
     }
 
     /* Hint box styling */
@@ -121,6 +148,125 @@
       color: var(--muted);
       margin-top: 0.25rem;
     }
+
+    /* Theme-aware outline button */
+    .theme-btn {
+      border-color: var(--accent) !important;
+      color: var(--accent) !important;
+      background-color: transparent !important;
+    }
+    .theme-btn:hover,
+    .theme-btn:focus {
+      background-color: var(--accent) !important;
+      color: var(--bg) !important;
+      border-color: var(--accent) !important;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.35);
+    }
+
+    /* Floating gear settings button (top-right) */
+    .floating-settings {
+      position: fixed;
+      top: 14px;
+      right: 14px;
+      z-index: 1080;
+      border-radius: 999px;
+      padding-inline: 10px;
+      padding-block: 6px;
+      backdrop-filter: blur(10px);
+      background-color: rgba(15,23,42,0.85) !important;
+    }
+
+    @media (max-width: 576px) {
+      .floating-settings {
+        top: 10px;
+        right: 10px;
+      }
+    }
+
+    /* === FULL PAGE FIREWORK OVERLAY === */
+    #fireworkOverlay {
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1075;
+      opacity: 0;
+    }
+
+    #fireworkOverlay.show {
+      animation: fireworkOverlayFade 0.8s ease-out forwards;
+    }
+
+    #fireworkOverlay::before,
+    #fireworkOverlay::after {
+      content: "";
+      position: absolute;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle, rgba(255,255,255,0.9) 0, rgba(255,255,255,0) 55%),
+        radial-gradient(circle at 20% 20%, rgba(34,197,94,0.9) 0, transparent 60%),
+        radial-gradient(circle at 80% 30%, rgba(56,189,248,0.9) 0, transparent 60%),
+        radial-gradient(circle at 30% 80%, rgba(244,114,182,0.9) 0, transparent 60%);
+      opacity: 0;
+    }
+
+    #fireworkOverlay.show::before {
+      top: 30%;
+      left: 20%;
+      animation: fireworkCircle 0.8s ease-out forwards;
+    }
+
+    #fireworkOverlay.show::after {
+      top: 60%;
+      right: 15%;
+      animation: fireworkCircle 0.8s ease-out forwards 0.1s;
+    }
+
+    @keyframes fireworkOverlayFade {
+      0% { opacity: 0; }
+      20% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    @keyframes fireworkCircle {
+      0% {
+        transform: scale(0.3);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(1.6);
+        opacity: 0;
+      }
+    }
+
+    /* === EMOJI POP EFFECT === */
+    .emoji-pop {
+      position: fixed;
+      z-index: 2000;
+      font-size: 1.6rem;
+      pointer-events: none;
+      animation: emojiPop 0.8s ease-out forwards;
+    }
+
+    @keyframes emojiPop {
+      0% {
+        transform: translate(-50%, 0) scale(0.7);
+        opacity: 1;
+      }
+      70% {
+        transform: translate(-50%, -30px) scale(1.1);
+        opacity: 1;
+      }
+      100% {
+        transform: translate(-50%, -50px) scale(0.9);
+        opacity: 0;
+      }
+    }
   </style>
 </head>
 <body>
@@ -138,52 +284,10 @@
         </button>
       </div>
       <div class="d-flex flex-column align-items-end mt-3 mt-sm-0" style="gap:6px;">
-
-  <div class="small text-uppercase text-muted text-end">Current time</div>
-  <div id="liveClock" class="fs-4 fw-semibold"></div>
-
-  <!-- Settings Dropdown -->
-  <div class="dropdown">
-    <button class="btn btn-outline-light btn-sm dropdown-toggle"
-            type="button"
-            id="settingsDropdown"
-            data-bs-toggle="dropdown"
-            aria-expanded="false">
-      ⚙️ Settings
-    </button>
-
-    <div class="dropdown-menu dropdown-menu-end p-3"
-         style="min-width: 240px; background: var(--card); color: var(--text); border: 1px solid rgba(255,255,255,0.15);">
-
-      <label for="themeSelect" class="form-label mb-1">Theme</label>
-      <select id="themeSelect" class="form-select mb-3">
-        <option value="cyberDark">Cyber Dark</option>
-        <option value="neonBlue">Neon Blue</option>
-        <option value="matrixGreen">Matrix Green</option>
-        <option value="sunsetOrange">Sunset Orange</option>
-        <option value="minimalLight">Minimal Light</option>
-        <option value="redTheme">Red Theme</option>
-        <option value="pinkTheme">Pink Theme</option>
-      </select>
-
-      <label for="fontSelect" class="form-label mb-1">Font</label>
-      <select id="fontSelect" class="form-select">
-        <option value="Orbitron">Orbitron</option>
-        <option value="Share Tech Mono">Share Tech Mono</option>
-        <option value="Audiowide">Audiowide</option>
-        <option value="Roboto">Roboto</option>
-        <option value="Courier New">Courier New</option>
-        <option value="Comic Sans MS">Comic Sans</option>
-      </select>
-
+        <div class="small text-uppercase text-muted text-end">Current time</div>
+        <div id="liveClock" class="fs-4 fw-semibold"></div>
+      </div>
     </div>
-  </div>
-
-</div>
-
-    </div>
-
-    
 
     <div id="cards" class="row g-3"></div>
 
@@ -195,9 +299,54 @@
         <span id="todayPlan" class="pill"
               title="Shows how much you should work on the next unfilled day to stay on track with the weekly 40h target."></span>
       </div>
-      <button id="resetBtn" class="btn btn-outline-light btn-sm">Reset Week</button>
+      <button id="resetBtn" class="btn btn-outline-light btn-sm theme-btn">Reset Week</button>
     </div>
   </div>
+
+  <!-- Floating Settings Gear (Dropdown) -->
+  <div class="dropdown">
+    <button class="btn btn-outline-light btn-sm theme-btn floating-settings dropdown-toggle"
+            type="button"
+            id="settingsDropdown"
+            data-bs-toggle="dropdown"
+            aria-expanded="false">
+      ⚙️
+    </button>
+
+    <div class="dropdown-menu dropdown-menu-end p-3"
+         aria-labelledby="settingsDropdown"
+         style="min-width: 240px; background: var(--card); color: var(--text); border: 1px solid rgba(255,255,255,0.15);">
+      <label for="themeSelect" class="form-label mb-1">Theme</label>
+      <select id="themeSelect" class="form-select mb-3">
+        <option value="cyberDark">Cyber Dark</option>
+        <option value="neonBlue">Neon Blue</option>
+        <option value="matrixGreen">Matrix Green</option>
+        <option value="sunsetOrange">Sunset Orange</option>
+        <option value="minimalLight">Minimal Light</option>
+        <option value="redTheme">Red Theme</option>
+        <option value="pinkTheme">Pink Theme</option>
+      </select>
+
+      <label for="modeSelect" class="form-label mb-1">Mode</label>
+      <select id="modeSelect" class="form-select mb-3">
+        <option value="normal">Normal</option>
+        <option value="ramadan">Ramadan</option>
+      </select>
+
+      <label for="fontSelect" class="form-label mb-1">Font</label>
+      <select id="fontSelect" class="form-select">
+        <option value="Orbitron">Orbitron</option>
+        <option value="Share Tech Mono">Share Tech Mono</option>
+        <option value="Audiowide">Audiowide</option>
+        <option value="Roboto">Roboto</option>
+        <option value="Courier New">Courier New</option>
+        <option value="Comic Sans MS">Comic Sans</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Full-page Firework Overlay -->
+  <div id="fireworkOverlay"></div>
 
   <!-- User Guide Modal -->
   <div class="modal fade" id="userGuideModal" tabindex="-1" aria-labelledby="userGuideLabel" aria-hidden="true">
@@ -309,9 +458,19 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday"];
-    const TARGET_PER_DAY = 8*60;   // 8 hours
+
     const DAY_MAX = 9*60;          // 9 hours cap
-    const WEEKLY_TARGET = 5*TARGET_PER_DAY;
+
+    const MODES = {
+      normal:  { label: 'Normal',  dailyHours: 8 }, // 8h/day
+      ramadan: { label: 'Ramadan', dailyHours: 6 }  // 6h/day
+    };
+
+    const MODE_KEY = 'workTimeCalculatorMode';
+
+    let currentMode   = 'normal';
+    let TARGET_PER_DAY = MODES[currentMode].dailyHours * 60;
+    let WEEKLY_TARGET  = 5 * TARGET_PER_DAY;
 
     const STORAGE_KEY = 'workTimeCalculator';
     const THEME_KEY   = 'workTimeCalculatorTheme';
@@ -351,11 +510,12 @@
               </button>
               <span id="${id}-delta"
                     class="pill mt-1"
-                    title="Difference from the 8h target for this day, after considering earlier days."></span>
+                    title="Difference from the daily target for this day, after considering earlier days."></span>
             </div>
             <div class="btn-group btn-group-sm ms-2">
-              <button class="btn btn-outline-light entry-btn" data-day="${id}">Entry Now</button>
-              <button class="btn btn-outline-light leave-btn" data-day="${id}">Leave Now</button>
+              <button class="btn btn-outline-light entry-btn theme-btn" data-day="${id}">Entry Now</button>
+              <button class="btn btn-outline-light leave-btn theme-btn" data-day="${id}">Leave Now</button>
+              <button class="btn btn-outline-light reset-day-btn theme-btn" data-day="${id}">Reset Day</button>
             </div>
           </div>
           <div id="${id}-collapse" class="collapse ${isFirst ? 'show' : ''}" data-bs-parent="#cards">
@@ -363,6 +523,13 @@
               ${buildSelect(id+"-in","Entry")}
               ${buildSelect(id+"-out","Leave")}
               ${buildSelect(id+"-dur","Or total work (hh:mm)")}
+
+              <div class="d-flex flex-wrap gap-2 mb-2">
+                <button class="btn btn-outline-light btn-sm theme-btn full-day-btn" data-day="${id}">
+                  Full day
+                </button>
+              </div>
+
               <div class="small" id="${id}-hint"
                    title="‘You can work X today’ tells you how much you should work today so your weekly total stays on track."></div>
               <div class="progress mt-2" style="height:6px;">
@@ -388,9 +555,25 @@
       recalc();
     }
 
+    // Emoji spawn near click
+    const EMOJIS = ["✨","🔥","💼","⏰","⚡","🎉"];
+
+    function spawnEmojiAt(x, y) {
+      const emoji = document.createElement("span");
+      emoji.className = "emoji-pop";
+      emoji.textContent = EMOJIS[Math.floor(Math.random() * EMOJIS.length)];
+      emoji.style.left = x + "px";
+      emoji.style.top  = y + "px";
+      document.body.appendChild(emoji);
+      setTimeout(() => {
+        emoji.remove();
+      }, 900);
+    }
+
     document.querySelectorAll('.entry-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', (e) => {
         const day = btn.dataset.day;
+        spawnEmojiAt(e.clientX, e.clientY);
         setNow(day, "in");
       });
     });
@@ -399,6 +582,28 @@
       btn.addEventListener('click', () => {
         const day = btn.dataset.day;
         setNow(day, "out");
+      });
+    });
+
+    // Quick preset: Full day (uses current mode's TARGET_PER_DAY)
+    document.querySelectorAll('.full-day-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const day = btn.dataset.day;
+
+        const totalMinutes = TARGET_PER_DAY;
+        const h = Math.floor(totalMinutes / 60);
+        const m = totalMinutes % 60;
+
+        document.getElementById(`${day}-dur-hour`).value = String(h).padStart(2, '0');
+        document.getElementById(`${day}-dur-min`).value  = String(m).padStart(2, '0');
+
+        document.getElementById(`${day}-in-hour`).value  = "00";
+        document.getElementById(`${day}-in-min`).value   = "00";
+        document.getElementById(`${day}-out-hour`).value = "00";
+        document.getElementById(`${day}-out-min`).value  = "00";
+
+        saveData();
+        recalc();
       });
     });
 
@@ -434,7 +639,6 @@
       const a=Math.abs(mins);
       return `${sign}${Math.floor(a/60)}h ${a%60}m`;
     }
-    // For the day diff pill (no automatic sign)
     function minsToHMNoSign(mins){
       const a=Math.abs(mins);
       return `${Math.floor(a/60)}h ${a%60}m`;
@@ -451,6 +655,23 @@
         dayChange
       };
     }
+
+    // Reset specific day
+    document.querySelectorAll('.reset-day-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const day = btn.dataset.day;
+
+        document.getElementById(`${day}-in-hour`).value = "00";
+        document.getElementById(`${day}-in-min`).value = "00";
+        document.getElementById(`${day}-out-hour`).value = "00";
+        document.getElementById(`${day}-out-min`).value = "00";
+        document.getElementById(`${day}-dur-hour`).value = "00";
+        document.getElementById(`${day}-dur-min`).value = "00";
+
+        saveData();
+        recalc();
+      });
+    });
 
     // Flex start: before 07:00 → 07:00, 09:00–09:15 → 09:00
     function flexStart(hhmm){
@@ -474,7 +695,6 @@
       if(dur!=="00:00"){
         const mins = toMin(dur);
         if (mins == null) return null;
-        // Cap at 9 hours max per day
         return Math.min(mins, DAY_MAX);
       }
       const tin=getValue(prefix+"-in");
@@ -484,7 +704,6 @@
         const mo = toMin(tout);
         if (mi == null || mo == null) return null;
         const raw = mo >= mi ? mo - mi : (24*60 - mi + mo);
-        // Cap at 9 hours max per day
         return Math.min(raw, DAY_MAX);
       }
       return null;
@@ -493,28 +712,51 @@
     function bumpPill(el){
       if(!el) return;
       el.classList.remove('pill-bump');
-      // force reflow to restart animation
       void el.offsetWidth;
       el.classList.add('pill-bump');
     }
+
+    function bumpProgress(el) {
+      if (!el) return;
+      el.classList.remove('progress-firework');
+      void el.offsetWidth;
+      el.classList.add('progress-firework');
+    }
+
+    // Full page firework trigger
+    function triggerFirework() {
+      const overlay = document.getElementById('fireworkOverlay');
+      if (!overlay) return;
+      overlay.classList.remove('show');
+      void overlay.offsetWidth;
+      overlay.classList.add('show');
+      setTimeout(() => {
+        overlay.classList.remove('show');
+      }, 900);
+    }
+
+    // Track last worked values to detect "day just filled"
+    let lastWorked = new Array(days.length).fill(null);
 
     function recalc(){
       const worked=[];
       days.forEach(d=>{worked.push(getWorked(d.toLowerCase()));});
 
-      // Base difference from 8h for each worked day
+      const justFilled = worked.map((w, idx) =>
+        lastWorked[idx] == null && w != null
+      );
+
       const baseDiffs = worked.map(w => (w == null ? null : w - TARGET_PER_DAY));
-      // Copy to a mutable array we will adjust
       const adjustedDiffs = baseDiffs.slice();
 
-      // Rule: earlier positive days cover later negative days
+      // Pass 1: earlier positive days cover later negative days
       for (let j = 0; j < adjustedDiffs.length; j++) {
         if (adjustedDiffs[j] != null && adjustedDiffs[j] < 0) {
-          let deficit = -adjustedDiffs[j]; // minutes we need to cover
+          let deficit = -adjustedDiffs[j];
           for (let k = 0; k < j; k++) {
             if (adjustedDiffs[k] != null && adjustedDiffs[k] > 0) {
               const use = Math.min(adjustedDiffs[k], deficit);
-              adjustedDiffs[k] -= use;   // consume from earlier surplus
+              adjustedDiffs[k] -= use;
               deficit -= use;
               if (deficit === 0) break;
             }
@@ -523,7 +765,22 @@
         }
       }
 
-      // Per-day calculations, hints, progress bars, and per-day diff pill
+      // Pass 2: later positive days cover earlier negative days
+      for (let j = adjustedDiffs.length - 1; j >= 0; j--) {
+        if (adjustedDiffs[j] != null && adjustedDiffs[j] > 0) {
+          let surplus = adjustedDiffs[j];
+          for (let k = j - 1; k >= 0; k--) {
+            if (adjustedDiffs[k] != null && adjustedDiffs[k] < 0) {
+              const use = Math.min(surplus, -adjustedDiffs[k]);
+              adjustedDiffs[k] += use;
+              surplus -= use;
+              if (surplus === 0) break;
+            }
+          }
+          adjustedDiffs[j] = surplus;
+        }
+      }
+
       days.forEach((d,idx)=>{
         const prefix=d.toLowerCase();
         const hint=document.getElementById(`${prefix}-hint`);
@@ -539,14 +796,14 @@
         if(target<0) target=0;
 
         if (w != null) {
-          // Day already has recorded work
           const diff = w - TARGET_PER_DAY;
+          const targetHours = TARGET_PER_DAY / 60;
           const diffLabel =
             diff === 0
-              ? 'Exact 8h'
+              ? `Exact ${targetHours}h`
               : diff > 0
-                ? `+${minsToHMNoSign(diff)} vs 8h`
-                : `-${minsToHMNoSign(-diff)} vs 8h`;
+                ? `+${minsToHMNoSign(diff)} vs ${targetHours}h`
+                : `-${minsToHMNoSign(-diff)} vs ${targetHours}h`;
 
           hint.innerHTML = `
             <div class="hint-box">
@@ -556,7 +813,7 @@
                 <span class="hint-value hint-value-strong">${minToHM(w)}</span>
               </div>
               <div class="hint-row">
-                <span class="hint-label">Compared to 8h</span>
+                <span class="hint-label">Compared to daily target</span>
                 <span class="hint-value">${diffLabel}</span>
               </div>
               <div class="hint-subtle">
@@ -570,7 +827,6 @@
           progressBar.style.width = `${ratio * 100}%`;
           progressBar.setAttribute('aria-valuenow', Math.round(ratio * 100));
         } else {
-          // Planning mode (no worked time yet)
           const startForCalc = entry !== "00:00" ? flexStart(entry) : null;
           let leaveBlock = '';
           if (entry !== "00:00") {
@@ -609,25 +865,35 @@
           progressBar.setAttribute('aria-valuenow', 0);
         }
 
-        // Per-day diff pill vs 8h (dynamic, using earlier surplus to cover later deficit)
         const adjDiff = adjustedDiffs[idx];
 
         if (w == null || adjDiff == null) {
           deltaEl.textContent = '';
           deltaEl.className = 'pill mt-1';
-        } else if (adjDiff === 0) {
+        } 
+        else if (adjDiff === 0) {
           deltaEl.textContent = 'Exact time';
           deltaEl.className = 'pill mt-1';
         } else if (adjDiff > 0) {
           deltaEl.textContent = `+${minsToHMNoSign(adjDiff)}`;
           deltaEl.className = 'pill good mt-1';
-        } else { // adjDiff < 0
+        } else {
           deltaEl.textContent = `-${minsToHMNoSign(-adjDiff)}`;
           deltaEl.className = 'pill bad mt-1';
         }
+
+        if (worked[idx] == null) {
+          deltaEl.style.visibility = "hidden";
+        } else {
+          deltaEl.style.visibility = "visible";
+        }
+
+        if (justFilled[idx]) {
+          bumpProgress(progressBar);
+          bumpPill(deltaEl);
+        }
       });
 
-      // Weekly totals
       const total=worked.reduce((a,b)=>a+(b||0),0);
       const rem=WEEKLY_TARGET-total;
       const totalEl=document.getElementById('totalWorked');
@@ -659,9 +925,27 @@
         plan.textContent='All days filled';
       }
       bumpPill(plan);
+      updateButtonsState();
+
+      // If any day just became filled → global firework
+      if (justFilled.some(Boolean)) {
+        triggerFirework();
+      }
+
+      lastWorked = worked.slice();
     }
 
-    // Theme definitions
+    function updateButtonsState() {
+      days.forEach(d => {
+        const id = d.toLowerCase();
+        const entry = getValue(id + '-in');
+        const leaveBtn = document.querySelector(`.leave-btn[data-day="${id}"]`);
+        if (leaveBtn) {
+          leaveBtn.disabled = (entry === '00:00');
+        }
+      });
+    }
+
     const themes = {
       cyberDark: { "--bg":"#0f172a","--card":"#111827","--text":"#e5e7eb","--accent":"#22c55e","--warn":"#f59e0b","--error":"#ef4444","--muted":"#94a3b8","--select-bg":"#0b1220","--select-text":"#e5e7eb","--select-border":"#444" },
       neonBlue: { "--bg":"#001f3f","--card":"#003366","--text":"#7FDBFF","--accent":"#39CCCC","--warn":"#FFDC00","--error":"#FF4136","--muted":"#AAAAAA","--select-bg":"#002244","--select-text":"#7FDBFF","--select-border":"#39CCCC" },
@@ -672,7 +956,6 @@
       pinkTheme: { "--bg":"#ffd6e7","--card":"#ffe6f0","--text":"#5a3d47","--accent":"#ff80ab","--warn":"#ff5680","--error":"#ff4d6d","--muted":"#c48fb3","--select-bg":"#ffe6f0","--select-text":"#5a3d47","--select-border":"#ff80ab" }
     };
 
-    // Font selector
     const fontSelect = document.getElementById('fontSelect');
     fontSelect.addEventListener('change', e => {
       const chosenFont = e.target.value;
@@ -680,7 +963,6 @@
       localStorage.setItem(FONT_KEY, chosenFont);
     });
 
-    // Theme selector
     const themeSelect = document.getElementById('themeSelect');
     themeSelect.addEventListener('change', e => {
       const themeName = e.target.value;
@@ -691,7 +973,22 @@
       localStorage.setItem(THEME_KEY, themeName);
     });
 
-    // Load saved theme & font
+    const modeSelect = document.getElementById('modeSelect');
+
+    function applyMode(modeName) {
+      if (!MODES[modeName]) modeName = 'normal';
+      currentMode   = modeName;
+      TARGET_PER_DAY = MODES[modeName].dailyHours * 60;
+      WEEKLY_TARGET  = 5 * TARGET_PER_DAY;
+      localStorage.setItem(MODE_KEY, modeName);
+    }
+
+    modeSelect.addEventListener('change', e => {
+      const modeName = e.target.value;
+      applyMode(modeName);
+      recalc();
+    });
+
     function loadPreferences(){
       const savedTheme = localStorage.getItem(THEME_KEY);
       if(savedTheme && themes[savedTheme]){
@@ -707,9 +1004,15 @@
         fontSelect.value = savedFont;
         document.documentElement.style.setProperty('--font', `'${savedFont}', sans-serif`);
       }
+
+      const savedMode = localStorage.getItem(MODE_KEY);
+      const modeName  = savedMode && MODES[savedMode] ? savedMode : 'normal';
+      if (modeSelect) {
+        modeSelect.value = modeName;
+      }
+      applyMode(modeName);
     }
 
-    // Live clock
     function updateClock(){
       const el = document.getElementById('liveClock');
       if(!el) return;
@@ -718,7 +1021,6 @@
       el.textContent = now.toLocaleTimeString([], opts);
     }
 
-    // Initialize
     loadData();
     loadPreferences();
     recalc();
