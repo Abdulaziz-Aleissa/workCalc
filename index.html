@@ -50,6 +50,7 @@
       border:1px solid var(--muted);
       color: var(--muted);
       transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+      white-space: nowrap; /* prevent text wrapping inside pills */
     }
     .good {
       color: var(--accent);
@@ -90,6 +91,7 @@
       text-decoration: none;
       padding-left: 0;
       padding-right: 0;
+      white-space: nowrap; /* keep day title one line */
     }
     .day-toggle.btn-link:hover {
       text-decoration: underline;
@@ -167,6 +169,11 @@
       box-shadow: 0 8px 18px rgba(0,0,0,0.35);
     }
 
+    /* Make ALL buttons single-line */
+    .btn {
+      white-space: nowrap;
+    }
+
     /* Floating gear settings button (top-right) */
     .floating-settings {
       position: fixed;
@@ -178,6 +185,7 @@
       padding-block: 6px;
       backdrop-filter: blur(10px);
       background-color: rgba(15,23,42,0.85) !important;
+      white-space: nowrap;
     }
 
     @media (max-width: 576px) {
@@ -295,9 +303,9 @@
       <div class="d-flex gap-2 mb-2 mb-sm-0">
         <span id="totalWorked" class="pill" title="Total time you have worked this week."></span>
         <span id="weeklyStatus" class="pill"
-              title="If you see ‘Over by X’, it means you have worked X minutes more than the 40h weekly target. If it says ‘X left’, that’s how many minutes you still need to work."></span>
+              title="If you see ‘Over by X’, it means you have worked X minutes more than the weekly target. If it says ‘X left’, that’s how many minutes you still need to work."></span>
         <span id="todayPlan" class="pill"
-              title="Shows how much you should work on the next unfilled day to stay on track with the weekly 40h target."></span>
+              title="Shows how much you should work on the next unfilled day to stay on track with the weekly target."></span>
       </div>
       <button id="resetBtn" class="btn btn-outline-light btn-sm theme-btn">Reset Week</button>
     </div>
@@ -359,12 +367,12 @@
         <div class="modal-body">
           <p class="mb-3">
             This tool helps you track your working hours from <strong>Sunday to Thursday</strong>.
-            Each day’s target is <strong>8 hours</strong>, so the weekly target is <strong>40 hours</strong>.
+            Each day’s target is your configured daily hours, and the weekly target is 5 × that.
           </p>
 
           <h6 class="mt-3">1. Basic idea</h6>
           <ul>
-            <li>Each day = <strong>8h</strong>, week = <strong>40h</strong>.</li>
+            <li>Each day = <strong>daily target</strong>, week = <strong>5 × daily target</strong>.</li>
             <li>You can either:
               <ul>
                 <li>Enter <strong>Entry</strong> and <strong>Leave</strong> times, or</li>
@@ -388,32 +396,10 @@
             <li>
               <strong>Sunday:</strong> You work from <strong>07:00 to 15:10</strong> → that’s
               <strong>8h 10m</strong>, so you are <strong>+10 minutes</strong>.
-              <br>
-              Sunday pill shows something like <code>+0h 10m</code>.
             </li>
             <li class="mt-2">
               <strong>Monday:</strong> Because of the +10 minutes from Sunday, your target becomes
               <strong>7h 50m</strong> instead of 8h.
-              <ul>
-                <li>If you work <strong>07:00 to 14:50</strong> (7h50):
-                  <ul>
-                    <li>Weekly total = exactly 16h → no extra and no deficit.</li>
-                    <li>Both Sunday and Monday pills show <strong>Exact time</strong>.</li>
-                  </ul>
-                </li>
-                <li>If you work <strong>07:00 to 14:55</strong> (7h55):
-                  <ul>
-                    <li>Weekly total = <strong>+5 minutes</strong>.</li>
-                    <li>Sunday pill becomes <strong>+5</strong>, Monday becomes <strong>Exact time</strong>.</li>
-                  </ul>
-                </li>
-                <li>If you work <strong>07:00 to 14:40</strong> (7h40):
-                  <ul>
-                    <li>Weekly total = <strong>-10 minutes</strong>.</li>
-                    <li>Sunday pill becomes <strong>Exact time</strong>, Monday pill shows <strong>-10</strong>.</li>
-                  </ul>
-                </li>
-              </ul>
             </li>
           </ol>
 
@@ -423,29 +409,22 @@
             <li><strong>Or total work (hh:mm)</strong>: if you just know the total hours, enter it here instead.</li>
             <li><strong>Hint box</strong>:
               <ul>
-                <li><em>Today plan</em>: tells you how much you should work to stay on track, and suggests a leave time if you enter a start time.</li>
-                <li><em>Today summary</em>: once you’ve worked, shows your actual time and how it compares to the 8h target (capped at 9h).</li>
+                <li><em>Today plan</em>: tells you how much you should work to stay on track.</li>
+                <li><em>Today summary</em>: once you’ve worked, shows your actual time vs target (capped at 9h).</li>
               </ul>
             </li>
-            <li><strong>Small progress bar</strong>: shows your progress towards the 8h goal for that day.</li>
-            <li><strong>Day pill under the day name</strong>:
-              <ul>
-                <li><code>Exact time</code> → you’re exactly on the 8h target after considering earlier days.</li>
-                <li><span class="text-success">+Xh Ym</span> → you’re ahead by that amount (green).</li>
-                <li><span class="text-danger">-Xh Ym</span> → you’re behind by that amount (red).</li>
-              </ul>
-            </li>
+            <li><strong>Small progress bar</strong>: shows your progress towards the daily target.</li>
           </ul>
 
           <h6 class="mt-3">5. Weekly summary pills</h6>
           <ul>
             <li><strong>Total</strong>: how much you worked in total this week.</li>
-            <li><strong>X left / Over by X</strong>: how far you are from the 40h target.</li>
+            <li><strong>X left / Over by X</strong>: how far you are from the weekly target.</li>
             <li><strong>Today plan</strong>: how much you should work on the next unfilled day.</li>
           </ul>
 
           <p class="mt-3 mb-0 small text-muted">
-            Tip: You can change the theme and font at any time. All your inputs and preferences are saved in your browser.
+            Tip: You can change the theme, mode (Normal/Ramadan), and font at any time. All your inputs and preferences are saved in your browser.
           </p>
         </div>
         <div class="modal-footer border-0">
@@ -497,7 +476,7 @@
     days.forEach(d => {
       const id = d.toLowerCase();
       const col = document.createElement('div');
-      col.className = 'col-sm-6';
+      col.className = 'col-12'; // ✅ 1 card per row on all devices
       const isFirst = d === "Sunday";
       col.innerHTML = `
         <div class="card h-100">
@@ -927,7 +906,6 @@
       bumpPill(plan);
       updateButtonsState();
 
-      // If any day just became filled → global firework
       if (justFilled.some(Boolean)) {
         triggerFirework();
       }
@@ -1020,6 +998,20 @@
       const opts = { hour: '2-digit', minute: '2-digit', second: '2-digit' };
       el.textContent = now.toLocaleTimeString([], opts);
     }
+
+    // ✅ Hide gear when User Guide is open, show when closed
+    document.addEventListener('DOMContentLoaded', () => {
+      const userGuideModalEl = document.getElementById('userGuideModal');
+      const settingsBtn = document.querySelector('.floating-settings');
+      if (userGuideModalEl && settingsBtn) {
+        userGuideModalEl.addEventListener('show.bs.modal', () => {
+          settingsBtn.classList.add('d-none');
+        });
+        userGuideModalEl.addEventListener('hidden.bs.modal', () => {
+          settingsBtn.classList.remove('d-none');
+        });
+      }
+    });
 
     loadData();
     loadPreferences();
