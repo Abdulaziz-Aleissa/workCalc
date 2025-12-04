@@ -192,7 +192,7 @@
       padding-inline: 10px;
       padding-block: 6px;
       backdrop-filter: blur(10px);
-      background-color: rgba(15,23,42,0.85) !important;
+      
       white-space: nowrap;
     }
 
@@ -284,32 +284,34 @@
       }
     }
 
-    /* === CLOCK STYLE === */
+    /* === CLOCK STYLE (theme-aware) === */
     .clock-wrapper {
       display: flex;
       flex-direction: column;
       align-items: flex-end;
-      gap: 4px;
-    }
-    .clock-label {
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--muted);
-      opacity: 0.85;
     }
     .clock-display {
-      padding: 4px 12px;
-      border-radius: 999px;
-      background: rgba(15,23,42,0.85);
-      border: 1px solid rgba(148,163,184,0.45);
-      box-shadow: 0 0 12px rgba(15,23,42,0.8);
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 1.1rem;
-      letter-spacing: 0.08em;
-      min-width: 135px;
-      text-align: center;
-    }
+  padding: 6px 18px;
+  border-radius: 999px;
+
+  /* Solid dark pill that works with all themes */
+  background:
+    radial-gradient(circle at 10% 0, rgba(255, 255, 255, 0), transparent 55%),
+    #181a2500;
+
+  border: 1px solid rgba(0, 0, 0, 0.11);
+
+  /* Text follows theme accent */
+  color: var(--accent);
+
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 1.1rem;
+  letter-spacing: 0.08em;
+  min-width: 135px;
+  text-align: center;
+  text-shadow: 0 0 6px rgba(0, 0, 0, 0.182);
+}
+
   </style>
 </head>
 <body>
@@ -327,7 +329,6 @@
         </button>
       </div>
       <div class="clock-wrapper mt-3 mt-sm-0">
-        <div class="clock-label">Current time</div>
         <div id="liveClock" class="clock-display"></div>
       </div>
     </div>
