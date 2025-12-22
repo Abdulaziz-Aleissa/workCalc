@@ -377,6 +377,69 @@
       </div>
     </div>
 
+    <!-- Monthly History -->
+    <div class="card mt-4" id="monthlyHistoryCard">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>📅 Monthly History</span>
+        <button class="btn btn-link day-toggle" type="button"
+                data-bs-toggle="collapse" data-bs-target="#history-collapse"
+                aria-expanded="false" aria-controls="history-collapse">
+          Toggle
+        </button>
+      </div>
+      <div id="history-collapse" class="collapse">
+        <div class="card-body">
+          <div id="weekSelector" class="mb-3">
+            <label for="weekSelect" class="form-label small">Select Week</label>
+            <select id="weekSelect" class="form-select form-select-sm">
+              <option value="current">Current Week</option>
+            </select>
+          </div>
+          <div id="weekHistoryDisplay">
+            <p class="text-muted small">No historical data available. Complete and reset weeks to build history.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Goal Streaks -->
+    <div class="card mt-4" id="streaksCard">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>🔥 Goal Streaks</span>
+        <button class="btn btn-link day-toggle" type="button"
+                data-bs-toggle="collapse" data-bs-target="#streaks-collapse"
+                aria-expanded="false" aria-controls="streaks-collapse">
+          Toggle
+        </button>
+      </div>
+      <div id="streaks-collapse" class="collapse">
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="hint-box">
+                <div class="hint-title">Current Streak</div>
+                <div class="hint-value hint-value-strong" id="currentStreak">0 days</div>
+                <div class="hint-subtle">Consecutive days meeting target</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="hint-box">
+                <div class="hint-title">Best Streak</div>
+                <div class="hint-value hint-value-strong" id="bestStreak">0 days</div>
+                <div class="hint-subtle">Longest streak ever</div>
+              </div>
+            </div>
+          </div>
+          <div class="hint-box mt-3">
+            <div class="hint-title">This Week's Progress</div>
+            <div id="weeklyStreakDisplay" class="d-flex gap-2 mt-2">
+              <!-- Dynamic streak indicators will be inserted here -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="d-flex flex-wrap justify-content-between align-items-center mt-4">
       <div class="d-flex gap-2 mb-2 mb-sm-0">
         <span id="totalWorked" class="pill" title="Total time you have worked this week."></span>
@@ -454,6 +517,19 @@
         <label class="form-check-label small" for="enableEndOfDayNotification">
           End of day target reminder
         </label>
+      </div>
+      
+      <hr class="my-3" style="border-color: rgba(255,255,255,0.15);">
+      
+      <label class="form-label mb-2">Data Management</label>
+      <div class="d-grid gap-2">
+        <button id="exportDataBtn" class="btn btn-outline-light btn-sm theme-btn">
+          📥 Export Data
+        </button>
+        <button id="importDataBtn" class="btn btn-outline-light btn-sm theme-btn">
+          📤 Import Data
+        </button>
+        <input type="file" id="importFileInput" accept=".json" style="display: none;">
       </div>
     </div>
   </div>
@@ -559,6 +635,8 @@
     const STORAGE_KEY = 'workTimeCalculator';
     const THEME_KEY   = 'workTimeCalculatorTheme';
     const FONT_KEY    = 'workTimeCalculatorFont';
+    const MONTHLY_HISTORY_KEY = 'workTimeCalculatorMonthlyHistory';
+    const STREAKS_KEY = 'workTimeCalculatorStreaks';
 
     const elCards = document.getElementById('cards');
 
@@ -715,8 +793,11 @@
 
     selects.forEach(sel => sel.addEventListener('change', () => { saveData(); recalc(); }));
     document.getElementById('resetBtn').addEventListener('click', () => {
+      saveWeekToHistory();
       selects.forEach(s => s.selectedIndex=0);
-      clearData(); recalc();
+      clearData(); 
+      recalc();
+      loadMonthlyHistory();
     });
 
     function toMin(hhmm){ if(!hhmm) return null; const [h,m]=hhmm.split(':').map(Number); return h*60+m; }
@@ -1019,6 +1100,7 @@
 
       lastWorked = worked.slice();
       updateAnalytics(worked);
+      updateStreaks();
     }
 
     function updateAnalytics(worked) {
@@ -1428,12 +1510,378 @@
       }
     }
 
+    // === MONTHLY HISTORY FUNCTIONS ===
+    function saveWeekToHistory() {
+      const worked = [];
+      days.forEach(d => { worked.push(getWorked(d.toLowerCase())); });
+      
+      // Only save if there's actual work data
+      const hasData = worked.some(w => w != null && w > 0);
+      if (!hasData) return;
+      
+      const weekData = {
+        timestamp: Date.now(),
+        date: new Date().toISOString(),
+        weekLabel: getWeekLabel(),
+        days: {},
+        total: worked.reduce((a, b) => a + (b || 0), 0),
+        target: WEEKLY_TARGET,
+        mode: currentMode
+      };
+      
+      // Save each day's data
+      days.forEach((d, idx) => {
+        if (worked[idx] != null) {
+          weekData.days[d] = worked[idx];
+        }
+      });
+      
+      // Load existing history
+      let history = [];
+      try {
+        const saved = localStorage.getItem(MONTHLY_HISTORY_KEY);
+        if (saved) {
+          history = JSON.parse(saved);
+        }
+      } catch (error) {
+        console.log('Error loading history:', error);
+      }
+      
+      // Add new week to history (limit to last 8 weeks per month)
+      history.unshift(weekData);
+      if (history.length > 8) {
+        history = history.slice(0, 8);
+      }
+      
+      try {
+        localStorage.setItem(MONTHLY_HISTORY_KEY, JSON.stringify(history));
+      } catch (error) {
+        console.log('Error saving history:', error);
+      }
+    }
+    
+    function getWeekLabel() {
+      const now = new Date();
+      const weekNum = Math.ceil((now.getDate()) / 7);
+      const monthName = now.toLocaleString('default', { month: 'short' });
+      return `${monthName} Week ${weekNum}, ${now.getFullYear()}`;
+    }
+    
+    function loadMonthlyHistory() {
+      const weekSelect = document.getElementById('weekSelect');
+      const displayDiv = document.getElementById('weekHistoryDisplay');
+      
+      if (!weekSelect || !displayDiv) return;
+      
+      try {
+        const saved = localStorage.getItem(MONTHLY_HISTORY_KEY);
+        if (!saved) {
+          displayDiv.innerHTML = '<p class="text-muted small">No historical data available. Complete and reset weeks to build history.</p>';
+          return;
+        }
+        
+        const history = JSON.parse(saved);
+        
+        // Update select dropdown
+        weekSelect.innerHTML = '<option value="current">Current Week</option>';
+        history.forEach((week, idx) => {
+          const option = document.createElement('option');
+          option.value = idx;
+          option.textContent = week.weekLabel;
+          weekSelect.appendChild(option);
+        });
+        
+        // Show current week by default
+        displayCurrentWeek();
+        
+      } catch (error) {
+        console.log('Error loading history:', error);
+        displayDiv.innerHTML = '<p class="text-muted small text-danger">Error loading historical data.</p>';
+      }
+    }
+    
+    function displayCurrentWeek() {
+      const displayDiv = document.getElementById('weekHistoryDisplay');
+      if (!displayDiv) return;
+      
+      const worked = [];
+      days.forEach(d => { worked.push(getWorked(d.toLowerCase())); });
+      const total = worked.reduce((a, b) => a + (b || 0), 0);
+      
+      let html = '<div class="hint-box">';
+      html += '<div class="hint-title">Current Week Progress</div>';
+      
+      days.forEach((d, idx) => {
+        const w = worked[idx];
+        if (w != null) {
+          html += `<div class="hint-row">
+            <span class="hint-label">${d}</span>
+            <span class="hint-value">${minToHM(w)}</span>
+          </div>`;
+        }
+      });
+      
+      html += `<div class="hint-row mt-2" style="border-top: 1px solid rgba(148,163,184,0.25); padding-top: 0.5rem;">
+        <span class="hint-label hint-value-strong">Total</span>
+        <span class="hint-value hint-value-strong">${minToHM(total)}</span>
+      </div>`;
+      html += '</div>';
+      
+      displayDiv.innerHTML = html;
+    }
+    
+    function displayHistoricalWeek(weekIndex) {
+      const displayDiv = document.getElementById('weekHistoryDisplay');
+      if (!displayDiv) return;
+      
+      try {
+        const saved = localStorage.getItem(MONTHLY_HISTORY_KEY);
+        if (!saved) return;
+        
+        const history = JSON.parse(saved);
+        const week = history[weekIndex];
+        
+        if (!week) return;
+        
+        let html = '<div class="hint-box">';
+        html += `<div class="hint-title">${week.weekLabel}</div>`;
+        
+        days.forEach(d => {
+          if (week.days[d] != null) {
+            html += `<div class="hint-row">
+              <span class="hint-label">${d}</span>
+              <span class="hint-value">${minToHM(week.days[d])}</span>
+            </div>`;
+          }
+        });
+        
+        html += `<div class="hint-row mt-2" style="border-top: 1px solid rgba(148,163,184,0.25); padding-top: 0.5rem;">
+          <span class="hint-label hint-value-strong">Total</span>
+          <span class="hint-value hint-value-strong">${minToHM(week.total)}</span>
+        </div>`;
+        html += `<div class="hint-row">
+          <span class="hint-label">Target</span>
+          <span class="hint-value">${minToHM(week.target)}</span>
+        </div>`;
+        
+        const diff = week.total - week.target;
+        const diffClass = diff >= 0 ? 'good' : 'bad';
+        html += `<div class="hint-row">
+          <span class="hint-label">Difference</span>
+          <span class="hint-value ${diffClass}">${diff >= 0 ? '+' : ''}${minToHM(diff)}</span>
+        </div>`;
+        
+        html += '</div>';
+        displayDiv.innerHTML = html;
+        
+      } catch (error) {
+        console.log('Error displaying week:', error);
+      }
+    }
+    
+    // Week selector change handler
+    document.addEventListener('DOMContentLoaded', () => {
+      const weekSelect = document.getElementById('weekSelect');
+      if (weekSelect) {
+        weekSelect.addEventListener('change', (e) => {
+          if (e.target.value === 'current') {
+            displayCurrentWeek();
+          } else {
+            displayHistoricalWeek(parseInt(e.target.value));
+          }
+        });
+      }
+    });
+
+    // === GOAL STREAKS FUNCTIONS ===
+    function loadStreaks() {
+      try {
+        const saved = localStorage.getItem(STREAKS_KEY);
+        if (saved) {
+          return JSON.parse(saved);
+        }
+      } catch (error) {
+        console.log('Error loading streaks:', error);
+      }
+      return {
+        currentStreak: 0,
+        bestStreak: 0,
+        lastCheckDate: null,
+        dailyHistory: []
+      };
+    }
+    
+    function saveStreaks(streaks) {
+      try {
+        localStorage.setItem(STREAKS_KEY, JSON.stringify(streaks));
+      } catch (error) {
+        console.log('Error saving streaks:', error);
+      }
+    }
+    
+    function updateStreaks() {
+      const worked = [];
+      days.forEach(d => { worked.push(getWorked(d.toLowerCase())); });
+      
+      const streaks = loadStreaks();
+      const today = new Date().toDateString();
+      
+      // Update daily history for the week
+      let consecutiveDays = 0;
+      for (let i = 0; i < worked.length; i++) {
+        if (worked[i] != null) {
+          const diff = worked[i] - TARGET_PER_DAY;
+          // Consider it a success if within -30 minutes of target
+          if (diff >= -30) {
+            consecutiveDays++;
+          } else {
+            consecutiveDays = 0;
+          }
+        }
+      }
+      
+      // Update current streak
+      if (consecutiveDays > 0) {
+        streaks.currentStreak = consecutiveDays;
+        
+        // Update best streak
+        if (streaks.currentStreak > streaks.bestStreak) {
+          streaks.bestStreak = streaks.currentStreak;
+        }
+      }
+      
+      saveStreaks(streaks);
+      displayStreaks(streaks, worked);
+    }
+    
+    function displayStreaks(streaks, worked) {
+      const currentStreakEl = document.getElementById('currentStreak');
+      const bestStreakEl = document.getElementById('bestStreak');
+      const weeklyStreakDisplay = document.getElementById('weeklyStreakDisplay');
+      
+      if (currentStreakEl) {
+        const dayText = streaks.currentStreak === 1 ? 'day' : 'days';
+        currentStreakEl.textContent = `${streaks.currentStreak} ${dayText}`;
+      }
+      
+      if (bestStreakEl) {
+        const dayText = streaks.bestStreak === 1 ? 'day' : 'days';
+        bestStreakEl.textContent = `${streaks.bestStreak} ${dayText}`;
+      }
+      
+      if (weeklyStreakDisplay) {
+        let html = '';
+        days.forEach((d, idx) => {
+          const w = worked[idx];
+          let icon = '⚪'; // Not filled
+          let title = 'No data';
+          
+          if (w != null) {
+            const diff = w - TARGET_PER_DAY;
+            if (diff >= -30) {
+              icon = '🔥'; // Met target
+              title = `${d}: Target met`;
+            } else {
+              icon = '❌'; // Missed target
+              title = `${d}: Missed target`;
+            }
+          }
+          
+          html += `<span title="${title}" style="font-size: 1.5rem;">${icon}</span>`;
+        });
+        
+        weeklyStreakDisplay.innerHTML = html;
+      }
+    }
+
+    // === EXPORT/IMPORT FUNCTIONS ===
+    function exportData() {
+      const data = {
+        version: '1.0',
+        exportDate: new Date().toISOString(),
+        currentWeek: localStorage.getItem(STORAGE_KEY),
+        history: localStorage.getItem(MONTHLY_HISTORY_KEY),
+        streaks: localStorage.getItem(STREAKS_KEY),
+        theme: localStorage.getItem(THEME_KEY),
+        font: localStorage.getItem(FONT_KEY),
+        mode: localStorage.getItem(MODE_KEY),
+        notifications: localStorage.getItem(NOTIFICATIONS_KEY)
+      };
+      
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `workcalc-data-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+    
+    function importData(fileContent) {
+      try {
+        const data = JSON.parse(fileContent);
+        
+        // Validate data structure
+        if (!data.version) {
+          alert('Invalid data format');
+          return;
+        }
+        
+        // Import all data
+        if (data.currentWeek) localStorage.setItem(STORAGE_KEY, data.currentWeek);
+        if (data.history) localStorage.setItem(MONTHLY_HISTORY_KEY, data.history);
+        if (data.streaks) localStorage.setItem(STREAKS_KEY, data.streaks);
+        if (data.theme) localStorage.setItem(THEME_KEY, data.theme);
+        if (data.font) localStorage.setItem(FONT_KEY, data.font);
+        if (data.mode) localStorage.setItem(MODE_KEY, data.mode);
+        if (data.notifications) localStorage.setItem(NOTIFICATIONS_KEY, data.notifications);
+        
+        alert('Data imported successfully! Page will reload.');
+        location.reload();
+        
+      } catch (error) {
+        console.log('Error importing data:', error);
+        alert('Error importing data. Please check the file format.');
+      }
+    }
+    
+    // Export/Import event listeners
+    document.addEventListener('DOMContentLoaded', () => {
+      const exportBtn = document.getElementById('exportDataBtn');
+      const importBtn = document.getElementById('importDataBtn');
+      const importInput = document.getElementById('importFileInput');
+      
+      if (exportBtn) {
+        exportBtn.addEventListener('click', exportData);
+      }
+      
+      if (importBtn && importInput) {
+        importBtn.addEventListener('click', () => {
+          importInput.click();
+        });
+        
+        importInput.addEventListener('change', (e) => {
+          const file = e.target.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+              importData(event.target.result);
+            };
+            reader.readAsText(file);
+          }
+        });
+      }
+    });
+
     loadData();
     loadPreferences();
     recalc();
     updateClock();
     setInterval(updateClock, 1000);
     initNotifications();
+    loadMonthlyHistory();
   </script>
 </body>
 </html>
