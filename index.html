@@ -440,6 +440,150 @@
       </div>
     </div>
 
+    <!-- Custom Daily Targets -->
+    <div class="card mt-4" id="customTargetsCard">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>⏰ Custom Daily Targets</span>
+        <button class="btn btn-link day-toggle" type="button"
+                data-bs-toggle="collapse" data-bs-target="#targets-collapse"
+                aria-expanded="false" aria-controls="targets-collapse">
+          Toggle
+        </button>
+      </div>
+      <div id="targets-collapse" class="collapse">
+        <div class="card-body">
+          <p class="small text-muted mb-3">Set different work hour targets for each day of the week.</p>
+          <div class="row g-2" id="customTargetsInputs">
+            <!-- Dynamic target inputs will be inserted here -->
+          </div>
+          <div class="mt-3 d-flex gap-2 flex-wrap">
+            <button id="applyCustomTargets" class="btn btn-sm btn-outline-success theme-btn">Apply Targets</button>
+            <button id="resetToDefaultTargets" class="btn btn-sm btn-outline-secondary theme-btn">Reset to Default</button>
+          </div>
+          <div class="mt-2">
+            <select id="targetPresets" class="form-select form-select-sm">
+              <option value="">Quick Presets...</option>
+              <option value="standard">Standard (8h all days)</option>
+              <option value="4day">4-Day Week (10h Mon-Thu)</option>
+              <option value="reducedFri">Reduced Friday (8h Mon-Thu, 4h Fri)</option>
+              <option value="flexWeek">Flex Week (6h, 8h, 8h, 8h, 10h)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Work Notes/Tags -->
+    <div class="card mt-4" id="workNotesCard">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>📝 Work Notes & Tags</span>
+        <button class="btn btn-link day-toggle" type="button"
+                data-bs-toggle="collapse" data-bs-target="#notes-collapse"
+                aria-expanded="false" aria-controls="notes-collapse">
+          Toggle
+        </button>
+      </div>
+      <div id="notes-collapse" class="collapse">
+        <div class="card-body">
+          <p class="small text-muted mb-3">Add notes and tags to track what you worked on each day.</p>
+          <div id="notesInputsContainer">
+            <!-- Dynamic notes inputs will be inserted here -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Overtime Tracker -->
+    <div class="card mt-4" id="overtimeCard">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>⏱️ Overtime Tracker</span>
+        <button class="btn btn-link day-toggle" type="button"
+                data-bs-toggle="collapse" data-bs-target="#overtime-collapse"
+                aria-expanded="false" aria-controls="overtime-collapse">
+          Toggle
+        </button>
+      </div>
+      <div id="overtime-collapse" class="collapse">
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="hint-box">
+                <div class="hint-title">This Week's Overtime</div>
+                <div class="hint-value hint-value-strong" id="weeklyOvertime">0h 0m</div>
+                <div class="hint-subtle">Hours beyond weekly target</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="hint-box">
+                <div class="hint-title">Monthly Overtime</div>
+                <div class="hint-value hint-value-strong" id="monthlyOvertime">0h 0m</div>
+                <div class="hint-subtle">Accumulated this month</div>
+              </div>
+            </div>
+          </div>
+          <div class="hint-box mt-3">
+            <div class="hint-title">Overtime Details</div>
+            <div id="overtimeDetails" class="small">
+              <p class="mb-1 text-muted">Work beyond your weekly target to see overtime accumulation.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Weekly Comparison Chart -->
+    <div class="card mt-4" id="comparisonCard">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>📊 Weekly Comparison</span>
+        <button class="btn btn-link day-toggle" type="button"
+                data-bs-toggle="collapse" data-bs-target="#comparison-collapse"
+                aria-expanded="false" aria-controls="comparison-collapse">
+          Toggle
+        </button>
+      </div>
+      <div id="comparison-collapse" class="collapse">
+        <div class="card-body">
+          <div class="hint-box mb-3">
+            <div class="hint-title">Trend Analysis</div>
+            <div id="trendIndicator" class="hint-value">--</div>
+          </div>
+          <div id="comparisonChart" style="position: relative; height: 200px;">
+            <!-- Visual bar chart will be rendered here -->
+          </div>
+          <div class="mt-3 small text-muted text-center" id="chartLegend">
+            Weekly totals compared over time
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Weekly Summary Report -->
+    <div class="card mt-4" id="reportCard">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>📄 Weekly Summary Report</span>
+        <button class="btn btn-link day-toggle" type="button"
+                data-bs-toggle="collapse" data-bs-target="#report-collapse"
+                aria-expanded="false" aria-controls="report-collapse">
+          Toggle
+        </button>
+      </div>
+      <div id="report-collapse" class="collapse">
+        <div class="card-body">
+          <p class="small text-muted mb-3">Generate a comprehensive weekly report with all metrics and insights.</p>
+          <div class="d-flex gap-2 flex-wrap">
+            <button id="generateReport" class="btn btn-sm btn-outline-primary theme-btn">📄 Generate Report</button>
+            <button id="printReport" class="btn btn-sm btn-outline-secondary theme-btn" disabled>🖨️ Print</button>
+            <button id="shareReport" class="btn btn-sm btn-outline-secondary theme-btn" disabled>📤 Share</button>
+          </div>
+          <div id="reportPreview" class="mt-3" style="display: none;">
+            <div class="border border-secondary rounded p-3" id="reportContent">
+              <!-- Report content will be dynamically generated here -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="d-flex flex-wrap justify-content-between align-items-center mt-4">
       <div class="d-flex gap-2 mb-2 mb-sm-0">
         <span id="totalWorked" class="pill" title="Total time you have worked this week."></span>
@@ -796,6 +940,7 @@
     document.getElementById('resetBtn').addEventListener('click', () => {
       try {
         saveWeekToHistory();
+        recordWeeklyOvertime(); // Record overtime before reset
       } catch (error) {
         console.log('Error saving week to history:', error);
       }
@@ -1106,6 +1251,8 @@
       lastWorked = worked.slice();
       updateAnalytics(worked);
       updateStreaks();
+      updateOvertime();
+      updateComparisonChart();
     }
 
     function updateAnalytics(worked) {
@@ -1878,6 +2025,492 @@
           }
         });
       }
+    });
+
+    // === CUSTOM DAILY TARGETS FUNCTIONS ===
+    const CUSTOM_TARGETS_KEY = 'workTimeCalculatorCustomTargets';
+    
+    function loadCustomTargets() {
+      const saved = localStorage.getItem(CUSTOM_TARGETS_KEY);
+      if (saved) {
+        return JSON.parse(saved);
+      }
+      // Default: 8 hours for all days
+      return {
+        sunday: 8 * 60,
+        monday: 8 * 60,
+        tuesday: 8 * 60,
+        wednesday: 8 * 60,
+        thursday: 8 * 60
+      };
+    }
+    
+    function saveCustomTargets(targets) {
+      localStorage.setItem(CUSTOM_TARGETS_KEY, JSON.stringify(targets));
+    }
+    
+    function initCustomTargets() {
+      const container = document.getElementById('customTargetsInputs');
+      if (!container) return;
+      
+      const targets = loadCustomTargets();
+      
+      let html = '';
+      days.forEach(d => {
+        const id = d.toLowerCase();
+        const hours = Math.floor(targets[id] / 60);
+        const mins = targets[id] % 60;
+        
+        html += `
+          <div class="col-12">
+            <label class="form-label small">${d}</label>
+            <div class="d-flex gap-2">
+              <input type="number" class="form-control form-control-sm" id="target-${id}-h" 
+                     min="0" max="12" value="${hours}" placeholder="Hours">
+              <input type="number" class="form-control form-control-sm" id="target-${id}-m" 
+                     min="0" max="59" value="${mins}" placeholder="Minutes">
+            </div>
+          </div>
+        `;
+      });
+      
+      container.innerHTML = html;
+      
+      // Apply button
+      const applyBtn = document.getElementById('applyCustomTargets');
+      if (applyBtn) {
+        applyBtn.addEventListener('click', () => {
+          const newTargets = {};
+          let totalTarget = 0;
+          
+          days.forEach(d => {
+            const id = d.toLowerCase();
+            const hours = parseInt(document.getElementById(`target-${id}-h`).value) || 0;
+            const mins = parseInt(document.getElementById(`target-${id}-m`).value) || 0;
+            newTargets[id] = hours * 60 + mins;
+            totalTarget += newTargets[id];
+          });
+          
+          saveCustomTargets(newTargets);
+          WEEKLY_TARGET = totalTarget;
+          recalc();
+          updateAnalytics();
+          updateStreaks();
+          updateOvertime();
+          alert('Custom targets applied successfully!');
+        });
+      }
+      
+      // Reset button
+      const resetBtn = document.getElementById('resetToDefaultTargets');
+      if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+          const defaultTargets = {
+            sunday: 8 * 60,
+            monday: 8 * 60,
+            tuesday: 8 * 60,
+            wednesday: 8 * 60,
+            thursday: 8 * 60
+          };
+          saveCustomTargets(defaultTargets);
+          WEEKLY_TARGET = 5 * 8 * 60;
+          TARGET_PER_DAY = 8 * 60;
+          initCustomTargets();
+          recalc();
+          updateAnalytics();
+          updateStreaks();
+          updateOvertime();
+          alert('Targets reset to default (8h per day)!');
+        });
+      }
+      
+      // Presets dropdown
+      const presetsSelect = document.getElementById('targetPresets');
+      if (presetsSelect) {
+        presetsSelect.addEventListener('change', (e) => {
+          const preset = e.target.value;
+          if (!preset) return;
+          
+          let presetTargets = {};
+          switch(preset) {
+            case 'standard':
+              presetTargets = { sunday: 480, monday: 480, tuesday: 480, wednesday: 480, thursday: 480 };
+              break;
+            case '4day':
+              presetTargets = { sunday: 0, monday: 600, tuesday: 600, wednesday: 600, thursday: 600 };
+              break;
+            case 'reducedFri':
+              presetTargets = { sunday: 480, monday: 480, tuesday: 480, wednesday: 480, thursday: 240 };
+              break;
+            case 'flexWeek':
+              presetTargets = { sunday: 360, monday: 480, tuesday: 480, wednesday: 480, thursday: 600 };
+              break;
+          }
+          
+          days.forEach(d => {
+            const id = d.toLowerCase();
+            const hours = Math.floor(presetTargets[id] / 60);
+            const mins = presetTargets[id] % 60;
+            document.getElementById(`target-${id}-h`).value = hours;
+            document.getElementById(`target-${id}-m`).value = mins;
+          });
+          
+          e.target.selectedIndex = 0;
+        });
+      }
+    }
+
+    // === WORK NOTES FUNCTIONS ===
+    const WORK_NOTES_KEY = 'workTimeCalculatorNotes';
+    
+    function loadWorkNotes() {
+      const saved = localStorage.getItem(WORK_NOTES_KEY);
+      return saved ? JSON.parse(saved) : {};
+    }
+    
+    function saveWorkNotes(notes) {
+      localStorage.setItem(WORK_NOTES_KEY, JSON.stringify(notes));
+    }
+    
+    function initWorkNotes() {
+      const container = document.getElementById('notesInputsContainer');
+      if (!container) return;
+      
+      const notes = loadWorkNotes();
+      
+      let html = '';
+      days.forEach(d => {
+        const id = d.toLowerCase();
+        const note = notes[id] || '';
+        
+        html += `
+          <div class="mb-3">
+            <label class="form-label small"><strong>${d}</strong></label>
+            <textarea class="form-control form-control-sm" id="note-${id}" rows="2" 
+                      placeholder="Add notes about what you worked on...">${note}</textarea>
+          </div>
+        `;
+      });
+      
+      container.innerHTML = html;
+      
+      // Auto-save on change
+      days.forEach(d => {
+        const id = d.toLowerCase();
+        const textarea = document.getElementById(`note-${id}`);
+        if (textarea) {
+          textarea.addEventListener('change', () => {
+            const notes = loadWorkNotes();
+            notes[id] = textarea.value;
+            saveWorkNotes(notes);
+          });
+        }
+      });
+    }
+
+    // === OVERTIME TRACKER FUNCTIONS ===
+    const OVERTIME_KEY = 'workTimeCalculatorOvertime';
+    
+    function loadOvertimeData() {
+      const saved = localStorage.getItem(OVERTIME_KEY);
+      return saved ? JSON.parse(saved) : { monthlyTotal: 0, weeks: [] };
+    }
+    
+    function saveOvertimeData(data) {
+      localStorage.setItem(OVERTIME_KEY, JSON.stringify(data));
+    }
+    
+    function updateOvertime() {
+      const worked = [];
+      days.forEach(d => { worked.push(getWorked(d.toLowerCase())); });
+      const totalWorked = worked.reduce((sum, w) => sum + (w || 0), 0);
+      
+      // Weekly overtime
+      const weeklyOvertime = Math.max(0, totalWorked - WEEKLY_TARGET);
+      
+      // Update display
+      const weeklyOvertimeEl = document.getElementById('weeklyOvertime');
+      const monthlyOvertimeEl = document.getElementById('monthlyOvertime');
+      const overtimeDetailsEl = document.getElementById('overtimeDetails');
+      
+      if (weeklyOvertimeEl) {
+        const h = Math.floor(weeklyOvertime / 60);
+        const m = weeklyOvertime % 60;
+        weeklyOvertimeEl.textContent = `${h}h ${m}m`;
+        weeklyOvertimeEl.classList.toggle('text-warning', weeklyOvertime > 0);
+      }
+      
+      // Load monthly data
+      const overtimeData = loadOvertimeData();
+      
+      if (monthlyOvertimeEl) {
+        const h = Math.floor(overtimeData.monthlyTotal / 60);
+        const m = overtimeData.monthlyTotal % 60;
+        monthlyOvertimeEl.textContent = `${h}h ${m}m`;
+        monthlyOvertimeEl.classList.toggle('text-warning', overtimeData.monthlyTotal > 0);
+      }
+      
+      if (overtimeDetailsEl) {
+        if (weeklyOvertime > 0) {
+          const h = Math.floor(weeklyOvertime / 60);
+          const m = weeklyOvertime % 60;
+          overtimeDetailsEl.innerHTML = `
+            <p class="mb-1">✅ You've worked <strong>${h}h ${m}m</strong> beyond your weekly target.</p>
+            <p class="mb-0 text-muted small">This overtime will be added to monthly total when you reset the week.</p>
+          `;
+        } else {
+          overtimeDetailsEl.innerHTML = `<p class="mb-1 text-muted">Work beyond your weekly target to see overtime accumulation.</p>`;
+        }
+      }
+    }
+    
+    function recordWeeklyOvertime() {
+      const worked = [];
+      days.forEach(d => { worked.push(getWorked(d.toLowerCase())); });
+      const totalWorked = worked.reduce((sum, w) => sum + (w || 0), 0);
+      const weeklyOvertime = Math.max(0, totalWorked - WEEKLY_TARGET);
+      
+      if (weeklyOvertime > 0) {
+        const overtimeData = loadOvertimeData();
+        overtimeData.monthlyTotal += weeklyOvertime;
+        overtimeData.weeks.push({
+          date: new Date().toISOString(),
+          overtime: weeklyOvertime
+        });
+        
+        // Keep only last 8 weeks
+        if (overtimeData.weeks.length > 8) {
+          overtimeData.weeks = overtimeData.weeks.slice(-8);
+        }
+        
+        saveOvertimeData(overtimeData);
+      }
+    }
+
+    // === WEEKLY COMPARISON CHART FUNCTIONS ===
+    function loadHistoryData() {
+      try {
+        const saved = localStorage.getItem(MONTHLY_HISTORY_KEY);
+        return saved ? JSON.parse(saved) : [];
+      } catch (error) {
+        console.log('Error loading history data:', error);
+        return [];
+      }
+    }
+    
+    function updateComparisonChart() {
+      const chartEl = document.getElementById('comparisonChart');
+      const trendEl = document.getElementById('trendIndicator');
+      if (!chartEl) return;
+      
+      // Get historical data
+      const history = loadHistoryData();
+      const currentWorked = days.reduce((sum, d) => sum + (getWorked(d.toLowerCase()) || 0), 0);
+      
+      const weeks = [];
+      if (history.length > 0) {
+        history.slice(-5).forEach(week => {
+          weeks.push({ label: week.weekLabel, total: week.total });
+        });
+      }
+      
+      // Add current week
+      weeks.push({ label: 'Current', total: currentWorked });
+      
+      if (weeks.length < 2) {
+        chartEl.innerHTML = '<p class="text-muted text-center small">Complete at least one week to see comparison.</p>';
+        if (trendEl) trendEl.textContent = '--';
+        return;
+      }
+      
+      // Calculate trend
+      if (trendEl && weeks.length >= 2) {
+        const prevWeek = weeks[weeks.length - 2].total;
+        const currWeek = weeks[weeks.length - 1].total;
+        const diff = currWeek - prevWeek;
+        const h = Math.floor(Math.abs(diff) / 60);
+        const m = Math.abs(diff) % 60;
+        
+        if (diff > 30) {
+          trendEl.innerHTML = `<span class="text-success">📈 +${h}h ${m}m vs last week</span>`;
+        } else if (diff < -30) {
+          trendEl.innerHTML = `<span class="text-danger">📉 -${h}h ${m}m vs last week</span>`;
+        } else {
+          trendEl.innerHTML = `<span class="text-muted">➡️ Stable (±${m}m)</span>`;
+        }
+      }
+      
+      // Draw simple bar chart
+      const maxTotal = Math.max(...weeks.map(w => w.total), WEEKLY_TARGET);
+      let chartHTML = '<div style="display: flex; align-items: flex-end; gap: 10px; height: 180px;">';
+      
+      weeks.forEach((week, idx) => {
+        const heightPercent = (week.total / maxTotal) * 100;
+        const h = Math.floor(week.total / 60);
+        const m = week.total % 60;
+        const isLast = idx === weeks.length - 1;
+        const color = week.total >= WEEKLY_TARGET ? 'var(--accent)' : 'var(--warn)';
+        
+        chartHTML += `
+          <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
+            <div style="width: 100%; height: ${heightPercent}%; background: ${color}; 
+                        border-radius: 4px; ${isLast ? 'opacity: 0.7; border: 2px dashed var(--text);' : ''}"
+                 title="${week.label}: ${h}h ${m}m"></div>
+            <div class="small text-muted mt-1" style="font-size: 0.7rem;">${week.label.length > 10 ? week.label.substring(0, 8) + '...' : week.label}</div>
+          </div>
+        `;
+      });
+      
+      chartHTML += '</div>';
+      chartEl.innerHTML = chartHTML;
+    }
+
+    // === WEEKLY SUMMARY REPORT FUNCTIONS ===
+    function generateWeeklyReport() {
+      const reportPreview = document.getElementById('reportPreview');
+      const reportContent = document.getElementById('reportContent');
+      const printBtn = document.getElementById('printReport');
+      const shareBtn = document.getElementById('shareReport');
+      
+      if (!reportContent) return;
+      
+      const worked = days.map(d => getWorked(d.toLowerCase()));
+      const totalWorked = worked.reduce((sum, w) => sum + (w || 0), 0);
+      const notes = loadWorkNotes();
+      const streaks = loadStreaks();
+      
+      let html = `
+        <div style="font-family: var(--font); color: var(--text);">
+          <h4 style="text-align: center; margin-bottom: 20px;">📄 Weekly Work Summary Report</h4>
+          <p style="text-align: center; color: var(--muted); margin-bottom: 20px;">
+            ${new Date().toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+          </p>
+          
+          <div style="border-bottom: 2px solid var(--muted); margin: 20px 0;"></div>
+          
+          <h5>📊 Overview</h5>
+          <ul>
+            <li><strong>Total Hours Worked:</strong> ${Math.floor(totalWorked / 60)}h ${totalWorked % 60}m</li>
+            <li><strong>Weekly Target:</strong> ${Math.floor(WEEKLY_TARGET / 60)}h ${WEEKLY_TARGET % 60}m</li>
+            <li><strong>Status:</strong> ${totalWorked >= WEEKLY_TARGET ? '✅ Target Met' : `⚠️ ${Math.floor((WEEKLY_TARGET - totalWorked) / 60)}h ${(WEEKLY_TARGET - totalWorked) % 60}m remaining`}</li>
+            <li><strong>Current Streak:</strong> ${streaks.currentStreak} day(s)</li>
+            <li><strong>Best Streak:</strong> ${streaks.bestStreak} day(s)</li>
+          </ul>
+          
+          <div style="border-bottom: 2px solid var(--muted); margin: 20px 0;"></div>
+          
+          <h5>📅 Daily Breakdown</h5>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr style="border-bottom: 1px solid var(--muted);">
+                <th style="text-align: left; padding: 8px;">Day</th>
+                <th style="text-align: center; padding: 8px;">Hours</th>
+                <th style="text-align: center; padding: 8px;">Status</th>
+                <th style="text-align: left; padding: 8px;">Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+      
+      days.forEach((d, idx) => {
+        const w = worked[idx];
+        const id = d.toLowerCase();
+        const note = notes[id] || '--';
+        const h = w ? Math.floor(w / 60) : 0;
+        const m = w ? w % 60 : 0;
+        const status = w ? (w >= TARGET_PER_DAY - 30 ? '✅' : '⚠️') : '⚪';
+        
+        html += `
+          <tr style="border-bottom: 1px solid rgba(148,163,184,0.3);">
+            <td style="padding: 8px;"><strong>${d}</strong></td>
+            <td style="text-align: center; padding: 8px;">${w ? `${h}h ${m}m` : '--'}</td>
+            <td style="text-align: center; padding: 8px;">${status}</td>
+            <td style="padding: 8px; font-size: 0.85rem;">${note}</td>
+          </tr>
+        `;
+      });
+      
+      html += `
+            </tbody>
+          </table>
+          
+          <div style="border-bottom: 2px solid var(--muted); margin: 20px 0;"></div>
+          
+          <h5>💡 Insights</h5>
+          <div style="background: rgba(148,163,184,0.1); padding: 15px; border-radius: 8px;">
+      `;
+      
+      // Add analytics insights
+      const filledDays = worked.filter(w => w != null);
+      if (filledDays.length > 0) {
+        const avgDaily = filledDays.reduce((sum, w) => sum + w, 0) / filledDays.length;
+        const avgH = Math.floor(avgDaily / 60);
+        const avgM = Math.round(avgDaily % 60);
+        
+        html += `<p>• Average daily hours: <strong>${avgH}h ${avgM}m</strong></p>`;
+        
+        const maxWorked = Math.max(...filledDays);
+        const maxDay = days[worked.indexOf(maxWorked)];
+        html += `<p>• Most productive day: <strong>${maxDay}</strong></p>`;
+        
+        const totalDeviation = filledDays.reduce((sum, w) => sum + Math.abs(w - TARGET_PER_DAY), 0);
+        const avgDeviation = totalDeviation / filledDays.length;
+        const score = Math.max(0, Math.round(100 - (avgDeviation / TARGET_PER_DAY) * 100));
+        html += `<p>• Consistency score: <strong>${score}%</strong></p>`;
+      } else {
+        html += `<p class="text-muted">No work data recorded this week.</p>`;
+      }
+      
+      html += `
+          </div>
+          
+          <div style="margin-top: 30px; text-align: center; color: var(--muted); font-size: 0.85rem;">
+            <p>Generated by WorkCalc on ${new Date().toLocaleString()}</p>
+          </div>
+        </div>
+      `;
+      
+      reportContent.innerHTML = html;
+      reportPreview.style.display = 'block';
+      
+      if (printBtn) {
+        printBtn.disabled = false;
+        printBtn.onclick = () => {
+          window.print();
+        };
+      }
+      
+      if (shareBtn) {
+        shareBtn.disabled = false;
+        shareBtn.onclick = () => {
+          const reportText = reportContent.innerText;
+          if (navigator.share) {
+            navigator.share({
+              title: 'Weekly Work Summary',
+              text: reportText
+            }).catch(() => {});
+          } else {
+            // Copy to clipboard
+            navigator.clipboard.writeText(reportText).then(() => {
+              alert('Report copied to clipboard!');
+            });
+          }
+        };
+      }
+    }
+    
+    // Initialize report generation
+    document.addEventListener('DOMContentLoaded', () => {
+      const generateBtn = document.getElementById('generateReport');
+      if (generateBtn) {
+        generateBtn.addEventListener('click', generateWeeklyReport);
+      }
+      
+      // Initialize all new features
+      initCustomTargets();
+      initWorkNotes();
+      updateOvertime();
+      updateComparisonChart();
     });
 
     loadData();
