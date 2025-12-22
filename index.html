@@ -1063,7 +1063,11 @@
         lastWorked[idx] == null && w != null
       );
 
-      const baseDiffs = worked.map(w => (w == null ? null : w - TARGET_PER_DAY));
+      // Load custom targets for each day
+      const customTargets = loadCustomTargets();
+      const dayTargets = days.map(d => customTargets[d.toLowerCase()]);
+
+      const baseDiffs = worked.map((w, idx) => (w == null ? null : w - dayTargets[idx]));
       const adjustedDiffs = baseDiffs.slice();
 
       // Pass 1: earlier positive days cover later negative days
@@ -1105,16 +1109,17 @@
         const deltaEl=document.getElementById(`${prefix}-delta`);
         const entry=getValue(prefix+"-in");
         const w=worked[idx];
+        const dayTarget = dayTargets[idx]; // Use custom target for this day
 
-        const plannedBefore=idx*TARGET_PER_DAY;
+        const plannedBefore = dayTargets.slice(0, idx).reduce((a, b) => a + b, 0);
         const actualBefore=worked.slice(0,idx).reduce((a,b)=>a+(b||0),0);
         const balance=actualBefore-plannedBefore;
-        let target=TARGET_PER_DAY-balance;
+        let target=dayTarget-balance;
         if(target<0) target=0;
 
         if (w != null) {
-          const diff = w - TARGET_PER_DAY;
-          const targetHours = TARGET_PER_DAY / 60;
+          const diff = w - dayTarget;
+          const targetHours = dayTarget / 60;
           const diffLabel =
             diff === 0
               ? `Exact ${targetHours}h`
@@ -1140,7 +1145,7 @@
           `;
           hint.title = "This is your actual worked time for this day (capped at 9 hours).";
 
-          const ratio = Math.min(w / TARGET_PER_DAY, 1);
+          const ratio = Math.min(w / dayTarget, 1);
           progressBar.style.width = `${ratio * 100}%`;
           progressBar.setAttribute('aria-valuenow', Math.round(ratio * 100));
         } else {
@@ -1258,6 +1263,10 @@
     function updateAnalytics(worked) {
       const filledDays = worked.filter(w => w != null);
       
+      // Load custom targets
+      const customTargets = loadCustomTargets();
+      const dayTargets = days.map(d => customTargets[d.toLowerCase()]);
+      
       // Average Daily Hours
       const avgDailyEl = document.getElementById('avgDailyHours');
       if (filledDays.length > 0) {
@@ -1287,16 +1296,22 @@
         mostProductiveEl.textContent = '--';
       }
       
-      // Consistency Score (based on how close each day is to target)
+      // Consistency Score (based on how close each day is to its target)
       const consistencyEl = document.getElementById('consistencyScore');
       if (filledDays.length > 0) {
         let totalDeviation = 0;
-        filledDays.forEach(w => {
-          totalDeviation += Math.abs(w - TARGET_PER_DAY);
+        let filledIndices = [];
+        worked.forEach((w, idx) => {
+          if (w != null) {
+            totalDeviation += Math.abs(w - dayTargets[idx]);
+            filledIndices.push(idx);
+          }
         });
         const avgDeviation = totalDeviation / filledDays.length;
+        // Calculate average target for filled days
+        const avgTarget = filledIndices.reduce((sum, idx) => sum + dayTargets[idx], 0) / filledIndices.length;
         // Score: 100% when avgDeviation is 0, decreasing as deviation increases
-        const score = Math.max(0, Math.round(100 - (avgDeviation / TARGET_PER_DAY) * 100));
+        const score = Math.max(0, Math.round(100 - (avgDeviation / avgTarget) * 100));
         consistencyEl.textContent = `${score}%`;
       } else {
         consistencyEl.textContent = '--';
@@ -1314,7 +1329,7 @@
         const undershoots = [];
         worked.forEach((w, idx) => {
           if (w != null) {
-            const diff = w - TARGET_PER_DAY;
+            const diff = w - dayTargets[idx];
             if (diff > 30) {
               overshoots.push(days[idx]);
             } else if (diff < -30) {
@@ -1332,7 +1347,15 @@
         }
         
         // Consistency advice
-        const avgDeviation = filledDays.reduce((sum, w) => sum + Math.abs(w - TARGET_PER_DAY), 0) / filledDays.length;
+        let totalDeviation = 0;
+        let filledIndices = [];
+        worked.forEach((w, idx) => {
+          if (w != null) {
+            totalDeviation += Math.abs(w - dayTargets[idx]);
+            filledIndices.push(idx);
+          }
+        });
+        const avgDeviation = totalDeviation / filledDays.length;
         if (avgDeviation < 30) {
           insights.push('💯 Excellent consistency! You\'re maintaining steady work hours.');
         } else if (avgDeviation > 60) {
@@ -1874,13 +1897,17 @@
       const worked = [];
       days.forEach(d => { worked.push(getWorked(d.toLowerCase())); });
       
+      // Load custom targets
+      const customTargets = loadCustomTargets();
+      const dayTargets = days.map(d => customTargets[d.toLowerCase()]);
+      
       const streaks = loadStreaks();
       
       // Calculate current streak from the most recent filled day backwards
       let consecutiveDays = 0;
       for (let i = worked.length - 1; i >= 0; i--) {
         if (worked[i] != null) {
-          const diff = worked[i] - TARGET_PER_DAY;
+          const diff = worked[i] - dayTargets[i];
           // Consider it a success if within -30 minutes of target
           if (diff >= -30) {
             consecutiveDays++;
@@ -1903,10 +1930,10 @@
       }
       
       saveStreaks(streaks);
-      displayStreaks(streaks, worked);
+      displayStreaks(streaks, worked, dayTargets);
     }
     
-    function displayStreaks(streaks, worked) {
+    function displayStreaks(streaks, worked, dayTargets) {
       const currentStreakEl = document.getElementById('currentStreak');
       const bestStreakEl = document.getElementById('bestStreak');
       const weeklyStreakDisplay = document.getElementById('weeklyStreakDisplay');
@@ -1929,7 +1956,7 @@
           let title = 'No data';
           
           if (w != null) {
-            const diff = w - TARGET_PER_DAY;
+            const diff = w - dayTargets[idx];
             if (diff >= -30) {
               icon = '🔥'; // Met target
               title = `${d}: Target met`;
