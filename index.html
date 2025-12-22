@@ -464,8 +464,8 @@
             <select id="targetPresets" class="form-select form-select-sm">
               <option value="">Quick Presets...</option>
               <option value="standard">Standard (8h all days)</option>
-              <option value="4day">4-Day Week (10h Mon-Thu)</option>
-              <option value="reducedFri">Reduced Friday (8h Mon-Thu, 4h Fri)</option>
+              <option value="4day">4-Day Week (10h Sun-Wed)</option>
+              <option value="reducedThu">Reduced Thursday (8h Sun-Wed, 4h Thu)</option>
               <option value="flexWeek">Flex Week (6h, 8h, 8h, 8h, 10h)</option>
             </select>
           </div>
@@ -1954,6 +1954,9 @@
         currentWeek: localStorage.getItem(STORAGE_KEY),
         history: localStorage.getItem(MONTHLY_HISTORY_KEY),
         streaks: localStorage.getItem(STREAKS_KEY),
+        customTargets: localStorage.getItem(CUSTOM_TARGETS_KEY),
+        workNotes: localStorage.getItem(WORK_NOTES_KEY),
+        overtime: localStorage.getItem(OVERTIME_KEY),
         theme: localStorage.getItem(THEME_KEY),
         font: localStorage.getItem(FONT_KEY),
         mode: localStorage.getItem(MODE_KEY),
@@ -1985,6 +1988,9 @@
         if (data.currentWeek) localStorage.setItem(STORAGE_KEY, data.currentWeek);
         if (data.history) localStorage.setItem(MONTHLY_HISTORY_KEY, data.history);
         if (data.streaks) localStorage.setItem(STREAKS_KEY, data.streaks);
+        if (data.customTargets) localStorage.setItem(CUSTOM_TARGETS_KEY, data.customTargets);
+        if (data.workNotes) localStorage.setItem(WORK_NOTES_KEY, data.workNotes);
+        if (data.overtime) localStorage.setItem(OVERTIME_KEY, data.overtime);
         if (data.theme) localStorage.setItem(THEME_KEY, data.theme);
         if (data.font) localStorage.setItem(FONT_KEY, data.font);
         if (data.mode) localStorage.setItem(MODE_KEY, data.mode);
@@ -2035,13 +2041,14 @@
       if (saved) {
         return JSON.parse(saved);
       }
-      // Default: 8 hours for all days
+      // Default: use current mode's daily hours for all days
+      const defaultHours = MODES[currentMode].dailyHours * 60;
       return {
-        sunday: 8 * 60,
-        monday: 8 * 60,
-        tuesday: 8 * 60,
-        wednesday: 8 * 60,
-        thursday: 8 * 60
+        sunday: defaultHours,
+        monday: defaultHours,
+        tuesday: defaultHours,
+        wednesday: defaultHours,
+        thursday: defaultHours
       };
     }
     
@@ -2105,22 +2112,23 @@
       const resetBtn = document.getElementById('resetToDefaultTargets');
       if (resetBtn) {
         resetBtn.addEventListener('click', () => {
+          const defaultHours = MODES[currentMode].dailyHours * 60;
           const defaultTargets = {
-            sunday: 8 * 60,
-            monday: 8 * 60,
-            tuesday: 8 * 60,
-            wednesday: 8 * 60,
-            thursday: 8 * 60
+            sunday: defaultHours,
+            monday: defaultHours,
+            tuesday: defaultHours,
+            wednesday: defaultHours,
+            thursday: defaultHours
           };
           saveCustomTargets(defaultTargets);
-          WEEKLY_TARGET = 5 * 8 * 60;
-          TARGET_PER_DAY = 8 * 60;
+          WEEKLY_TARGET = 5 * defaultHours;
+          TARGET_PER_DAY = defaultHours;
           initCustomTargets();
           recalc();
           updateAnalytics();
           updateStreaks();
           updateOvertime();
-          alert('Targets reset to default (8h per day)!');
+          alert(`Targets reset to default (${MODES[currentMode].dailyHours}h per day)!`);
         });
       }
       
@@ -2137,9 +2145,9 @@
               presetTargets = { sunday: 480, monday: 480, tuesday: 480, wednesday: 480, thursday: 480 };
               break;
             case '4day':
-              presetTargets = { sunday: 0, monday: 600, tuesday: 600, wednesday: 600, thursday: 600 };
+              presetTargets = { sunday: 600, monday: 600, tuesday: 600, wednesday: 600, thursday: 0 };
               break;
-            case 'reducedFri':
+            case 'reducedThu':
               presetTargets = { sunday: 480, monday: 480, tuesday: 480, wednesday: 480, thursday: 240 };
               break;
             case 'flexWeek':
