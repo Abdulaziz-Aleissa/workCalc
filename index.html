@@ -637,6 +637,7 @@
     const FONT_KEY    = 'workTimeCalculatorFont';
     const MONTHLY_HISTORY_KEY = 'workTimeCalculatorMonthlyHistory';
     const STREAKS_KEY = 'workTimeCalculatorStreaks';
+    const NOTIFICATIONS_KEY = 'workTimeCalculatorNotifications';
 
     const elCards = document.getElementById('cards');
 
@@ -793,7 +794,11 @@
 
     selects.forEach(sel => sel.addEventListener('change', () => { saveData(); recalc(); }));
     document.getElementById('resetBtn').addEventListener('click', () => {
-      saveWeekToHistory();
+      try {
+        saveWeekToHistory();
+      } catch (error) {
+        console.log('Error saving week to history:', error);
+      }
       selects.forEach(s => s.selectedIndex=0);
       clearData(); 
       recalc();
@@ -1331,7 +1336,6 @@
     });
 
     // === WORK-LIFE BALANCE NOTIFICATIONS ===
-    const NOTIFICATIONS_KEY = 'workTimeCalculatorNotifications';
     let notificationInterval = null;
     let lastBreakNotification = Date.now();
     let lastEndOfDayCheck = null; // Track last date we checked for end of day
@@ -1724,30 +1728,31 @@
       days.forEach(d => { worked.push(getWorked(d.toLowerCase())); });
       
       const streaks = loadStreaks();
-      const today = new Date().toDateString();
       
-      // Update daily history for the week
+      // Calculate current streak from the most recent filled day backwards
       let consecutiveDays = 0;
-      for (let i = 0; i < worked.length; i++) {
+      for (let i = worked.length - 1; i >= 0; i--) {
         if (worked[i] != null) {
           const diff = worked[i] - TARGET_PER_DAY;
           // Consider it a success if within -30 minutes of target
           if (diff >= -30) {
             consecutiveDays++;
           } else {
-            consecutiveDays = 0;
+            // Stop counting when we hit a day that missed the target
+            break;
           }
+        } else {
+          // Stop at unfilled days
+          break;
         }
       }
       
       // Update current streak
-      if (consecutiveDays > 0) {
-        streaks.currentStreak = consecutiveDays;
-        
-        // Update best streak
-        if (streaks.currentStreak > streaks.bestStreak) {
-          streaks.bestStreak = streaks.currentStreak;
-        }
+      streaks.currentStreak = consecutiveDays;
+      
+      // Update best streak
+      if (streaks.currentStreak > streaks.bestStreak) {
+        streaks.bestStreak = streaks.currentStreak;
       }
       
       saveStreaks(streaks);
