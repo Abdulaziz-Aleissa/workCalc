@@ -335,6 +335,48 @@
 
     <div id="cards" class="row g-3"></div>
 
+    <!-- Analytics Dashboard -->
+    <div class="card mt-4" id="analyticsCard">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>📊 Analytics Dashboard</span>
+        <button class="btn btn-link day-toggle" type="button"
+                data-bs-toggle="collapse" data-bs-target="#analytics-collapse"
+                aria-expanded="false" aria-controls="analytics-collapse">
+          Toggle
+        </button>
+      </div>
+      <div id="analytics-collapse" class="collapse">
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <div class="hint-box">
+                <div class="hint-title">Average Daily Hours</div>
+                <div class="hint-value hint-value-strong" id="avgDailyHours">--</div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="hint-box">
+                <div class="hint-title">Most Productive Day</div>
+                <div class="hint-value hint-value-strong" id="mostProductiveDay">--</div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="hint-box">
+                <div class="hint-title">Consistency Score</div>
+                <div class="hint-value hint-value-strong" id="consistencyScore">--</div>
+              </div>
+            </div>
+          </div>
+          <div class="hint-box mt-3">
+            <div class="hint-title">Insights & Recommendations</div>
+            <div id="analyticsInsights" class="small">
+              <p class="mb-1">Fill in your work hours to see personalized insights.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="d-flex flex-wrap justify-content-between align-items-center mt-4">
       <div class="d-flex gap-2 mb-2 mb-sm-0">
         <span id="totalWorked" class="pill" title="Total time you have worked this week."></span>
@@ -362,6 +404,7 @@
          style="min-width: 240px; background: var(--card); color: var(--text); border: 1px solid rgba(255,255,255,0.15);">
       <label for="themeSelect" class="form-label mb-1">Theme</label>
       <select id="themeSelect" class="form-select mb-3">
+        <option value="auto">Auto (System)</option>
         <option value="cyberDark">Cyber Dark</option>
         <option value="neonBlue">Neon Blue</option>
         <option value="matrixGreen">Matrix Green</option>
@@ -378,7 +421,7 @@
       </select>
 
       <label for="fontSelect" class="form-label mb-1">Font</label>
-      <select id="fontSelect" class="form-select">
+      <select id="fontSelect" class="form-select mb-3">
         <option value="Orbitron">Orbitron</option>
         <option value="Share Tech Mono">Share Tech Mono</option>
         <option value="Audiowide">Audiowide</option>
@@ -386,6 +429,32 @@
         <option value="Courier New">Courier New</option>
         <option value="Comic Sans MS">Comic Sans</option>
       </select>
+      
+      <hr class="my-3" style="border-color: rgba(255,255,255,0.15);">
+      
+      <label class="form-label mb-2">Work-Life Balance</label>
+      
+      <div class="form-check mb-2">
+        <input class="form-check-input" type="checkbox" id="enableNotifications">
+        <label class="form-check-label" for="enableNotifications">
+          Enable Reminders
+        </label>
+      </div>
+      
+      <label for="breakIntervalSelect" class="form-label mb-1 small">Break Reminder Interval</label>
+      <select id="breakIntervalSelect" class="form-select form-select-sm mb-2">
+        <option value="30">Every 30 minutes</option>
+        <option value="60" selected>Every 60 minutes</option>
+        <option value="90">Every 90 minutes</option>
+        <option value="120">Every 2 hours</option>
+      </select>
+      
+      <div class="form-check mb-2">
+        <input class="form-check-input" type="checkbox" id="enableEndOfDayNotification" checked>
+        <label class="form-check-label small" for="enableEndOfDayNotification">
+          End of day target reminder
+        </label>
+      </div>
     </div>
   </div>
 
@@ -949,6 +1018,111 @@
       }
 
       lastWorked = worked.slice();
+      updateAnalytics(worked);
+    }
+
+    function updateAnalytics(worked) {
+      const filledDays = worked.filter(w => w != null);
+      
+      // Average Daily Hours
+      const avgDailyEl = document.getElementById('avgDailyHours');
+      if (filledDays.length > 0) {
+        const avg = filledDays.reduce((a, b) => a + b, 0) / filledDays.length;
+        avgDailyEl.textContent = minToHM(Math.round(avg));
+      } else {
+        avgDailyEl.textContent = '--';
+      }
+      
+      // Most Productive Day
+      const mostProductiveEl = document.getElementById('mostProductiveDay');
+      if (filledDays.length > 0) {
+        let maxIdx = -1;
+        let maxWork = -1;
+        worked.forEach((w, idx) => {
+          if (w != null && w > maxWork) {
+            maxWork = w;
+            maxIdx = idx;
+          }
+        });
+        if (maxIdx >= 0) {
+          mostProductiveEl.textContent = `${days[maxIdx]} (${minToHM(maxWork)})`;
+        } else {
+          mostProductiveEl.textContent = '--';
+        }
+      } else {
+        mostProductiveEl.textContent = '--';
+      }
+      
+      // Consistency Score (based on how close each day is to target)
+      const consistencyEl = document.getElementById('consistencyScore');
+      if (filledDays.length > 0) {
+        let totalDeviation = 0;
+        filledDays.forEach(w => {
+          totalDeviation += Math.abs(w - TARGET_PER_DAY);
+        });
+        const avgDeviation = totalDeviation / filledDays.length;
+        // Score: 100% when avgDeviation is 0, decreasing as deviation increases
+        const score = Math.max(0, Math.round(100 - (avgDeviation / TARGET_PER_DAY) * 100));
+        consistencyEl.textContent = `${score}%`;
+      } else {
+        consistencyEl.textContent = '--';
+      }
+      
+      // Insights & Recommendations
+      const insightsEl = document.getElementById('analyticsInsights');
+      if (filledDays.length === 0) {
+        insightsEl.innerHTML = '<p class="mb-1">Fill in your work hours to see personalized insights.</p>';
+      } else {
+        let insights = [];
+        
+        // Check overshooting/undershooting
+        const overshoots = [];
+        const undershoots = [];
+        worked.forEach((w, idx) => {
+          if (w != null) {
+            const diff = w - TARGET_PER_DAY;
+            if (diff > 30) {
+              overshoots.push(days[idx]);
+            } else if (diff < -30) {
+              undershoots.push(days[idx]);
+            }
+          }
+        });
+        
+        if (overshoots.length > 0) {
+          insights.push(`✅ You exceeded targets on: <strong>${overshoots.join(', ')}</strong>`);
+        }
+        
+        if (undershoots.length > 0) {
+          insights.push(`⚠️ You were below target on: <strong>${undershoots.join(', ')}</strong>`);
+        }
+        
+        // Consistency advice
+        const avgDeviation = filledDays.reduce((sum, w) => sum + Math.abs(w - TARGET_PER_DAY), 0) / filledDays.length;
+        if (avgDeviation < 30) {
+          insights.push('💯 Excellent consistency! You\'re maintaining steady work hours.');
+        } else if (avgDeviation > 60) {
+          insights.push('📌 Tip: Try to maintain more consistent daily hours for better work-life balance.');
+        }
+        
+        // Weekly target progress
+        const total = worked.reduce((a, b) => a + (b || 0), 0);
+        const remaining = WEEKLY_TARGET - total;
+        const unfilledDays = worked.filter(w => w == null).length;
+        
+        if (remaining > 0 && unfilledDays > 0) {
+          const perDayNeeded = Math.ceil(remaining / unfilledDays);
+          insights.push(`🎯 To meet weekly target: Work <strong>${minToHM(perDayNeeded)}</strong> per remaining day.`);
+        } else if (remaining <= 0) {
+          insights.push('🎉 Congratulations! You\'ve met or exceeded your weekly target.');
+        }
+        
+        if (insights.length === 0) {
+          insights.push('📊 Keep tracking your hours for more insights.');
+        }
+        
+        insightsEl.innerHTML = insights.map(i => `<p class="mb-1">${i}</p>`).join('');
+      }
     }
 
     function updateButtonsState() {
@@ -980,13 +1154,37 @@
     });
 
     const themeSelect = document.getElementById('themeSelect');
+    
+    function applyTheme(themeName) {
+      let actualTheme = themeName;
+      
+      // Handle auto theme
+      if (themeName === 'auto') {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        actualTheme = prefersDark ? 'cyberDark' : 'minimalLight';
+      }
+      
+      const theme = themes[actualTheme];
+      if (theme) {
+        for(const key in theme){
+          document.documentElement.style.setProperty(key, theme[key]);
+        }
+      }
+    }
+    
     themeSelect.addEventListener('change', e => {
       const themeName = e.target.value;
-      const theme = themes[themeName];
-      for(const key in theme){
-        document.documentElement.style.setProperty(key, theme[key]);
-      }
+      applyTheme(themeName);
       localStorage.setItem(THEME_KEY, themeName);
+    });
+    
+    // Listen for system theme changes when in auto mode
+    const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    darkModeMediaQuery.addEventListener('change', () => {
+      const currentTheme = localStorage.getItem(THEME_KEY);
+      if (!currentTheme || currentTheme === 'auto') {
+        applyTheme('auto');
+      }
     });
 
     const modeSelect = document.getElementById('modeSelect');
@@ -1007,13 +1205,12 @@
 
     function loadPreferences(){
       const savedTheme = localStorage.getItem(THEME_KEY);
-      if(savedTheme && themes[savedTheme]){
-        themeSelect.value = savedTheme;
-        const theme = themes[savedTheme];
-        for(const key in theme){
-          document.documentElement.style.setProperty(key, theme[key]);
-        }
+      const themeToLoad = savedTheme || 'auto';
+      
+      if(themeSelect){
+        themeSelect.value = themeToLoad;
       }
+      applyTheme(themeToLoad);
 
       const savedFont = localStorage.getItem(FONT_KEY);
       if(savedFont){
@@ -1051,11 +1248,189 @@
       }
     });
 
+    // === WORK-LIFE BALANCE NOTIFICATIONS ===
+    const NOTIFICATIONS_KEY = 'workTimeCalculatorNotifications';
+    let notificationInterval = null;
+    let lastBreakNotification = Date.now();
+    
+    function initNotifications() {
+      const enableCheckbox = document.getElementById('enableNotifications');
+      const breakIntervalSelect = document.getElementById('breakIntervalSelect');
+      const endOfDayCheckbox = document.getElementById('enableEndOfDayNotification');
+      
+      // Load saved preferences
+      const savedPrefs = loadNotificationPreferences();
+      if (enableCheckbox) enableCheckbox.checked = savedPrefs.enabled;
+      if (breakIntervalSelect) breakIntervalSelect.value = savedPrefs.breakInterval;
+      if (endOfDayCheckbox) endOfDayCheckbox.checked = savedPrefs.endOfDay;
+      
+      // Request permission if enabled
+      if (savedPrefs.enabled && 'Notification' in window) {
+        if (Notification.permission === 'default') {
+          Notification.requestPermission();
+        }
+      }
+      
+      // Event listeners
+      if (enableCheckbox) {
+        enableCheckbox.addEventListener('change', () => {
+          const enabled = enableCheckbox.checked;
+          saveNotificationPreferences();
+          
+          if (enabled) {
+            requestNotificationPermission();
+            startNotificationTimer();
+          } else {
+            stopNotificationTimer();
+          }
+        });
+      }
+      
+      if (breakIntervalSelect) {
+        breakIntervalSelect.addEventListener('change', () => {
+          saveNotificationPreferences();
+          if (enableCheckbox && enableCheckbox.checked) {
+            stopNotificationTimer();
+            startNotificationTimer();
+          }
+        });
+      }
+      
+      if (endOfDayCheckbox) {
+        endOfDayCheckbox.addEventListener('change', saveNotificationPreferences);
+      }
+      
+      // Start timer if enabled
+      if (savedPrefs.enabled) {
+        startNotificationTimer();
+      }
+    }
+    
+    function loadNotificationPreferences() {
+      try {
+        const saved = localStorage.getItem(NOTIFICATIONS_KEY);
+        if (saved) {
+          return JSON.parse(saved);
+        }
+      } catch (error) {
+        console.log('Error loading notification preferences:', error);
+      }
+      return {
+        enabled: false,
+        breakInterval: 60,
+        endOfDay: true
+      };
+    }
+    
+    function saveNotificationPreferences() {
+      const enableCheckbox = document.getElementById('enableNotifications');
+      const breakIntervalSelect = document.getElementById('breakIntervalSelect');
+      const endOfDayCheckbox = document.getElementById('enableEndOfDayNotification');
+      
+      const prefs = {
+        enabled: enableCheckbox ? enableCheckbox.checked : false,
+        breakInterval: breakIntervalSelect ? parseInt(breakIntervalSelect.value) : 60,
+        endOfDay: endOfDayCheckbox ? endOfDayCheckbox.checked : true
+      };
+      
+      try {
+        localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(prefs));
+      } catch (error) {
+        console.log('Error saving notification preferences:', error);
+      }
+    }
+    
+    function requestNotificationPermission() {
+      if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission().then(permission => {
+          if (permission === 'granted') {
+            showNotification('Notifications Enabled', '✅ Work-life balance reminders are now active!');
+          }
+        });
+      }
+    }
+    
+    function showNotification(title, body, icon = '⏰') {
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification(title, {
+          body: body,
+          icon: icon,
+          badge: icon,
+          tag: 'work-calc-notification'
+        });
+      }
+    }
+    
+    function startNotificationTimer() {
+      stopNotificationTimer(); // Clear any existing timer
+      
+      const prefs = loadNotificationPreferences();
+      if (!prefs.enabled) return;
+      
+      const intervalMs = prefs.breakInterval * 60 * 1000;
+      lastBreakNotification = Date.now();
+      
+      notificationInterval = setInterval(() => {
+        checkAndSendNotifications();
+      }, 60000); // Check every minute
+    }
+    
+    function stopNotificationTimer() {
+      if (notificationInterval) {
+        clearInterval(notificationInterval);
+        notificationInterval = null;
+      }
+    }
+    
+    function checkAndSendNotifications() {
+      const prefs = loadNotificationPreferences();
+      if (!prefs.enabled) return;
+      
+      const now = Date.now();
+      const intervalMs = prefs.breakInterval * 60 * 1000;
+      
+      // Check if it's time for a break reminder
+      if (now - lastBreakNotification >= intervalMs) {
+        showNotification(
+          '🧘 Time for a Break!',
+          `You've been working for ${prefs.breakInterval} minutes. Take a short break to refresh.`
+        );
+        lastBreakNotification = now;
+      }
+      
+      // Check end of day notification
+      if (prefs.endOfDay) {
+        const currentHour = new Date().getHours();
+        const currentMinute = new Date().getMinutes();
+        
+        // Send notification at 5:00 PM (17:00)
+        if (currentHour === 17 && currentMinute === 0) {
+          const worked = [];
+          days.forEach(d => { worked.push(getWorked(d.toLowerCase())); });
+          const total = worked.reduce((a, b) => a + (b || 0), 0);
+          const remaining = WEEKLY_TARGET - total;
+          
+          if (remaining > 0) {
+            showNotification(
+              '📅 End of Day Reminder',
+              `You have ${minToHM(remaining)} remaining to meet your weekly target.`
+            );
+          } else {
+            showNotification(
+              '🎉 Great Work Today!',
+              'You\'ve met your weekly target. Have a great evening!'
+            );
+          }
+        }
+      }
+    }
+
     loadData();
     loadPreferences();
     recalc();
     updateClock();
     setInterval(updateClock, 1000);
+    initNotifications();
   </script>
 </body>
 </html>
