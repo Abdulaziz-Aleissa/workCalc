@@ -1252,6 +1252,7 @@
     const NOTIFICATIONS_KEY = 'workTimeCalculatorNotifications';
     let notificationInterval = null;
     let lastBreakNotification = Date.now();
+    let lastEndOfDayCheck = null; // Track last date we checked for end of day
     
     function initNotifications() {
       const enableCheckbox = document.getElementById('enableNotifications');
@@ -1350,12 +1351,10 @@
       }
     }
     
-    function showNotification(title, body, icon = '⏰') {
+    function showNotification(title, body) {
       if ('Notification' in window && Notification.permission === 'granted') {
         new Notification(title, {
           body: body,
-          icon: icon,
-          badge: icon,
           tag: 'work-calc-notification'
         });
       }
@@ -1398,13 +1397,15 @@
         lastBreakNotification = now;
       }
       
-      // Check end of day notification
+      // Check end of day notification (once per day between 17:00 and 17:05)
       if (prefs.endOfDay) {
-        const currentHour = new Date().getHours();
-        const currentMinute = new Date().getMinutes();
+        const currentDate = new Date();
+        const currentHour = currentDate.getHours();
+        const currentMinute = currentDate.getMinutes();
+        const today = currentDate.toDateString();
         
-        // Send notification at 5:00 PM (17:00)
-        if (currentHour === 17 && currentMinute === 0) {
+        // Send notification between 17:00 and 17:05, but only once per day
+        if (currentHour === 17 && currentMinute < 5 && lastEndOfDayCheck !== today) {
           const worked = [];
           days.forEach(d => { worked.push(getWorked(d.toLowerCase())); });
           const total = worked.reduce((a, b) => a + (b || 0), 0);
@@ -1421,6 +1422,8 @@
               'You\'ve met your weekly target. Have a great evening!'
             );
           }
+          
+          lastEndOfDayCheck = today;
         }
       }
     }
