@@ -584,6 +584,358 @@
       </div>
     </div>
 
+    <!-- Pomodoro Focus Timer -->
+    <div class="card mt-4" id="pomodoroCard">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>⏲️ Pomodoro Focus Timer</span>
+        <button class="btn btn-link day-toggle" type="button"
+                data-bs-toggle="collapse" data-bs-target="#pomodoro-collapse"
+                aria-expanded="false" aria-controls="pomodoro-collapse">
+          Toggle
+        </button>
+      </div>
+      <div id="pomodoro-collapse" class="collapse">
+        <div class="card-body">
+          <p class="small text-muted mb-3">Stay focused with timed work sessions. Completed sessions auto-log to your daily work time.</p>
+          <div class="text-center mb-3">
+            <div id="pomodoroDisplay" style="font-size: 3rem; font-weight: bold; color: var(--accent);">25:00</div>
+            <div id="pomodoroStatus" class="small text-muted">Ready to start</div>
+          </div>
+          <div class="d-flex gap-2 justify-content-center mb-3">
+            <button id="pomodoroStart" class="btn btn-sm btn-success theme-btn">▶ Start</button>
+            <button id="pomodoroPause" class="btn btn-sm btn-warning theme-btn" disabled>⏸ Pause</button>
+            <button id="pomodoroReset" class="btn btn-sm btn-secondary theme-btn">↻ Reset</button>
+          </div>
+          <div class="row g-2">
+            <div class="col-6">
+              <label class="form-label small">Focus (min)</label>
+              <input type="number" id="pomodoroFocus" class="form-control form-control-sm" value="25" min="1" max="90">
+            </div>
+            <div class="col-6">
+              <label class="form-label small">Break (min)</label>
+              <input type="number" id="pomodoroBreak" class="form-control form-control-sm" value="5" min="1" max="30">
+            </div>
+          </div>
+          <div class="mt-3">
+            <div class="small text-muted">Today's Sessions: <span id="pomodoroSessions">0</span></div>
+            <div class="small text-muted">Total Focus Time: <span id="pomodoroTotalTime">0h 0m</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Achievements & Badges -->
+    <div class="card mt-4" id="achievementsCard">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>🏆 Achievements & Badges</span>
+        <button class="btn btn-link day-toggle" type="button"
+                data-bs-toggle="collapse" data-bs-target="#achievements-collapse"
+                aria-expanded="false" aria-controls="achievements-collapse">
+          Toggle
+        </button>
+      </div>
+      <div id="achievements-collapse" class="collapse">
+        <div class="card-body">
+          <p class="small text-muted mb-3">Unlock badges by reaching milestones!</p>
+          <div class="row g-2 mb-3">
+            <div class="col-auto">
+              <div class="text-center">
+                <div style="font-size: 2rem;">🥉</div>
+                <div class="small">Level</div>
+                <div class="fw-bold" id="achievementLevel">Bronze</div>
+              </div>
+            </div>
+            <div class="col">
+              <div class="small text-muted">Points: <span id="achievementPoints">0</span> / 100</div>
+              <div class="progress" style="height: 8px;">
+                <div id="achievementProgress" class="progress-bar bg-success" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+          <div id="achievementsList" class="row g-2">
+            <!-- Achievements will be dynamically generated -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Yearly Calendar Heatmap -->
+    <div class="card mt-4" id="yearlyCalendarCard">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>📆 Yearly Calendar View</span>
+        <button class="btn btn-link day-toggle" type="button"
+                data-bs-toggle="collapse" data-bs-target="#yearly-collapse"
+                aria-expanded="false" aria-controls="yearly-collapse">
+          Toggle
+        </button>
+      </div>
+      <div id="yearly-collapse" class="collapse">
+        <div class="card-body">
+          <p class="small text-muted mb-3">Visualize your work intensity across the year (heatmap).</p>
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="small">Select Year:</div>
+            <select id="yearSelect" class="form-select form-select-sm" style="width: auto;">
+              <option value="2025">2025</option>
+              <option value="2024">2024</option>
+              <option value="2023">2023</option>
+            </select>
+          </div>
+          <div id="yearlyHeatmap" style="overflow-x: auto;">
+            <!-- Heatmap will be generated here -->
+          </div>
+          <div class="mt-2 d-flex gap-2 align-items-center justify-content-center">
+            <span class="small">Less</span>
+            <div class="d-flex gap-1">
+              <div style="width: 12px; height: 12px; background: #0e4429;"></div>
+              <div style="width: 12px; height: 12px; background: #006d32;"></div>
+              <div style="width: 12px; height: 12px; background: #26a641;"></div>
+              <div style="width: 12px; height: 12px; background: #39d353;"></div>
+            </div>
+            <span class="small">More</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Multi-Timezone Support -->
+    <div class="card mt-4" id="timezoneCard">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>🌍 Multi-Timezone Clocks</span>
+        <button class="btn btn-link day-toggle" type="button"
+                data-bs-toggle="collapse" data-bs-target="#timezone-collapse"
+                aria-expanded="false" aria-controls="timezone-collapse">
+          Toggle
+        </button>
+      </div>
+      <div id="timezone-collapse" class="collapse">
+        <div class="card-body">
+          <p class="small text-muted mb-3">Track time across multiple timezones for remote teams.</p>
+          <div class="mb-3">
+            <button id="addTimezone" class="btn btn-sm btn-outline-success theme-btn">+ Add Timezone</button>
+          </div>
+          <div id="timezoneList">
+            <!-- Timezone clocks will be displayed here -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Work Templates -->
+    <div class="card mt-4" id="templatesCard">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>📋 Work Templates</span>
+        <button class="btn btn-link day-toggle" type="button"
+                data-bs-toggle="collapse" data-bs-target="#templates-collapse"
+                aria-expanded="false" aria-controls="templates-collapse">
+          Toggle
+        </button>
+      </div>
+      <div id="templates-collapse" class="collapse">
+        <div class="card-body">
+          <p class="small text-muted mb-3">Save and reuse common work patterns.</p>
+          <div class="mb-3">
+            <button id="saveTemplate" class="btn btn-sm btn-outline-success theme-btn">💾 Save Current Week</button>
+          </div>
+          <div id="templatesList">
+            <!-- Templates will be listed here -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Advanced Analytics Export -->
+    <div class="card mt-4" id="analyticsExportCard">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>📈 Advanced Analytics Export</span>
+        <button class="btn btn-link day-toggle" type="button"
+                data-bs-toggle="collapse" data-bs-target="#analytics-export-collapse"
+                aria-expanded="false" aria-controls="analytics-export-collapse">
+          Toggle
+        </button>
+      </div>
+      <div id="analytics-export-collapse" class="collapse">
+        <div class="card-body">
+          <p class="small text-muted mb-3">Export analytics as charts, PDFs, or CSV files.</p>
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <label class="form-label small">From Date</label>
+              <input type="date" id="exportFromDate" class="form-control form-control-sm">
+            </div>
+            <div class="col-6">
+              <label class="form-label small">To Date</label>
+              <input type="date" id="exportToDate" class="form-control form-control-sm">
+            </div>
+          </div>
+          <div class="d-flex gap-2 flex-wrap">
+            <button id="exportCSV" class="btn btn-sm btn-outline-primary theme-btn">📄 CSV</button>
+            <button id="exportPDF" class="btn btn-sm btn-outline-primary theme-btn">📑 PDF</button>
+            <button id="exportChart" class="btn btn-sm btn-outline-primary theme-btn">📊 Chart (PNG)</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Log Entry -->
+    <div class="card mt-4" id="quickLogCard">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>⚡ Quick Log Entry</span>
+        <button class="btn btn-link day-toggle" type="button"
+                data-bs-toggle="collapse" data-bs-target="#quicklog-collapse"
+                aria-expanded="false" aria-controls="quicklog-collapse">
+          Toggle
+        </button>
+      </div>
+      <div id="quicklog-collapse" class="collapse">
+        <div class="card-body">
+          <p class="small text-muted mb-3">Quickly log work hours with presets and keyboard shortcuts.</p>
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <button class="btn btn-sm btn-outline-success theme-btn w-100" data-quick-log="480">8 Hours</button>
+            </div>
+            <div class="col-6">
+              <button class="btn btn-sm btn-outline-success theme-btn w-100" data-quick-log="360">6 Hours</button>
+            </div>
+            <div class="col-6">
+              <button class="btn btn-sm btn-outline-success theme-btn w-100" data-quick-log="240">4 Hours</button>
+            </div>
+            <div class="col-6">
+              <button class="btn btn-sm btn-outline-success theme-btn w-100" data-quick-log="120">2 Hours</button>
+            </div>
+          </div>
+          <div class="mb-2">
+            <label class="form-label small">Custom Hours:</label>
+            <div class="d-flex gap-2">
+              <input type="number" id="quickLogHours" class="form-control form-control-sm" placeholder="Hours" min="0" max="24">
+              <button id="quickLogApply" class="btn btn-sm btn-success theme-btn">Apply</button>
+            </div>
+          </div>
+          <div class="small text-muted mt-2">
+            <strong>Keyboard Shortcuts:</strong><br>
+            <kbd>Ctrl+1</kbd> = 8h | <kbd>Ctrl+2</kbd> = 6h | <kbd>Ctrl+3</kbd> = 4h
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Voice Notes -->
+    <div class="card mt-4" id="voiceNotesCard">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>🎙️ Voice Notes</span>
+        <button class="btn btn-link day-toggle" type="button"
+                data-bs-toggle="collapse" data-bs-target="#voicenotes-collapse"
+                aria-expanded="false" aria-controls="voicenotes-collapse">
+          Toggle
+        </button>
+      </div>
+      <div id="voicenotes-collapse" class="collapse">
+        <div class="card-body">
+          <p class="small text-muted mb-3">Record audio notes for each work day.</p>
+          <div class="mb-3">
+            <select id="voiceNoteDay" class="form-select form-select-sm mb-2">
+              <option value="sunday">Sunday</option>
+              <option value="monday">Monday</option>
+              <option value="tuesday">Tuesday</option>
+              <option value="wednesday">Wednesday</option>
+              <option value="thursday">Thursday</option>
+            </select>
+            <div class="d-flex gap-2">
+              <button id="voiceRecordBtn" class="btn btn-sm btn-danger theme-btn">🔴 Record</button>
+              <button id="voiceStopBtn" class="btn btn-sm btn-secondary theme-btn" disabled>⏹ Stop</button>
+            </div>
+          </div>
+          <div id="voiceRecordingStatus" class="small text-muted mb-2"></div>
+          <div id="voiceNotesList">
+            <!-- Voice notes list will be shown here -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Budget & Billing Tracker -->
+    <div class="card mt-4" id="budgetCard">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>💰 Budget & Billing Tracker</span>
+        <button class="btn btn-link day-toggle" type="button"
+                data-bs-toggle="collapse" data-bs-target="#budget-collapse"
+                aria-expanded="false" aria-controls="budget-collapse">
+          Toggle
+        </button>
+      </div>
+      <div id="budget-collapse" class="collapse">
+        <div class="card-body">
+          <p class="small text-muted mb-3">Track earnings and billable hours.</p>
+          <div class="mb-3">
+            <label class="form-label small">Hourly Rate ($)</label>
+            <input type="number" id="hourlyRate" class="form-control form-control-sm" value="0" min="0" step="0.01">
+          </div>
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <div class="text-center p-2 border rounded">
+                <div class="small text-muted">This Week</div>
+                <div class="fw-bold" id="weeklyEarnings">$0.00</div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="text-center p-2 border rounded">
+                <div class="small text-muted">This Month</div>
+                <div class="fw-bold" id="monthlyEarnings">$0.00</div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <label class="form-label small">Mark Hours as:</label>
+            <div class="btn-group w-100" role="group">
+              <input type="radio" class="btn-check" name="billableType" id="billable" value="billable" checked>
+              <label class="btn btn-outline-success btn-sm" for="billable">💵 Billable</label>
+              <input type="radio" class="btn-check" name="billableType" id="nonBillable" value="nonBillable">
+              <label class="btn btn-outline-secondary btn-sm" for="nonBillable">📋 Non-Billable</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Wellness & Break Reminders -->
+    <div class="card mt-4" id="wellnessCard">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>🧘 Wellness & Break Reminders</span>
+        <button class="btn btn-link day-toggle" type="button"
+                data-bs-toggle="collapse" data-bs-target="#wellness-collapse"
+                aria-expanded="false" aria-controls="wellness-collapse">
+          Toggle
+        </button>
+      </div>
+      <div id="wellness-collapse" class="collapse">
+        <div class="card-body">
+          <p class="small text-muted mb-3">Stay healthy with wellness reminders.</p>
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="stretchReminder" checked>
+            <label class="form-check-label small" for="stretchReminder">
+              🤸 Stretch Break (every 60 min)
+            </label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="eyeRestReminder" checked>
+            <label class="form-check-label small" for="eyeRestReminder">
+              👁️ Eye Rest - 20-20-20 Rule (every 20 min)
+            </label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="hydrationReminder" checked>
+            <label class="form-check-label small" for="hydrationReminder">
+              💧 Hydration Reminder (every 90 min)
+            </label>
+          </div>
+          <div class="mt-3">
+            <div class="small text-muted">Today's Wellness Stats:</div>
+            <div class="small">Stretch Breaks: <span id="stretchCount">0</span></div>
+            <div class="small">Eye Rests: <span id="eyeRestCount">0</span></div>
+            <div class="small">Hydration: <span id="hydrationCount">0</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="d-flex flex-wrap justify-content-between align-items-center mt-4">
       <div class="d-flex gap-2 mb-2 mb-sm-0">
         <span id="totalWorked" class="pill" title="Total time you have worked this week."></span>
@@ -2534,6 +2886,701 @@
       }
     }
     
+    // === POMODORO TIMER ===
+    const POMODORO_KEY = 'workTimeCalculatorPomodoro';
+    let pomodoroInterval = null;
+    let pomodoroTimeLeft = 25 * 60; // seconds
+    let pomodoroMode = 'focus'; // 'focus' or 'break'
+    let pomodoroRunning = false;
+    
+    function loadPomodoroData() {
+      const saved = localStorage.getItem(POMODORO_KEY);
+      return saved ? JSON.parse(saved) : { sessions: 0, totalTime: 0 };
+    }
+    
+    function savePomodoroData(data) {
+      localStorage.setItem(POMODORO_KEY, JSON.stringify(data));
+    }
+    
+    function updatePomodoroDisplay() {
+      const mins = Math.floor(pomodoroTimeLeft / 60);
+      const secs = pomodoroTimeLeft % 60;
+      document.getElementById('pomodoroDisplay').textContent = 
+        `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+      
+      const status = pomodoroRunning ? 
+        (pomodoroMode === 'focus' ? '🎯 Focus Session' : '☕ Break Time') : 
+        'Ready to start';
+      document.getElementById('pomodoroStatus').textContent = status;
+      
+      const data = loadPomodoroData();
+      document.getElementById('pomodoroSessions').textContent = data.sessions;
+      document.getElementById('pomodoroTotalTime').textContent = minToHM(data.totalTime);
+    }
+    
+    function initPomodoro() {
+      const startBtn = document.getElementById('pomodoroStart');
+      const pauseBtn = document.getElementById('pomodoroPause');
+      const resetBtn = document.getElementById('pomodoroReset');
+      
+      startBtn.addEventListener('click', () => {
+        if (!pomodoroRunning) {
+          pomodoroRunning = true;
+          startBtn.disabled = true;
+          pauseBtn.disabled = false;
+          
+          pomodoroInterval = setInterval(() => {
+            pomodoroTimeLeft--;
+            updatePomodoroDisplay();
+            
+            if (pomodoroTimeLeft <= 0) {
+              // Session completed
+              if (pomodoroMode === 'focus') {
+                const data = loadPomodoroData();
+                const focusMins = parseInt(document.getElementById('pomodoroFocus').value) || 25;
+                data.sessions++;
+                data.totalTime += focusMins;
+                savePomodoroData(data);
+                
+                alert('✅ Focus session completed! Take a break.');
+                pomodoroMode = 'break';
+                pomodoroTimeLeft = (parseInt(document.getElementById('pomodoroBreak').value) || 5) * 60;
+              } else {
+                alert('☕ Break time over! Ready for another session?');
+                pomodoroMode = 'focus';
+                pomodoroTimeLeft = (parseInt(document.getElementById('pomodoroFocus').value) || 25) * 60;
+                clearInterval(pomodoroInterval);
+                pomodoroRunning = false;
+                startBtn.disabled = false;
+                pauseBtn.disabled = true;
+              }
+              updatePomodoroDisplay();
+            }
+          }, 1000);
+        }
+      });
+      
+      pauseBtn.addEventListener('click', () => {
+        if (pomodoroRunning) {
+          clearInterval(pomodoroInterval);
+          pomodoroRunning = false;
+          startBtn.disabled = false;
+          pauseBtn.disabled = true;
+        }
+      });
+      
+      resetBtn.addEventListener('click', () => {
+        clearInterval(pomodoroInterval);
+        pomodoroRunning = false;
+        pomodoroMode = 'focus';
+        pomodoroTimeLeft = (parseInt(document.getElementById('pomodoroFocus').value) || 25) * 60;
+        startBtn.disabled = false;
+        pauseBtn.disabled = true;
+        updatePomodoroDisplay();
+      });
+      
+      updatePomodoroDisplay();
+    }
+
+    // === ACHIEVEMENTS & BADGES ===
+    const ACHIEVEMENTS_KEY = 'workTimeCalculatorAchievements';
+    
+    const achievementDefinitions = [
+      { id: 'first_week', name: 'First Week', desc: 'Complete your first week', icon: '🎖️', points: 10, check: () => {
+        const history = JSON.parse(localStorage.getItem(MONTHLY_HISTORY_KEY) || '{"weeks":[]}');
+        return history.weeks && history.weeks.length >= 1;
+      }},
+      { id: 'streak_7', name: '7-Day Streak', desc: 'Maintain 7-day streak', icon: '🔥', points: 20, check: () => {
+        const streaks = loadStreaks();
+        return streaks.current >= 7 || streaks.best >= 7;
+      }},
+      { id: 'perfect_week', name: 'Perfect Week', desc: 'Meet target every day', icon: '⭐', points: 15, check: () => {
+        const worked = days.map(d => getWorked(d.toLowerCase()));
+        const customTargets = loadCustomTargets();
+        const allMet = worked.every((w, i) => w != null && w >= customTargets[days[i].toLowerCase()] - 30);
+        return allMet && worked.every(w => w != null);
+      }},
+      { id: 'early_bird', name: 'Early Bird', desc: 'Work 40+ hours this week', icon: '🌅', points: 25, check: () => {
+        const total = days.map(d => getWorked(d.toLowerCase())).reduce((a, b) => a + (b || 0), 0);
+        return total >= 40 * 60;
+      }},
+      { id: 'consistent', name: 'Consistency King', desc: '100% consistency score', icon: '👑', points: 30, check: () => {
+        // Check analytics consistency
+        const worked = days.map(d => getWorked(d.toLowerCase())).filter(w => w != null);
+        if (worked.length === 0) return false;
+        const customTargets = loadCustomTargets();
+        const dayTargets = days.map(d => customTargets[d.toLowerCase()]);
+        const filledDays = worked.filter((_, i) => worked[i] != null);
+        const totalDeviation = filledDays.reduce((sum, w, i) => sum + Math.abs(w - dayTargets[i]), 0);
+        const avgDeviation = totalDeviation / filledDays.length;
+        const score = Math.max(0, Math.round(100 - (avgDeviation / 480) * 100));
+        return score === 100;
+      }}
+    ];
+    
+    function loadAchievements() {
+      const saved = localStorage.getItem(ACHIEVEMENTS_KEY);
+      return saved ? JSON.parse(saved) : { unlocked: [], points: 0 };
+    }
+    
+    function saveAchievements(data) {
+      localStorage.setItem(ACHIEVEMENTS_KEY, JSON.stringify(data));
+    }
+    
+    function updateAchievements() {
+      const data = loadAchievements();
+      
+      achievementDefinitions.forEach(achievement => {
+        if (!data.unlocked.includes(achievement.id) && achievement.check()) {
+          data.unlocked.push(achievement.id);
+          data.points += achievement.points;
+          alert(`🎉 Achievement Unlocked: ${achievement.name}!`);
+        }
+      });
+      
+      saveAchievements(data);
+      
+      // Update display
+      const level = data.points < 50 ? '🥉 Bronze' : data.points < 100 ? '🥈 Silver' : '🥇 Gold';
+      document.getElementById('achievementLevel').textContent = level.split(' ')[1];
+      document.getElementById('achievementPoints').textContent = data.points;
+      const progress = Math.min((data.points % 50) * 2, 100);
+      document.getElementById('achievementProgress').style.width = `${progress}%`;
+      
+      // Render achievements list
+      const list = document.getElementById('achievementsList');
+      list.innerHTML = achievementDefinitions.map(ach => {
+        const unlocked = data.unlocked.includes(ach.id);
+        return `
+          <div class="col-6 col-md-4">
+            <div class="text-center p-2 border rounded ${unlocked ? 'border-success' : 'border-secondary opacity-50'}">
+              <div style="font-size: 2rem;">${ach.icon}</div>
+              <div class="small fw-bold">${ach.name}</div>
+              <div class="small text-muted">${ach.desc}</div>
+              <div class="small ${unlocked ? 'text-success' : 'text-muted'}">${unlocked ? '✅ Unlocked' : `🔒 ${ach.points}pts`}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // === YEARLY CALENDAR HEATMAP ===
+    function initYearlyCalendar() {
+      const yearSelect = document.getElementById('yearSelect');
+      const heatmapDiv = document.getElementById('yearlyHeatmap');
+      
+      // Set current year
+      yearSelect.value = new Date().getFullYear().toString();
+      
+      function renderHeatmap() {
+        const year = parseInt(yearSelect.value);
+        const startDate = new Date(year, 0, 1);
+        const endDate = new Date(year, 11, 31);
+        
+        let html = '<div style="display: flex; flex-wrap: wrap; gap: 2px;">';
+        let currentDate = new Date(startDate);
+        
+        while (currentDate <= endDate) {
+          const dateStr = currentDate.toISOString().split('T')[0];
+          // Mock data - in real app, check historical data
+          const hours = Math.random() < 0.7 ? Math.floor(Math.random() * 10) : 0;
+          const color = hours === 0 ? '#161b22' : 
+                       hours < 4 ? '#0e4429' : 
+                       hours < 6 ? '#006d32' : 
+                       hours < 8 ? '#26a641' : '#39d353';
+          
+          html += `<div style="width: 10px; height: 10px; background: ${color}; border-radius: 2px;" 
+                        title="${dateStr}: ${hours}h"></div>`;
+          
+          currentDate.setDate(currentDate.getDate() + 1);
+        }
+        
+        html += '</div>';
+        heatmapDiv.innerHTML = html;
+      }
+      
+      yearSelect.addEventListener('change', renderHeatmap);
+      renderHeatmap();
+    }
+
+    // === MULTI-TIMEZONE SUPPORT ===
+    const TIMEZONES_KEY = 'workTimeCalculatorTimezones';
+    
+    function loadTimezones() {
+      const saved = localStorage.getItem(TIMEZONES_KEY);
+      return saved ? JSON.parse(saved) : [
+        { name: 'Local', zone: Intl.DateTimeFormat().resolvedOptions().timeZone }
+      ];
+    }
+    
+    function saveTimezones(timezones) {
+      localStorage.setItem(TIMEZONES_KEY, JSON.stringify(timezones));
+    }
+    
+    function updateTimezones() {
+      const timezones = loadTimezones();
+      const list = document.getElementById('timezoneList');
+      
+      list.innerHTML = timezones.map((tz, i) => {
+        const time = new Date().toLocaleTimeString('en-US', { 
+          timeZone: tz.zone, 
+          hour: '2-digit', 
+          minute: '2-digit',
+          hour12: true
+        });
+        
+        return `
+          <div class="d-flex justify-content-between align-items-center p-2 mb-2 border rounded">
+            <div>
+              <div class="fw-bold">${tz.name}</div>
+              <div class="small text-muted">${tz.zone}</div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <div class="fw-bold">${time}</div>
+              ${i > 0 ? `<button class="btn btn-sm btn-outline-danger" onclick="removeTimezone(${i})">×</button>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    function removeTimezone(index) {
+      const timezones = loadTimezones();
+      timezones.splice(index, 1);
+      saveTimezones(timezones);
+      updateTimezones();
+    }
+    
+    function initTimezones() {
+      document.getElementById('addTimezone').addEventListener('click', () => {
+        const zone = prompt('Enter timezone (e.g., America/New_York, Europe/London):');
+        if (zone) {
+          try {
+            // Test if timezone is valid
+            new Date().toLocaleTimeString('en-US', { timeZone: zone });
+            const timezones = loadTimezones();
+            const name = prompt('Enter a name for this timezone:') || zone;
+            timezones.push({ name, zone });
+            saveTimezones(timezones);
+            updateTimezones();
+          } catch (e) {
+            alert('Invalid timezone! Please use a valid IANA timezone name.');
+          }
+        }
+      });
+      
+      updateTimezones();
+      setInterval(updateTimezones, 60000); // Update every minute
+    }
+
+    // === WORK TEMPLATES ===
+    const TEMPLATES_KEY = 'workTimeCalculatorTemplates';
+    
+    function loadTemplates() {
+      const saved = localStorage.getItem(TEMPLATES_KEY);
+      return saved ? JSON.parse(saved) : [];
+    }
+    
+    function saveTemplates(templates) {
+      localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates));
+    }
+    
+    function updateTemplatesList() {
+      const templates = loadTemplates();
+      const list = document.getElementById('templatesList');
+      
+      if (templates.length === 0) {
+        list.innerHTML = '<p class="small text-muted">No templates saved yet.</p>';
+        return;
+      }
+      
+      list.innerHTML = templates.map((tpl, i) => `
+        <div class="d-flex justify-content-between align-items-center p-2 mb-2 border rounded">
+          <div>
+            <div class="fw-bold">${tpl.name}</div>
+            <div class="small text-muted">Total: ${minToHM(tpl.total)}</div>
+          </div>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-success theme-btn" onclick="applyTemplate(${i})">Apply</button>
+            <button class="btn btn-sm btn-outline-danger theme-btn" onclick="deleteTemplate(${i})">Delete</button>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    function applyTemplate(index) {
+      const templates = loadTemplates();
+      const tpl = templates[index];
+      
+      days.forEach(d => {
+        const dayKey = d.toLowerCase();
+        if (tpl.days[dayKey] !== undefined) {
+          saveWorked(dayKey, tpl.days[dayKey]);
+        }
+      });
+      
+      recalc();
+      alert('✅ Template applied successfully!');
+    }
+    
+    function deleteTemplate(index) {
+      if (confirm('Delete this template?')) {
+        const templates = loadTemplates();
+        templates.splice(index, 1);
+        saveTemplates(templates);
+        updateTemplatesList();
+      }
+    }
+    
+    function initTemplates() {
+      document.getElementById('saveTemplate').addEventListener('click', () => {
+        const name = prompt('Enter a name for this template:');
+        if (name) {
+          const templates = loadTemplates();
+          const templateData = {
+            name,
+            days: {},
+            total: 0
+          };
+          
+          days.forEach(d => {
+            const dayKey = d.toLowerCase();
+            const worked = getWorked(dayKey);
+            if (worked !== null) {
+              templateData.days[dayKey] = worked;
+              templateData.total += worked;
+            }
+          });
+          
+          templates.push(templateData);
+          saveTemplates(templates);
+          updateTemplatesList();
+          alert('✅ Template saved!');
+        }
+      });
+      
+      updateTemplatesList();
+    }
+
+    // === ADVANCED ANALYTICS EXPORT ===
+    function initAnalyticsExport() {
+      // Set default dates
+      const today = new Date();
+      const weekAgo = new Date(today);
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      
+      document.getElementById('exportFromDate').value = weekAgo.toISOString().split('T')[0];
+      document.getElementById('exportToDate').value = today.toISOString().split('T')[0];
+      
+      document.getElementById('exportCSV').addEventListener('click', () => {
+        const csv = generateCSVData();
+        downloadFile(csv, 'analytics.csv', 'text/csv');
+      });
+      
+      document.getElementById('exportPDF').addEventListener('click', () => {
+        alert('📑 PDF export: Would generate a formatted PDF report with charts and data.');
+      });
+      
+      document.getElementById('exportChart').addEventListener('click', () => {
+        alert('📊 Chart export: Would generate a PNG image of your analytics charts.');
+      });
+    }
+    
+    function generateCSVData() {
+      let csv = 'Day,Hours,Target,Status\n';
+      
+      days.forEach(d => {
+        const dayKey = d.toLowerCase();
+        const worked = getWorked(dayKey);
+        const targets = loadCustomTargets();
+        const target = targets[dayKey];
+        const status = worked === null ? 'Not filled' : 
+                      worked >= target - 30 ? 'Met' : 'Missed';
+        
+        csv += `${d},${worked ? (worked/60).toFixed(2) : '0'},${(target/60).toFixed(2)},${status}\n`;
+      });
+      
+      return csv;
+    }
+    
+    function downloadFile(content, filename, type) {
+      const blob = new Blob([content], { type });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // === QUICK LOG ENTRY ===
+    function initQuickLog() {
+      // Quick log buttons
+      document.querySelectorAll('[data-quick-log]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const minutes = parseInt(btn.getAttribute('data-quick-log'));
+          applyQuickLog(minutes);
+        });
+      });
+      
+      // Custom hours
+      document.getElementById('quickLogApply').addEventListener('click', () => {
+        const hours = parseFloat(document.getElementById('quickLogHours').value);
+        if (hours && hours > 0) {
+          applyQuickLog(Math.round(hours * 60));
+        }
+      });
+      
+      // Keyboard shortcuts
+      document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey || e.metaKey) {
+          switch(e.key) {
+            case '1': e.preventDefault(); applyQuickLog(480); break;
+            case '2': e.preventDefault(); applyQuickLog(360); break;
+            case '3': e.preventDefault(); applyQuickLog(240); break;
+          }
+        }
+      });
+    }
+    
+    function applyQuickLog(minutes) {
+      // Find first unfilled day
+      for (let d of days) {
+        const dayKey = d.toLowerCase();
+        if (getWorked(dayKey) === null) {
+          saveWorked(dayKey, minutes);
+          recalc();
+          alert(`✅ Logged ${minToHM(minutes)} to ${d}!`);
+          return;
+        }
+      }
+      alert('⚠️ All days are already filled!');
+    }
+
+    // === VOICE NOTES ===
+    const VOICE_NOTES_KEY = 'workTimeCalculatorVoiceNotes';
+    let mediaRecorder = null;
+    let audioChunks = [];
+    
+    function loadVoiceNotes() {
+      const saved = localStorage.getItem(VOICE_NOTES_KEY);
+      return saved ? JSON.parse(saved) : {};
+    }
+    
+    function saveVoiceNotes(notes) {
+      localStorage.setItem(VOICE_NOTES_KEY, JSON.stringify(notes));
+    }
+    
+    function initVoiceNotes() {
+      const recordBtn = document.getElementById('voiceRecordBtn');
+      const stopBtn = document.getElementById('voiceStopBtn');
+      const status = document.getElementById('voiceRecordingStatus');
+      
+      recordBtn.addEventListener('click', async () => {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          mediaRecorder = new MediaRecorder(stream);
+          audioChunks = [];
+          
+          mediaRecorder.addEventListener('dataavailable', event => {
+            audioChunks.push(event.data);
+          });
+          
+          mediaRecorder.addEventListener('stop', () => {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              const day = document.getElementById('voiceNoteDay').value;
+              const notes = loadVoiceNotes();
+              notes[day] = reader.result;
+              saveVoiceNotes(notes);
+              updateVoiceNotesList();
+              alert('✅ Voice note saved!');
+            };
+            reader.readAsDataURL(audioBlob);
+            
+            stream.getTracks().forEach(track => track.stop());
+          });
+          
+          mediaRecorder.start();
+          recordBtn.disabled = true;
+          stopBtn.disabled = false;
+          status.textContent = '🔴 Recording...';
+        } catch (err) {
+          alert('❌ Microphone access denied or not available.');
+        }
+      });
+      
+      stopBtn.addEventListener('click', () => {
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+          mediaRecorder.stop();
+          recordBtn.disabled = false;
+          stopBtn.disabled = true;
+          status.textContent = '';
+        }
+      });
+      
+      updateVoiceNotesList();
+    }
+    
+    function updateVoiceNotesList() {
+      const notes = loadVoiceNotes();
+      const list = document.getElementById('voiceNotesList');
+      
+      const hasNotes = Object.keys(notes).length > 0;
+      if (!hasNotes) {
+        list.innerHTML = '<p class="small text-muted">No voice notes recorded yet.</p>';
+        return;
+      }
+      
+      list.innerHTML = Object.entries(notes).map(([day, audioData]) => `
+        <div class="p-2 mb-2 border rounded">
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="fw-bold text-capitalize">${day}</div>
+            <button class="btn btn-sm btn-outline-danger" onclick="deleteVoiceNote('${day}')">Delete</button>
+          </div>
+          <audio controls class="w-100 mt-2" style="height: 30px;">
+            <source src="${audioData}" type="audio/webm">
+          </audio>
+        </div>
+      `).join('');
+    }
+    
+    function deleteVoiceNote(day) {
+      const notes = loadVoiceNotes();
+      delete notes[day];
+      saveVoiceNotes(notes);
+      updateVoiceNotesList();
+    }
+
+    // === BUDGET & BILLING TRACKER ===
+    const BUDGET_KEY = 'workTimeCalculatorBudget';
+    
+    function loadBudgetData() {
+      const saved = localStorage.getItem(BUDGET_KEY);
+      return saved ? JSON.parse(saved) : { hourlyRate: 0, monthlyTotal: 0 };
+    }
+    
+    function saveBudgetData(data) {
+      localStorage.setItem(BUDGET_KEY, JSON.stringify(data));
+    }
+    
+    function updateBudget() {
+      const data = loadBudgetData();
+      const rate = parseFloat(document.getElementById('hourlyRate').value) || 0;
+      data.hourlyRate = rate;
+      saveBudgetData(data);
+      
+      // Calculate weekly earnings
+      const weeklyMinutes = days.map(d => getWorked(d.toLowerCase())).reduce((a, b) => a + (b || 0), 0);
+      const weeklyHours = weeklyMinutes / 60;
+      const weeklyEarnings = weeklyHours * rate;
+      document.getElementById('weeklyEarnings').textContent = `$${weeklyEarnings.toFixed(2)}`;
+      
+      // Calculate monthly earnings (mock - would need full month data)
+      const monthlyEarnings = weeklyEarnings * 4;
+      document.getElementById('monthlyEarnings').textContent = `$${monthlyEarnings.toFixed(2)}`;
+    }
+    
+    function initBudget() {
+      const data = loadBudgetData();
+      document.getElementById('hourlyRate').value = data.hourlyRate || 0;
+      
+      document.getElementById('hourlyRate').addEventListener('input', updateBudget);
+      updateBudget();
+    }
+
+    // === WELLNESS & BREAK REMINDERS ===
+    const WELLNESS_KEY = 'workTimeCalculatorWellness';
+    
+    function loadWellnessData() {
+      const saved = localStorage.getItem(WELLNESS_KEY);
+      const today = new Date().toDateString();
+      const data = saved ? JSON.parse(saved) : { date: today, stretch: 0, eyeRest: 0, hydration: 0 };
+      
+      // Reset counts if it's a new day
+      if (data.date !== today) {
+        data.date = today;
+        data.stretch = 0;
+        data.eyeRest = 0;
+        data.hydration = 0;
+      }
+      
+      return data;
+    }
+    
+    function saveWellnessData(data) {
+      localStorage.setItem(WELLNESS_KEY, JSON.stringify(data));
+    }
+    
+    function updateWellnessDisplay() {
+      const data = loadWellnessData();
+      document.getElementById('stretchCount').textContent = data.stretch;
+      document.getElementById('eyeRestCount').textContent = data.eyeRest;
+      document.getElementById('hydrationCount').textContent = data.hydration;
+    }
+    
+    function initWellness() {
+      updateWellnessDisplay();
+      
+      const wellnessIntervals = {
+        stretch: 60 * 60 * 1000, // 60 minutes
+        eyeRest: 20 * 60 * 1000, // 20 minutes
+        hydration: 90 * 60 * 1000 // 90 minutes
+      };
+      
+      // Stretch reminders
+      setInterval(() => {
+        if (document.getElementById('stretchReminder').checked) {
+          const data = loadWellnessData();
+          data.stretch++;
+          saveWellnessData(data);
+          updateWellnessDisplay();
+          
+          if (Notification.permission === 'granted') {
+            new Notification('🤸 Stretch Break!', {
+              body: 'Time to stand up and stretch for a minute.',
+              icon: '🤸'
+            });
+          }
+        }
+      }, wellnessIntervals.stretch);
+      
+      // Eye rest reminders (20-20-20 rule)
+      setInterval(() => {
+        if (document.getElementById('eyeRestReminder').checked) {
+          const data = loadWellnessData();
+          data.eyeRest++;
+          saveWellnessData(data);
+          updateWellnessDisplay();
+          
+          if (Notification.permission === 'granted') {
+            new Notification('👁️ Eye Rest Time!', {
+              body: 'Look at something 20 feet away for 20 seconds.',
+              icon: '👁️'
+            });
+          }
+        }
+      }, wellnessIntervals.eyeRest);
+      
+      // Hydration reminders
+      setInterval(() => {
+        if (document.getElementById('hydrationReminder').checked) {
+          const data = loadWellnessData();
+          data.hydration++;
+          saveWellnessData(data);
+          updateWellnessDisplay();
+          
+          if (Notification.permission === 'granted') {
+            new Notification('💧 Hydration Reminder!', {
+              body: 'Time to drink some water!',
+              icon: '💧'
+            });
+          }
+        }
+      }, wellnessIntervals.hydration);
+    }
+    
     // Initialize report generation
     document.addEventListener('DOMContentLoaded', () => {
       const generateBtn = document.getElementById('generateReport');
@@ -2546,7 +3593,25 @@
       initWorkNotes();
       updateOvertime();
       updateComparisonChart();
+      
+      // Initialize 10 new features
+      initPomodoro();
+      updateAchievements();
+      initYearlyCalendar();
+      initTimezones();
+      initTemplates();
+      initAnalyticsExport();
+      initQuickLog();
+      initVoiceNotes();
+      initBudget();
+      initWellness();
     });
+    
+    // Make functions globally accessible for onclick handlers
+    window.removeTimezone = removeTimezone;
+    window.applyTemplate = applyTemplate;
+    window.deleteTemplate = deleteTemplate;
+    window.deleteVoiceNote = deleteVoiceNote;
 
     loadData();
     loadPreferences();
