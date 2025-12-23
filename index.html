@@ -323,12 +323,257 @@
       color: var(--muted) !important;
     }
     
-    /* === PROFESSIONAL MULTI-COLUMN LAYOUT === */
+    /* === WORLD-CLASS PROFESSIONAL LAYOUT === */
+    
+    /* MAIN APP LAYOUT */
+    .app-layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* SIDEBAR NAVIGATION */
+    .app-sidebar {
+      width: 260px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+      backdrop-filter: blur(10px);
+      border-right: 1px solid rgba(255,255,255,0.1);
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      z-index: 1050;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow-y: auto;
+      box-shadow: 2px 0 20px rgba(0,0,0,0.3);
+    }
+
+    .app-sidebar.collapsed {
+      transform: translateX(-100%);
+    }
+
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .sidebar-logo {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), var(--warn));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .sidebar-toggle {
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.5rem;
+      transition: background 0.2s;
+    }
+
+    .sidebar-toggle:hover {
+      background: rgba(255,255,255,0.1);
+    }
+
+    .sidebar-nav {
+      padding: 1rem 0;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 1.5rem;
+      color: var(--text);
+      text-decoration: none;
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+      cursor: pointer;
+    }
+
+    .nav-item:hover {
+      background: rgba(255,255,255,0.05);
+      color: var(--accent);
+    }
+
+    .nav-item.active {
+      background: rgba(34,197,94,0.1);
+      border-left-color: var(--accent);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .nav-icon {
+      font-size: 1.25rem;
+      margin-right: 0.75rem;
+      min-width: 28px;
+      text-align: center;
+    }
+
+    .nav-label {
+      flex: 1;
+    }
+
+    .nav-badge {
+      background: var(--accent);
+      color: var(--bg);
+      font-size: 0.7rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+
+    /* MAIN CONTENT AREA */
+    .app-main {
+      flex: 1;
+      margin-left: 260px;
+      transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .app-main.sidebar-collapsed {
+      margin-left: 0;
+    }
+
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 1040;
+      background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%);
+      backdrop-filter: blur(15px) saturate(180%);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding: 1rem 2rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .header-title h1 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--text), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .menu-toggle {
+      display: none;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: var(--text);
+      font-size: 1.5rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .menu-toggle:hover {
+      background: rgba(255,255,255,0.15);
+    }
+
+    /* CONTENT TABS */
+    .content-tabs {
+      background: rgba(255,255,255,0.03);
+      padding: 0.5rem;
+      border-radius: 0.75rem;
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      padding: 0.65rem 1.25rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+    }
+
+    .tab-btn.active {
+      background: var(--accent);
+      color: var(--bg);
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(34,197,94,0.3);
+    }
+
+    .tab-count {
+      background: rgba(255,255,255,0.2);
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .tab-btn.active .tab-count {
+      background: rgba(0,0,0,0.2);
+    }
+
+    /* TAB CONTENT */
+    .tab-content-wrapper {
+      display: none;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .tab-content-wrapper.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .content-container {
+      padding: 2rem;
+    }
+
+    /* FEATURE GRID */
     .feature-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
       gap: 1.5rem;
-      margin-top: 1.5rem;
     }
     
     @media (min-width: 992px) {
@@ -345,43 +590,163 @@
     }
     
     .section-title {
-      font-size: 1.5rem;
+      font-size: 1.25rem;
       font-weight: 700;
       margin-bottom: 1.5rem;
-      padding-bottom: 0.5rem;
-      border-bottom: 2px solid var(--accent);
-      color: var(--text);
+      color: var(--accent);
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 1.5px;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent) 0%, transparent 100%);
+    }
+
+    /* MOBILE RESPONSIVE */
+    @media (max-width: 768px) {
+      .app-sidebar {
+        transform: translateX(-100%);
+      }
+
+      .app-sidebar.show {
+        transform: translateX(0);
+      }
+
+      .app-main {
+        margin-left: 0 !important;
+      }
+
+      .menu-toggle {
+        display: block;
+      }
+
+      .feature-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .content-container {
+        padding: 1rem;
+      }
+
+      .content-tabs {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .header-title h1 {
+        font-size: 1.25rem;
+      }
     }
 
   </style>
 </head>
 <body>
-  <div class="container py-4">
-
-    <!-- Header + Live Clock + User Guide -->
-    <div class="d-flex flex-wrap justify-content-between align-items-start mb-3">
-      <div class="me-3">
-        <h1 class="mb-2 text-uppercase">Work Time Calculator (Sun → Thu)</h1>
-        <button type="button"
-                class="btn btn-outline-info btn-sm"
-                data-bs-toggle="modal"
-                data-bs-target="#userGuideModal">
-          User Guide
-        </button>
+  <!-- APP LAYOUT -->
+  <div class="app-layout">
+    
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="app-sidebar" id="appSidebar">
+      <div class="sidebar-header">
+        <h3 class="sidebar-logo">WorkCalc</h3>
+        <button class="sidebar-toggle" id="sidebarClose">×</button>
       </div>
-      <div class="clock-wrapper mt-3 mt-sm-0">
-        <div id="liveClock" class="clock-display"></div>
-      </div>
-    </div>
+      <nav class="sidebar-nav">
+        <a class="nav-item active" data-tab="main">
+          <span class="nav-icon">⏰</span>
+          <span class="nav-label">Time Entry</span>
+        </a>
+        <a class="nav-item" data-tab="analytics">
+          <span class="nav-icon">📊</span>
+          <span class="nav-label">Analytics</span>
+          <span class="nav-badge">3</span>
+        </a>
+        <a class="nav-item" data-tab="goals">
+          <span class="nav-icon">🎯</span>
+          <span class="nav-label">Goals & Tracking</span>
+          <span class="nav-badge">3</span>
+        </a>
+        <a class="nav-item" data-tab="customization">
+          <span class="nav-icon">⚙️</span>
+          <span class="nav-label">Customization</span>
+          <span class="nav-badge">2</span>
+        </a>
+        <a class="nav-item" data-tab="reports">
+          <span class="nav-icon">📄</span>
+          <span class="nav-label">Reports & Data</span>
+          <span class="nav-badge">3</span>
+        </a>
+        <a class="nav-item" data-tab="productivity">
+          <span class="nav-icon">⚡</span>
+          <span class="nav-label">Productivity</span>
+          <span class="nav-badge">3</span>
+        </a>
+        <a class="nav-item" data-tab="advanced">
+          <span class="nav-icon">🚀</span>
+          <span class="nav-label">Advanced</span>
+          <span class="nav-badge">5</span>
+        </a>
+      </nav>
+    </aside>
 
-    <div id="cards" class="row g-3"></div>
+    <!-- MAIN CONTENT -->
+    <main class="app-main" id="appMain">
+      <!-- HEADER -->
+      <header class="app-header">
+        <div class="header-content">
+          <div class="header-title">
+            <button class="menu-toggle" id="menuToggle">☰</button>
+            <h1>Work Time Calculator (Sun → Thu)</h1>
+            <button type="button" class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#userGuideModal">
+              User Guide
+            </button>
+          </div>
+          <div class="clock-wrapper">
+            <div id="liveClock" class="clock-display"></div>
+          </div>
+        </div>
+      </header>
 
-    <!-- SECTION: Core Analytics & Tracking -->
-    <div class="feature-section">
-      <h2 class="section-title">📊 Analytics & Insights</h2>
-      <div class="feature-grid feature-grid-2col">
+      <!-- CONTENT CONTAINER -->
+      <div class="content-container">
+        
+        <!-- TIME ENTRY (Always Visible) -->
+        <div id="cards" class="row g-3 mb-4"></div>
+
+        <!-- CONTENT TABS -->
+        <div class="content-tabs">
+          <button class="tab-btn active" data-tab="analytics">
+            📊 Analytics <span class="tab-count">3</span>
+          </button>
+          <button class="tab-btn" data-tab="goals">
+            🎯 Goals <span class="tab-count">3</span>
+          </button>
+          <button class="tab-btn" data-tab="customization">
+            ⚙️ Customization <span class="tab-count">2</span>
+          </button>
+          <button class="tab-btn" data-tab="reports">
+            📄 Reports <span class="tab-count">3</span>
+          </button>
+          <button class="tab-btn" data-tab="productivity">
+            ⚡ Productivity <span class="tab-count">3</span>
+          </button>
+          <button class="tab-btn" data-tab="advanced">
+            🚀 Advanced <span class="tab-count">5</span>
+          </button>
+        </div>
+
+        <!-- TAB CONTENT: ANALYTICS -->
+        <div class="tab-content-wrapper active" id="tab-analytics">
+          <div class="feature-section">
+            <h2 class="section-title">📊 Analytics & Insights</h2>
+            <div class="feature-grid feature-grid-2col">
+
 
     <!-- Analytics Dashboard -->
     <div class="card mt-4" id="analyticsCard">
@@ -452,12 +817,18 @@
 
       </div>
     </div>
-    <!-- END SECTION: Core Analytics & Tracking -->
+     <!-- END SECTION: Core Analytics & Tracking -->
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- END TAB: ANALYTICS -->
 
-    <!-- SECTION: Goals & Progress -->
-    <div class="feature-section">
-      <h2 class="section-title">🎯 Goals & Progress Tracking</h2>
-      <div class="feature-grid feature-grid-3col">
+    <!-- TAB CONTENT: GOALS -->
+    <div class="tab-content-wrapper" id="tab-goals">
+      <div class="feature-section">
+        <h2 class="section-title">🎯 Goals & Progress Tracking</h2>
+        <div class="feature-grid feature-grid-3col">
 
     <!-- Goal Streaks -->
     <div class="card mt-4" id="streaksCard">
@@ -501,10 +872,18 @@
     </div>
     <!-- END SECTION: Goals & Progress -->
 
-    <!-- SECTION: Customization & Planning -->
-    <div class="feature-section">
-      <h2 class="section-title">⚙️ Customization & Planning</h2>
-      <div class="feature-grid feature-grid-2col">
+    <!-- END SECTION: Goals & Progress -->
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- END TAB: GOALS -->
+
+    <!-- TAB CONTENT: CUSTOMIZATION -->
+    <div class="tab-content-wrapper" id="tab-customization">
+      <div class="feature-section">
+        <h2 class="section-title">⚙️ Customization & Planning</h2>
+        <div class="feature-grid feature-grid-2col">
 
     <!-- Custom Daily Targets -->
     <div class="card mt-4" id="customTargetsCard">
@@ -559,14 +938,19 @@
       </div>
     </div>
 
+        </div>
       </div>
     </div>
     <!-- END SECTION: Customization & Planning -->
+      </div>
+    </div>
+    <!-- END TAB: CUSTOMIZATION -->
 
-    <!-- SECTION: Reports & Data -->
-    <div class="feature-section">
-      <h2 class="section-title">📄 Reports & Data Management</h2>
-      <div class="feature-grid feature-grid-3col">
+    <!-- TAB CONTENT: REPORTS -->
+    <div class="tab-content-wrapper" id="tab-reports">
+      <div class="feature-section">
+        <h2 class="section-title">📄 Reports & Data Management</h2>
+        <div class="feature-grid feature-grid-3col">
 
     <!-- Overtime Tracker -->
     <div class="card mt-4" id="overtimeCard">
@@ -660,13 +1044,18 @@
     </div>
 
       </div>
+      </div>
     </div>
     <!-- END SECTION: Reports & Data -->
+      </div>
+    </div>
+    <!-- END TAB: REPORTS -->
 
-    <!-- SECTION: Productivity Tools -->
-    <div class="feature-section">
-      <h2 class="section-title">⚡ Productivity & Focus Tools</h2>
-      <div class="feature-grid feature-grid-2col">
+    <!-- TAB CONTENT: PRODUCTIVITY -->
+    <div class="tab-content-wrapper" id="tab-productivity">
+      <div class="feature-section">
+        <h2 class="section-title">⚡ Productivity & Focus Tools</h2>
+        <div class="feature-grid feature-grid-2col">
 
     <!-- Pomodoro Focus Timer -->
     <div class="card mt-4" id="pomodoroCard">
@@ -746,11 +1135,17 @@
       </div>
     </div>
     <!-- END SECTION: Productivity Tools -->
+        </div>
+      </div>
+      </div>
+    </div>
+    <!-- END TAB: PRODUCTIVITY -->
 
-    <!-- SECTION: Advanced Features -->
-    <div class="feature-section">
-      <h2 class="section-title">🚀 Advanced Features</h2>
-      <div class="feature-grid feature-grid-3col">
+    <!-- TAB CONTENT: ADVANCED -->
+    <div class="tab-content-wrapper" id="tab-advanced">
+      <div class="feature-section">
+        <h2 class="section-title">🚀 Advanced Features</h2>
+        <div class="feature-grid feature-grid-3col">
 
     <!-- Yearly Calendar Heatmap -->
     <div class="card mt-4" id="yearlyCalendarCard">
@@ -1032,8 +1427,13 @@
       </div>
     </div>
     <!-- END SECTION: Advanced Features -->
+        </div>
+      </div>
+    </div>
+    <!-- END TAB: ADVANCED -->
 
-    <div class="d-flex flex-wrap justify-content-between align-items-center mt-4">
+        <!-- WEEKLY SUMMARY -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center mt-4">
       <div class="d-flex gap-2 mb-2 mb-sm-0">
         <span id="totalWorked" class="pill" title="Total time you have worked this week."></span>
         <span id="weeklyStatus" class="pill"
@@ -1042,8 +1442,14 @@
               title="Shows how much you should work on the next unfilled day to stay on track with the weekly target."></span>
       </div>
       <button id="resetBtn" class="btn btn-outline-light btn-sm theme-btn">Reset Week</button>
-    </div>
+        </div>
+
+      </div>
+      <!-- END CONTENT CONTAINER -->
+    </main>
+    <!-- END APP MAIN -->
   </div>
+  <!-- END APP LAYOUT -->
 
   <!-- Floating Settings Gear (Dropdown) -->
   <div class="dropdown">
@@ -1218,6 +1624,145 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+    // ========================================
+    // SIDEBAR & TAB NAVIGATION
+    // ========================================
+    
+    // Sidebar toggle functionality
+    const sidebar = document.getElementById('appSidebar');
+    const appMain = document.getElementById('appMain');
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebarClose = document.getElementById('sidebarClose');
+    
+    // Load sidebar state from localStorage
+    const sidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+    if (sidebarCollapsed) {
+      sidebar.classList.add('collapsed');
+      appMain.classList.add('sidebar-collapsed');
+    }
+    
+    // Toggle sidebar on mobile
+    menuToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('show');
+    });
+    
+    // Close sidebar
+    sidebarClose.addEventListener('click', () => {
+      sidebar.classList.add('collapsed');
+      appMain.classList.add('sidebar-collapsed');
+      localStorage.setItem('sidebarCollapsed', 'true');
+    });
+    
+    // Tab switching functionality
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content-wrapper');
+    const navItems = document.querySelectorAll('.nav-item');
+    
+    function switchTab(tabId) {
+      // Update tab buttons
+      tabButtons.forEach(btn => {
+        if (btn.dataset.tab === tabId) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+      
+      // Update tab content
+      tabContents.forEach(content => {
+        if (content.id === `tab-${tabId}`) {
+          content.classList.add('active');
+        } else {
+          content.classList.remove('active');
+        }
+      });
+      
+      // Update sidebar nav
+      navItems.forEach(item => {
+        if (item.dataset.tab === tabId) {
+          item.classList.add('active');
+        } else {
+          item.classList.remove('active');
+        }
+      });
+      
+      // Scroll to top smoothly
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      
+      // Save active tab
+      localStorage.setItem('activeTab', tabId);
+    }
+    
+    // Tab button click handlers
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        switchTab(btn.dataset.tab);
+      });
+    });
+    
+    // Sidebar nav click handlers
+    navItems.forEach(item => {
+      item.addEventListener('click', (e) => {
+        e.preventDefault();
+        const tabId = item.dataset.tab;
+        
+        // Main is always visible (time entry), other tabs switch content
+        if (tabId !== 'main') {
+          switchTab(tabId);
+        } else {
+          // Scroll to time entry cards
+          document.getElementById('cards').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Close sidebar on mobile
+        if (window.innerWidth <= 768) {
+          sidebar.classList.remove('show');
+        }
+      });
+    });
+    
+    // Keyboard shortcuts for tabs (Arrow keys)
+    document.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+        return; // Don't interfere with form inputs
+      }
+      
+      const currentTab = document.querySelector('.tab-btn.active');
+      if (!currentTab) return;
+      
+      const tabList = Array.from(tabButtons);
+      const currentIndex = tabList.indexOf(currentTab);
+      
+      if (e.key === 'ArrowRight' && currentIndex < tabList.length - 1) {
+        e.preventDefault();
+        switchTab(tabList[currentIndex + 1].dataset.tab);
+      } else if (e.key === 'ArrowLeft' && currentIndex > 0) {
+        e.preventDefault();
+        switchTab(tabList[currentIndex - 1].dataset.tab);
+      }
+    });
+    
+    // Restore last active tab on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedTab = localStorage.getItem('activeTab');
+      if (savedTab && savedTab !== 'main') {
+        switchTab(savedTab);
+      }
+    });
+    
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', (e) => {
+      if (window.innerWidth <= 768) {
+        if (!sidebar.contains(e.target) && !menuToggle.contains(e.target) && sidebar.classList.contains('show')) {
+          sidebar.classList.remove('show');
+        }
+      }
+    });
+    
+    // ========================================
+    // ORIGINAL SCRIPT CONTENT
+    // ========================================
+    
     const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday"];
 
     const DAY_MAX = 9*60;          // 9 hours cap
