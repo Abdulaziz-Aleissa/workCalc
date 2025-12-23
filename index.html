@@ -335,6 +335,7 @@
     .app-sidebar {
       width: 260px;
       background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+      -webkit-backdrop-filter: blur(10px);
       backdrop-filter: blur(10px);
       border-right: 1px solid rgba(255,255,255,0.1);
       position: fixed;
@@ -367,6 +368,7 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
+      color: var(--accent); /* Fallback for browsers that don't support gradient text */
     }
 
     .sidebar-toggle {
@@ -447,6 +449,7 @@
       top: 0;
       z-index: 1040;
       background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%);
+      -webkit-backdrop-filter: blur(15px) saturate(180%);
       backdrop-filter: blur(15px) saturate(180%);
       border-bottom: 1px solid rgba(255,255,255,0.1);
       padding: 1rem 2rem;
@@ -475,6 +478,7 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
+      color: var(--text); /* Fallback for browsers that don't support gradient text */
     }
 
     .menu-toggle {
@@ -533,7 +537,7 @@
     }
 
     .tab-count {
-      background: rgba(255,255,255,0.2);
+      background: rgba(0,0,0,0.3);
       padding: 0.15rem 0.5rem;
       border-radius: 999px;
       font-size: 0.75rem;
@@ -541,7 +545,7 @@
     }
 
     .tab-btn.active .tab-count {
-      background: rgba(0,0,0,0.2);
+      background: rgba(0,0,0,0.25);
     }
 
     /* TAB CONTENT */
@@ -1635,10 +1639,14 @@
     const sidebarClose = document.getElementById('sidebarClose');
     
     // Load sidebar state from localStorage
-    const sidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-    if (sidebarCollapsed) {
-      sidebar.classList.add('collapsed');
-      appMain.classList.add('sidebar-collapsed');
+    try {
+      const sidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+      if (sidebarCollapsed) {
+        sidebar.classList.add('collapsed');
+        appMain.classList.add('sidebar-collapsed');
+      }
+    } catch (e) {
+      console.warn('localStorage not available for sidebar state:', e);
     }
     
     // Toggle sidebar on mobile
@@ -1650,7 +1658,11 @@
     sidebarClose.addEventListener('click', () => {
       sidebar.classList.add('collapsed');
       appMain.classList.add('sidebar-collapsed');
-      localStorage.setItem('sidebarCollapsed', 'true');
+      try {
+        localStorage.setItem('sidebarCollapsed', 'true');
+      } catch (e) {
+        console.warn('localStorage not available:', e);
+      }
     });
     
     // Tab switching functionality
@@ -1690,7 +1702,11 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
       
       // Save active tab
-      localStorage.setItem('activeTab', tabId);
+      try {
+        localStorage.setItem('activeTab', tabId);
+      } catch (e) {
+        console.warn('localStorage not available:', e);
+      }
     }
     
     // Tab button click handlers
@@ -1744,9 +1760,13 @@
     
     // Restore last active tab on page load
     window.addEventListener('DOMContentLoaded', () => {
-      const savedTab = localStorage.getItem('activeTab');
-      if (savedTab && savedTab !== 'main') {
-        switchTab(savedTab);
+      try {
+        const savedTab = localStorage.getItem('activeTab');
+        if (savedTab && savedTab !== 'main') {
+          switchTab(savedTab);
+        }
+      } catch (e) {
+        console.warn('localStorage not available:', e);
       }
     });
     
