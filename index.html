@@ -1908,7 +1908,11 @@
     const fontSelect = document.getElementById('fontSelect');
     fontSelect.addEventListener('change', e => {
       const chosenFont = e.target.value;
-      document.documentElement.style.setProperty('--font', `'${chosenFont}', sans-serif`);
+      if (chosenFont === 'System') {
+        document.documentElement.style.setProperty('--font', '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif');
+      } else {
+        document.documentElement.style.setProperty('--font', `'${chosenFont}', sans-serif`);
+      }
       localStorage.setItem(FONT_KEY, chosenFont);
     });
 
@@ -1974,7 +1978,11 @@
       const savedFont = localStorage.getItem(FONT_KEY);
       if(savedFont){
         fontSelect.value = savedFont;
-        document.documentElement.style.setProperty('--font', `'${savedFont}', sans-serif`);
+        if (savedFont === 'System') {
+          document.documentElement.style.setProperty('--font', '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif');
+        } else {
+          document.documentElement.style.setProperty('--font', `'${savedFont}', sans-serif`);
+        }
       }
 
       const savedMode = localStorage.getItem(MODE_KEY);
