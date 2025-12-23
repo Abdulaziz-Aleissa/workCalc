@@ -625,7 +625,7 @@
           <div id="comparisonChart" style="position: relative; height: 200px;">
             <!-- Visual bar chart will be rendered here -->
           </div>
-          <div class="mt-3 small text-muted text-center" id="chartLegend">
+          <div class="mt-3 small text-muted-themed text-center" id="chartLegend">
             Weekly totals compared over time
           </div>
         </div>
@@ -1205,7 +1205,7 @@
             <li><strong>Today plan</strong>: how much you should work on the next unfilled day.</li>
           </ul>
 
-          <p class="mt-3 mb-0 small text-muted">
+          <p class="mt-3 mb-0 small text-muted-themed">
             Tip: You can change the theme, mode (Normal/Ramadan), and font at any time. All your inputs and preferences are saved in your browser.
           </p>
         </div>
@@ -2793,7 +2793,7 @@
           const m = weeklyOvertime % 60;
           overtimeDetailsEl.innerHTML = `
             <p class="mb-1">✅ You've worked <strong>${h}h ${m}m</strong> beyond your weekly target.</p>
-            <p class="mb-0 text-muted small">This overtime will be added to monthly total when you reset the week.</p>
+            <p class="mb-0 text-muted-themed small">This overtime will be added to monthly total when you reset the week.</p>
           `;
         } else {
           overtimeDetailsEl.innerHTML = `<p class="mb-1 text-muted-themed">Work beyond your weekly target to see overtime accumulation.</p>`;
@@ -3207,7 +3207,7 @@
               <div style="font-size: 2rem;">${ach.icon}</div>
               <div class="small fw-bold">${ach.name}</div>
               <div class="small text-muted-themed">${ach.desc}</div>
-              <div class="small ${unlocked ? 'text-success' : 'text-muted'}">${unlocked ? '✅ Unlocked' : `🔒 ${ach.points}pts`}</div>
+              <div class="small ${unlocked ? 'text-success' : 'text-muted-themed'}">${unlocked ? '✅ Unlocked' : `🔒 ${ach.points}pts`}</div>
             </div>
           </div>
         `;
