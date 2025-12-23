@@ -1,0 +1,4557 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Work Time Calculator — Sun→Thu</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Modern Professional Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Orbitron:wght@400;600&family=Share+Tech+Mono&family=Audiowide&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#0f172a; --card:#111827; --muted:#cbd5e1;
+      --accent:#22c55e; --warn:#f59e0b; --error:#ef4444; --text:#e5e7eb;
+      --select-bg:#0b1220; --select-text:#e5e7eb; --select-border:#444;
+      --font:'Inter', sans-serif;
+      --secondary-text:#94a3b8;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    .card {
+      background: var(--card);
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+      opacity: 0;
+      transform: translateY(10px);
+      animation: fadeInUp 0.4s ease forwards;
+    }
+    .card-header {
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    /* Allow header content to wrap nicely so buttons never overflow card */
+    .card-header.d-flex {
+      flex-wrap: wrap;
+      row-gap: 0.5rem;
+    }
+    .card-header .btn-group {
+      flex-shrink: 0;
+    }
+
+    .form-select {
+      background: var(--select-bg);
+      color: var(--select-text);
+      border: 1px solid var(--select-border);
+      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+    .pill {
+      display:inline-block;
+      padding:4px 10px;
+      border-radius:999px;
+      font-size:12px;
+      border:1px solid var(--muted);
+      color: var(--muted);
+      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+      white-space: nowrap; /* prevent text wrapping inside pills */
+    }
+    .good {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+    .warn {
+      color: var(--warn);
+      border-color: var(--warn);
+    }
+    .bad  {
+      color: var(--error);
+      border-color: var(--error);
+    }
+    .pill-bump {
+      animation: pillBump 0.25s ease;
+    }
+
+    .progress {
+      background-color: rgba(148,163,184,0.25);
+      transition: background-color 0.3s ease;
+      position: relative;
+      overflow: visible;
+    }
+    .progress-bar {
+      background-color: var(--accent);
+      transition: width 0.3s ease, background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+    }
+
+    .progress-firework {
+      animation: progressPulse 0.45s ease-out;
+      box-shadow: 0 0 10px rgba(34,197,94,0.5);
+    }
+
+    .day-toggle.btn-link {
+      color: inherit;
+      text-decoration: none;
+      padding-left: 0;
+      padding-right: 0;
+      white-space: nowrap; /* keep day title one line */
+    }
+    .day-toggle.btn-link:hover {
+      text-decoration: underline;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pillBump {
+      0%   { transform: scale(1); }
+      50%  { transform: scale(1.08); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes progressPulse {
+      0%   { transform: scaleX(1);   box-shadow: 0 0 0 rgba(34,197,94,0); }
+      50%  { transform: scaleX(1.06); box-shadow: 0 0 14px rgba(34,197,94,0.8); }
+      100% { transform: scaleX(1);   box-shadow: 0 0 0 rgba(34,197,94,0); }
+    }
+
+    /* Hint box styling */
+    .hint-box {
+      margin-top: 0.35rem;
+      padding: 0.55rem 0.75rem;
+      border-radius: 0.75rem;
+      background: rgba(148,163,184,0.08);
+      border: 1px solid rgba(148,163,184,0.25);
+      font-size: 0.8rem;
+    }
+    .hint-title {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+      font-weight: 600;
+    }
+    .hint-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 0.1rem;
+    }
+    .hint-label {
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .hint-value {
+      font-weight: 500;
+    }
+    .hint-value-strong {
+      font-weight: 600;
+    }
+    .hint-subtle {
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-top: 0.25rem;
+    }
+
+    /* Theme-aware outline button */
+    .theme-btn {
+      border-color: var(--accent) !important;
+      color: var(--accent) !important;
+      background-color: transparent !important;
+    }
+    .theme-btn:hover,
+    .theme-btn:focus {
+      background-color: var(--accent) !important;
+      color: var(--bg) !important;
+      border-color: var(--accent) !important;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.35);
+    }
+
+    /* Make ALL buttons single-line */
+    .btn {
+      white-space: nowrap;
+    }
+
+    /* Floating gear settings button (top-right) */
+    .floating-settings {
+      position: fixed;
+      top: 14px;
+      right: 14px;
+      z-index: 1080;
+      border-radius: 999px;
+      padding-inline: 10px;
+      padding-block: 6px;
+      backdrop-filter: blur(6px);
+      
+      white-space: nowrap;
+    }
+
+    @media (max-width: 576px) {
+      .floating-settings {
+        top: 10px;
+        right: 10px;
+      }
+    }
+
+    /* === FULL PAGE FIREWORK OVERLAY === */
+    #fireworkOverlay {
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1075;
+      opacity: 0;
+    }
+
+    #fireworkOverlay.show {
+      animation: fireworkOverlayFade 0.8s ease-out forwards;
+    }
+
+    #fireworkOverlay::before,
+    #fireworkOverlay::after {
+      content: "";
+      position: absolute;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle, rgba(255,255,255,0.9) 0, rgba(255,255,255,0) 55%),
+        radial-gradient(circle at 20% 20%, rgba(34,197,94,0.9) 0, transparent 60%),
+        radial-gradient(circle at 80% 30%, rgba(56,189,248,0.9) 0, transparent 60%),
+        radial-gradient(circle at 30% 80%, rgba(244,114,182,0.9) 0, transparent 60%);
+      opacity: 0;
+    }
+
+    #fireworkOverlay.show::before {
+      top: 30%;
+      left: 20%;
+      animation: fireworkCircle 0.8s ease-out forwards;
+    }
+
+    #fireworkOverlay.show::after {
+      top: 60%;
+      right: 15%;
+      animation: fireworkCircle 0.8s ease-out forwards 0.1s;
+    }
+
+    @keyframes fireworkOverlayFade {
+      0% { opacity: 0; }
+      20% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    @keyframes fireworkCircle {
+      0% {
+        transform: scale(0.3);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(1.6);
+        opacity: 0;
+      }
+    }
+
+    /* === EMOJI POP EFFECT === */
+    .emoji-pop {
+      position: fixed;
+      z-index: 2000;
+      font-size: 1.6rem;
+      pointer-events: none;
+      animation: emojiPop 0.8s ease-out forwards;
+    }
+
+    @keyframes emojiPop {
+      0% {
+        transform: translate(-50%, 0) scale(0.7);
+        opacity: 1;
+      }
+      70% {
+        transform: translate(-50%, -30px) scale(1.1);
+        opacity: 1;
+      }
+      100% {
+        transform: translate(-50%, -50px) scale(0.9);
+        opacity: 0;
+      }
+    }
+
+    /* === CLOCK STYLE (theme-aware, centered) === */
+    .clock-wrapper {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+    }
+    .clock-display {
+      padding: 8px 24px;
+      border-radius: 999px;
+
+      /* Solid dark pill that works with all themes */
+      background:
+        radial-gradient(circle at 10% 0, rgba(255, 255, 255, 0), transparent 55%),
+        #181a2500;
+
+      border: 1px solid rgba(0, 0, 0, 0.11);
+
+      /* Text follows theme accent */
+      color: var(--accent);
+
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 1.2rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      min-width: 160px;
+      text-align: center;
+      text-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* === THEME-AWARE TEXT CLASSES === */
+    .text-secondary-themed {
+      color: var(--secondary-text) !important;
+    }
+    .text-muted-themed {
+      color: var(--muted) !important;
+    }
+    
+    /* === WORLD-CLASS PROFESSIONAL LAYOUT === */
+    
+    /* MAIN APP LAYOUT */
+    .app-layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* SIDEBAR NAVIGATION */
+    .app-sidebar {
+      width: 260px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+      -webkit-backdrop-filter: blur(6px);
+      backdrop-filter: blur(6px);
+      border-right: 1px solid rgba(255,255,255,0.1);
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      z-index: 1050;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow-y: auto;
+      box-shadow: 2px 0 20px rgba(0,0,0,0.3);
+      will-change: transform;
+    }
+
+    .app-sidebar.collapsed {
+      transform: translateX(-100%);
+    }
+
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .sidebar-logo {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), var(--warn));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: var(--accent); /* Fallback for browsers that don't support gradient text */
+    }
+
+    .sidebar-toggle {
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.5rem;
+      transition: background 0.2s;
+    }
+
+    .sidebar-toggle:hover {
+      background: rgba(255,255,255,0.1);
+    }
+
+    .sidebar-nav {
+      padding: 1rem 0;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 1.5rem;
+      color: var(--text);
+      text-decoration: none;
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+      cursor: pointer;
+    }
+
+    .nav-item:hover {
+      background: rgba(255,255,255,0.05);
+      color: var(--accent);
+    }
+
+    .nav-item.active {
+      background: rgba(34,197,94,0.1);
+      border-left-color: var(--accent);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .nav-icon {
+      font-size: 1.25rem;
+      margin-right: 0.75rem;
+      min-width: 28px;
+      text-align: center;
+    }
+
+    .nav-label {
+      flex: 1;
+    }
+
+    .nav-badge {
+      background: var(--accent);
+      color: var(--bg);
+      font-size: 0.7rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+
+    /* MAIN CONTENT AREA */
+    .app-main {
+      flex: 1;
+      margin-left: 260px;
+      transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .app-main.sidebar-collapsed {
+      margin-left: 0;
+    }
+
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 1040;
+      background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%);
+      -webkit-backdrop-filter: blur(8px) saturate(150%);
+      backdrop-filter: blur(8px) saturate(150%);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding: 1rem 2rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      will-change: transform;
+    }
+
+    .header-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+    }
+
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      width: 100%;
+      justify-content: space-between;
+    }
+    
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .header-title h1 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--text), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: var(--text); /* Fallback for browsers that don't support gradient text */
+    }
+
+    .menu-toggle {
+      display: none;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: var(--text);
+      font-size: 1.5rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .menu-toggle:hover {
+      background: rgba(255,255,255,0.15);
+    }
+
+    /* CONTENT TABS */
+    .content-tabs {
+      background: rgba(255,255,255,0.03);
+      padding: 0.5rem;
+      border-radius: 0.75rem;
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      padding: 0.65rem 1.25rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+    }
+
+    .tab-btn.active {
+      background: var(--accent);
+      color: var(--bg);
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(34,197,94,0.3);
+    }
+
+    .tab-count {
+      background: rgba(0,0,0,0.3);
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .tab-btn.active .tab-count {
+      background: rgba(0,0,0,0.25);
+    }
+
+    /* TAB CONTENT */
+    .tab-content-wrapper {
+      display: none;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .tab-content-wrapper.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .content-container {
+      padding: 2rem;
+    }
+
+    /* FEATURE GRID */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 1.5rem;
+    }
+    
+    @media (min-width: 992px) {
+      .feature-grid-2col {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .feature-grid-3col {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+    
+    .feature-section {
+      margin-bottom: 3rem;
+    }
+    
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent) 0%, transparent 100%);
+    }
+
+    /* MOBILE RESPONSIVE - Native-like Experience */
+    @media (max-width: 768px) {
+      .app-sidebar {
+        transform: translateX(-100%);
+        width: 80%;
+        max-width: 300px;
+      }
+
+      .app-sidebar.show {
+        transform: translateX(0);
+        box-shadow: 4px 0 30px rgba(0,0,0,0.5);
+      }
+
+      .app-main {
+        margin-left: 0 !important;
+      }
+
+      .menu-toggle {
+        display: block;
+        background: rgba(255,255,255,0.12);
+        border: 1px solid rgba(255,255,255,0.25);
+        padding: 0.6rem 0.9rem;
+        font-size: 1.4rem;
+        border-radius: 0.6rem;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        -webkit-tap-highlight-color: transparent;
+      }
+      
+      .menu-toggle:active {
+        transform: scale(0.95);
+        background: rgba(255,255,255,0.18);
+      }
+
+      .feature-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .content-container {
+        padding: 0.75rem;
+      }
+      
+      .app-header {
+        padding: 0.75rem 1rem;
+      }
+
+      .content-tabs {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE/Edge */
+        padding: 0.4rem;
+      }
+      
+      .content-tabs::-webkit-scrollbar {
+        display: none; /* Chrome/Safari */
+      }
+      
+      .tab-btn {
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+        -webkit-tap-highlight-color: transparent;
+        min-width: fit-content;
+      }
+      
+      .tab-btn:active {
+        transform: scale(0.97);
+      }
+
+      .header-title h1 {
+        font-size: 1.1rem;
+        white-space: nowrap;
+      }
+      
+      .header-title .btn {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.7rem;
+      }
+      
+      .clock-display {
+        font-size: 1rem;
+        padding: 7px 20px;
+        min-width: 140px;
+      }
+      
+      /* Native-like cards */
+      .card {
+        border-radius: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      }
+      
+      /* Better touch targets */
+      .btn {
+        min-height: 44px;
+        -webkit-tap-highlight-color: transparent;
+      }
+      
+      .nav-item {
+        -webkit-tap-highlight-color: transparent;
+        min-height: 48px;
+      }
+      
+      .nav-item:active {
+        transform: translateX(2px);
+      }
+      
+      /* Smooth scrolling */
+      html {
+        scroll-behavior: smooth;
+      }
+      
+      /* Overlay for sidebar */
+      body.sidebar-open::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 1045;
+        -webkit-backdrop-filter: blur(2px);
+        backdrop-filter: blur(2px);
+      }
+    }
+
+  </style>
+</head>
+<body>
+  <!-- APP LAYOUT -->
+  <div class="app-layout">
+    
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="app-sidebar" id="appSidebar">
+      <div class="sidebar-header">
+        <h3 class="sidebar-logo">WorkCalc</h3>
+        <button class="sidebar-toggle" id="sidebarClose">×</button>
+      </div>
+      <nav class="sidebar-nav">
+        <a class="nav-item active" data-tab="main">
+          <span class="nav-icon">⏰</span>
+          <span class="nav-label">Time Entry</span>
+        </a>
+        <a class="nav-item" data-tab="analytics">
+          <span class="nav-icon">📊</span>
+          <span class="nav-label">Analytics</span>
+          <span class="nav-badge">3</span>
+        </a>
+        <a class="nav-item" data-tab="goals">
+          <span class="nav-icon">🎯</span>
+          <span class="nav-label">Goals & Tracking</span>
+          <span class="nav-badge">3</span>
+        </a>
+        <a class="nav-item" data-tab="customization">
+          <span class="nav-icon">⚙️</span>
+          <span class="nav-label">Customization</span>
+          <span class="nav-badge">2</span>
+        </a>
+        <a class="nav-item" data-tab="reports">
+          <span class="nav-icon">📄</span>
+          <span class="nav-label">Reports & Data</span>
+          <span class="nav-badge">3</span>
+        </a>
+        <a class="nav-item" data-tab="productivity">
+          <span class="nav-icon">⚡</span>
+          <span class="nav-label">Productivity</span>
+          <span class="nav-badge">3</span>
+        </a>
+        <a class="nav-item" data-tab="advanced">
+          <span class="nav-icon">🚀</span>
+          <span class="nav-label">Advanced</span>
+          <span class="nav-badge">5</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="app-main" id="appMain">
+      <!-- HEADER -->
+      <header class="app-header">
+        <div class="header-content">
+          <div class="header-title">
+            <div class="header-left">
+              <button class="menu-toggle" id="menuToggle">☰</button>
+              <h1>Work Time Calculator (Sun → Thu)</h1>
+            </div>
+            <button type="button" class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#userGuideModal">
+              User Guide
+            </button>
+          </div>
+          <div class="clock-wrapper">
+            <div id="liveClock" class="clock-display"></div>
+          </div>
+        </div>
+      </header>
+
+      <!-- CONTENT CONTAINER -->
+      <div class="content-container">
+        
+        <!-- TIME ENTRY (Always Visible) -->
+        <div id="cards" class="row g-3 mb-4"></div>
+
+        <!-- CONTENT TABS -->
+        <div class="content-tabs">
+          <button class="tab-btn active" data-tab="analytics">
+            📊 Analytics <span class="tab-count">3</span>
+          </button>
+          <button class="tab-btn" data-tab="goals">
+            🎯 Goals <span class="tab-count">3</span>
+          </button>
+          <button class="tab-btn" data-tab="customization">
+            ⚙️ Customization <span class="tab-count">2</span>
+          </button>
+          <button class="tab-btn" data-tab="reports">
+            📄 Reports <span class="tab-count">3</span>
+          </button>
+          <button class="tab-btn" data-tab="productivity">
+            ⚡ Productivity <span class="tab-count">3</span>
+          </button>
+          <button class="tab-btn" data-tab="advanced">
+            🚀 Advanced <span class="tab-count">5</span>
+          </button>
+        </div>
+
+        <!-- TAB CONTENT: ANALYTICS -->
+        <div class="tab-content-wrapper active" id="tab-analytics">
+          <div class="feature-section">
+            <h2 class="section-title">📊 Analytics & Insights</h2>
+            <div class="feature-grid feature-grid-2col">
+
+
+    <!-- Analytics Dashboard -->
+    <div class="card mt-4" id="analyticsCard">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>📊 Analytics Dashboard</span>
+        <button class="btn btn-link day-toggle" type="button"
+                data-bs-toggle="collapse" data-bs-target="#analytics-collapse"
+                aria-expanded="false" aria-controls="analytics-collapse">
+          Toggle
+        </button>
+      </div>
+      <div id="analytics-collapse" class="collapse">
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <div class="hint-box">
+                <div class="hint-title">Average Daily Hours</div>
+                <div class="hint-value hint-value-strong" id="avgDailyHours">--</div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="hint-box">
+                <div class="hint-title">Most Productive Day</div>
+                <div class="hint-value hint-value-strong" id="mostProductiveDay">--</div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="hint-box">
+                <div class="hint-title">Consistency Score</div>
+                <div class="hint-value hint-value-strong" id="consistencyScore">--</div>
+              </div>
+            </div>
+          </div>
+          <div class="hint-box mt-3">
+            <div class="hint-title">Insights & Recommendations</div>
+            <div id="analyticsInsights" class="small">
+              <p class="mb-1">Fill in your work hours to see personalized insights.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Monthly History -->
+    <div class="card mt-4" id="monthlyHistoryCard">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>📅 Monthly History</span>
+        <button class="btn btn-link day-toggle" type="button"
+                data-bs-toggle="collapse" data-bs-target="#history-collapse"
+                aria-expanded="false" aria-controls="history-collapse">
+          Toggle
+        </button>
+      </div>
+      <div id="history-collapse" class="collapse">
+        <div class="card-body">
+          <div id="weekSelector" class="mb-3">
+            <label for="weekSelect" class="form-label small">Select Week</label>
+            <select id="weekSelect" class="form-select form-select-sm">
+              <option value="current">Current Week</option>
+            </select>
+          </div>
+          <div id="weekHistoryDisplay">
+            <p class="text-muted-themed small">No historical data available. Complete and reset weeks to build history.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+      </div>
+    </div>
+     <!-- END SECTION: Core Analytics & Tracking -->
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- END TAB: ANALYTICS -->
+
+    <!-- TAB CONTENT: GOALS -->
+    <div class="tab-content-wrapper" id="tab-goals">
+      <div class="feature-section">
+        <h2 class="section-title">🎯 Goals & Progress Tracking</h2>
+        <div class="feature-grid feature-grid-3col">
+
+    <!-- Goal Streaks -->
+    <div class="card mt-4" id="streaksCard">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>🔥 Goal Streaks</span>
+        <button class="btn btn-link day-toggle" type="button"
+                data-bs-toggle="collapse" data-bs-target="#streaks-collapse"
+                aria-expanded="false" aria-controls="streaks-collapse">
+          Toggle
+        </button>
+      </div>
+      <div id="streaks-collapse" class="collapse">
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="hint-box">
+                <div class="hint-title">Current Streak</div>
+                <div class="hint-value hint-value-strong" id="currentStreak">0 days</div>
+                <div class="hint-subtle">Consecutive days meeting target</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="hint-box">
+                <div class="hint-title">Best Streak</div>
+                <div class="hint-value hint-value-strong" id="bestStreak">0 days</div>
+                <div class="hint-subtle">Longest streak ever</div>
+              </div>
+            </div>
+          </div>
+          <div class="hint-box mt-3">
+            <div class="hint-title">This Week's Progress</div>
+            <div id="weeklyStreakDisplay" class="d-flex gap-2 mt-2">
+              <!-- Dynamic streak indicators will be inserted here -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+      </div>
+    </div>
+    <!-- END SECTION: Goals & Progress -->
+
+    <!-- END SECTION: Goals & Progress -->
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- END TAB: GOALS -->
+
+    <!-- TAB CONTENT: CUSTOMIZATION -->
+    <div class="tab-content-wrapper" id="tab-customization">
+      <div class="feature-section">
+        <h2 class="section-title">⚙️ Customization & Planning</h2>
+        <div class="feature-grid feature-grid-2col">
+
+    <!-- Custom Daily Targets -->
+    <div class="card mt-4" id="customTargetsCard">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>⏰ Custom Daily Targets</span>
+        <button class="btn btn-link day-toggle" type="button"
+                data-bs-toggle="collapse" data-bs-target="#targets-collapse"
+                aria-expanded="false" aria-controls="targets-collapse">
+          Toggle
+        </button>
+      </div>
+      <div id="targets-collapse" class="collapse">
+        <div class="card-body">
+          <p class="small text-muted-themed mb-3">Set different work hour targets for each day of the week.</p>
+          <div class="row g-2" id="customTargetsInputs">
+            <!-- Dynamic target inputs will be inserted here -->
+          </div>
+          <div class="mt-3 d-flex gap-2 flex-wrap">
+            <button id="applyCustomTargets" class="btn btn-sm btn-outline-success theme-btn">Apply Targets</button>
+            <button id="resetToDefaultTargets" class="btn btn-sm btn-outline-secondary theme-btn">Reset to Default</button>
+          </div>
+          <div class="mt-2">
+            <select id="targetPresets" class="form-select form-select-sm">
+              <option value="">Quick Presets...</option>
+              <option value="standard">Standard (8h all days)</option>
+              <option value="4day">4-Day Week (10h Sun-Wed)</option>
+              <option value="reducedThu">Reduced Thursday (8h Sun-Wed, 4h Thu)</option>
+              <option value="flexWeek">Flex Week (6h, 8h, 8h, 8h, 10h)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Work Notes/Tags -->
+    <div class="card mt-4" id="workNotesCard">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>📝 Work Notes & Tags</span>
+        <button class="btn btn-link day-toggle" type="button"
+                data-bs-toggle="collapse" data-bs-target="#notes-collapse"
+                aria-expanded="false" aria-controls="notes-collapse">
+          Toggle
+        </button>
+      </div>
+      <div id="notes-collapse" class="collapse">
+        <div class="card-body">
+          <p class="small text-muted-themed mb-3">Add notes and tags to track what you worked on each day.</p>
+          <div id="notesInputsContainer">
+            <!-- Dynamic notes inputs will be inserted here -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+        </div>
+      </div>
+    </div>
+    <!-- END SECTION: Customization & Planning -->
+      </div>
+    </div>
+    <!-- END TAB: CUSTOMIZATION -->
+
+    <!-- TAB CONTENT: REPORTS -->
+    <div class="tab-content-wrapper" id="tab-reports">
+      <div class="feature-section">
+        <h2 class="section-title">📄 Reports & Data Management</h2>
+        <div class="feature-grid feature-grid-3col">
+
+    <!-- Overtime Tracker -->
+    <div class="card mt-4" id="overtimeCard">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>⏱️ Overtime Tracker</span>
+        <button class="btn btn-link day-toggle" type="button"
+                data-bs-toggle="collapse" data-bs-target="#overtime-collapse"
+                aria-expanded="false" aria-controls="overtime-collapse">
+          Toggle
+        </button>
+      </div>
+      <div id="overtime-collapse" class="collapse">
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="hint-box">
+                <div class="hint-title">This Week's Overtime</div>
+                <div class="hint-value hint-value-strong" id="weeklyOvertime">0h 0m</div>
+                <div class="hint-subtle">Hours beyond weekly target</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="hint-box">
+                <div class="hint-title">Monthly Overtime</div>
+                <div class="hint-value hint-value-strong" id="monthlyOvertime">0h 0m</div>
+                <div class="hint-subtle">Accumulated this month</div>
+              </div>
+            </div>
+          </div>
+          <div class="hint-box mt-3">
+            <div class="hint-title">Overtime Details</div>
+            <div id="overtimeDetails" class="small">
+              <p class="mb-1 text-muted-themed">Work beyond your weekly target to see overtime accumulation.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Weekly Comparison Chart -->
+    <div class="card mt-4" id="comparisonCard">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>📊 Weekly Comparison</span>
+        <button class="btn btn-link day-toggle" type="button"
+                data-bs-toggle="collapse" data-bs-target="#comparison-collapse"
+                aria-expanded="false" aria-controls="comparison-collapse">
+          Toggle
+        </button>
+      </div>
+      <div id="comparison-collapse" class="collapse">
+        <div class="card-body">
+          <div class="hint-box mb-3">
+            <div class="hint-title">Trend Analysis</div>
+            <div id="trendIndicator" class="hint-value">--</div>
+          </div>
+          <div id="comparisonChart" style="position: relative; height: 200px;">
+            <!-- Visual bar chart will be rendered here -->
+          </div>
+          <div class="mt-3 small text-muted-themed text-center" id="chartLegend">
+            Weekly totals compared over time
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Weekly Summary Report -->
+    <div class="card mt-4" id="reportCard">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>📄 Weekly Summary Report</span>
+        <button class="btn btn-link day-toggle" type="button"
+                data-bs-toggle="collapse" data-bs-target="#report-collapse"
+                aria-expanded="false" aria-controls="report-collapse">
+          Toggle
+        </button>
+      </div>
+      <div id="report-collapse" class="collapse">
+        <div class="card-body">
+          <p class="small text-muted-themed mb-3">Generate a comprehensive weekly report with all metrics and insights.</p>
+          <div class="d-flex gap-2 flex-wrap">
+            <button id="generateReport" class="btn btn-sm btn-outline-primary theme-btn">📄 Generate Report</button>
+            <button id="printReport" class="btn btn-sm btn-outline-secondary theme-btn" disabled>🖨️ Print</button>
+            <button id="shareReport" class="btn btn-sm btn-outline-secondary theme-btn" disabled>📤 Share</button>
+          </div>
+          <div id="reportPreview" class="mt-3" style="display: none;">
+            <div class="border border-secondary rounded p-3" id="reportContent">
+              <!-- Report content will be dynamically generated here -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+      </div>
+      </div>
+    </div>
+    <!-- END SECTION: Reports & Data -->
+      </div>
+    </div>
+    <!-- END TAB: REPORTS -->
+
+    <!-- TAB CONTENT: PRODUCTIVITY -->
+    <div class="tab-content-wrapper" id="tab-productivity">
+      <div class="feature-section">
+        <h2 class="section-title">⚡ Productivity & Focus Tools</h2>
+        <div class="feature-grid feature-grid-2col">
+
+    <!-- Pomodoro Focus Timer -->
+    <div class="card mt-4" id="pomodoroCard">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>⏲️ Pomodoro Focus Timer</span>
+        <button class="btn btn-link day-toggle" type="button"
+                data-bs-toggle="collapse" data-bs-target="#pomodoro-collapse"
+                aria-expanded="false" aria-controls="pomodoro-collapse">
+          Toggle
+        </button>
+      </div>
+      <div id="pomodoro-collapse" class="collapse">
+        <div class="card-body">
+          <p class="small text-muted-themed mb-3">Stay focused with timed work sessions. Completed sessions auto-log to your daily work time.</p>
+          <div class="text-center mb-3">
+            <div id="pomodoroDisplay" style="font-size: 3rem; font-weight: bold; color: var(--accent);">25:00</div>
+            <div id="pomodoroStatus" class="small text-muted-themed">Ready to start</div>
+          </div>
+          <div class="d-flex gap-2 justify-content-center mb-3">
+            <button id="pomodoroStart" class="btn btn-sm btn-success theme-btn">▶ Start</button>
+            <button id="pomodoroPause" class="btn btn-sm btn-warning theme-btn" disabled>⏸ Pause</button>
+            <button id="pomodoroReset" class="btn btn-sm btn-secondary theme-btn">↻ Reset</button>
+          </div>
+          <div class="row g-2">
+            <div class="col-6">
+              <label class="form-label small">Focus (min)</label>
+              <input type="number" id="pomodoroFocus" class="form-control form-control-sm" value="25" min="1" max="90">
+            </div>
+            <div class="col-6">
+              <label class="form-label small">Break (min)</label>
+              <input type="number" id="pomodoroBreak" class="form-control form-control-sm" value="5" min="1" max="30">
+            </div>
+          </div>
+          <div class="mt-3">
+            <div class="small text-muted-themed">Today's Sessions: <span id="pomodoroSessions">0</span></div>
+            <div class="small text-muted-themed">Total Focus Time: <span id="pomodoroTotalTime">0h 0m</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Achievements & Badges -->
+    <div class="card mt-4" id="achievementsCard">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>🏆 Achievements & Badges</span>
+        <button class="btn btn-link day-toggle" type="button"
+                data-bs-toggle="collapse" data-bs-target="#achievements-collapse"
+                aria-expanded="false" aria-controls="achievements-collapse">
+          Toggle
+        </button>
+      </div>
+      <div id="achievements-collapse" class="collapse">
+        <div class="card-body">
+          <p class="small text-muted-themed mb-3">Unlock badges by reaching milestones!</p>
+          <div class="row g-2 mb-3">
+            <div class="col-auto">
+              <div class="text-center">
+                <div style="font-size: 2rem;">🥉</div>
+                <div class="small">Level</div>
+                <div class="fw-bold" id="achievementLevel">Bronze</div>
+              </div>
+            </div>
+            <div class="col">
+              <div class="small text-muted-themed">Points: <span id="achievementPoints">0</span> / 100</div>
+              <div class="progress" style="height: 8px;">
+                <div id="achievementProgress" class="progress-bar bg-success" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+          <div id="achievementsList" class="row g-2">
+            <!-- Achievements will be dynamically generated -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+      </div>
+    </div>
+    <!-- END SECTION: Productivity Tools -->
+        </div>
+      </div>
+      </div>
+    </div>
+    <!-- END TAB: PRODUCTIVITY -->
+
+    <!-- TAB CONTENT: ADVANCED -->
+    <div class="tab-content-wrapper" id="tab-advanced">
+      <div class="feature-section">
+        <h2 class="section-title">🚀 Advanced Features</h2>
+        <div class="feature-grid feature-grid-3col">
+
+    <!-- Yearly Calendar Heatmap -->
+    <div class="card mt-4" id="yearlyCalendarCard">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>📆 Yearly Calendar View</span>
+        <button class="btn btn-link day-toggle" type="button"
+                data-bs-toggle="collapse" data-bs-target="#yearly-collapse"
+                aria-expanded="false" aria-controls="yearly-collapse">
+          Toggle
+        </button>
+      </div>
+      <div id="yearly-collapse" class="collapse">
+        <div class="card-body">
+          <p class="small text-muted-themed mb-3">Visualize your work intensity across the year (heatmap).</p>
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="small">Select Year:</div>
+            <select id="yearSelect" class="form-select form-select-sm" style="width: auto;">
+              <option value="2025">2025</option>
+              <option value="2024">2024</option>
+              <option value="2023">2023</option>
+            </select>
+          </div>
+          <div id="yearlyHeatmap" style="overflow-x: auto;">
+            <!-- Heatmap will be generated here -->
+          </div>
+          <div class="mt-2 d-flex gap-2 align-items-center justify-content-center">
+            <span class="small">Less</span>
+            <div class="d-flex gap-1">
+              <div style="width: 12px; height: 12px; background: #0e4429;"></div>
+              <div style="width: 12px; height: 12px; background: #006d32;"></div>
+              <div style="width: 12px; height: 12px; background: #26a641;"></div>
+              <div style="width: 12px; height: 12px; background: #39d353;"></div>
+            </div>
+            <span class="small">More</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Multi-Timezone Support -->
+    <div class="card mt-4" id="timezoneCard">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>🌍 Multi-Timezone Clocks</span>
+        <button class="btn btn-link day-toggle" type="button"
+                data-bs-toggle="collapse" data-bs-target="#timezone-collapse"
+                aria-expanded="false" aria-controls="timezone-collapse">
+          Toggle
+        </button>
+      </div>
+      <div id="timezone-collapse" class="collapse">
+        <div class="card-body">
+          <p class="small text-muted-themed mb-3">Track time across multiple timezones for remote teams.</p>
+          <div class="mb-3">
+            <button id="addTimezone" class="btn btn-sm btn-outline-success theme-btn">+ Add Timezone</button>
+          </div>
+          <div id="timezoneList">
+            <!-- Timezone clocks will be displayed here -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Work Templates -->
+    <div class="card mt-4" id="templatesCard">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>📋 Work Templates</span>
+        <button class="btn btn-link day-toggle" type="button"
+                data-bs-toggle="collapse" data-bs-target="#templates-collapse"
+                aria-expanded="false" aria-controls="templates-collapse">
+          Toggle
+        </button>
+      </div>
+      <div id="templates-collapse" class="collapse">
+        <div class="card-body">
+          <p class="small text-muted-themed mb-3">Save and reuse common work patterns.</p>
+          <div class="mb-3">
+            <button id="saveTemplate" class="btn btn-sm btn-outline-success theme-btn">💾 Save Current Week</button>
+          </div>
+          <div id="templatesList">
+            <!-- Templates will be listed here -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Advanced Analytics Export -->
+    <div class="card mt-4" id="analyticsExportCard">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>📈 Advanced Analytics Export</span>
+        <button class="btn btn-link day-toggle" type="button"
+                data-bs-toggle="collapse" data-bs-target="#analytics-export-collapse"
+                aria-expanded="false" aria-controls="analytics-export-collapse">
+          Toggle
+        </button>
+      </div>
+      <div id="analytics-export-collapse" class="collapse">
+        <div class="card-body">
+          <p class="small text-muted-themed mb-3">Export analytics as charts, PDFs, or CSV files.</p>
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <label class="form-label small">From Date</label>
+              <input type="date" id="exportFromDate" class="form-control form-control-sm">
+            </div>
+            <div class="col-6">
+              <label class="form-label small">To Date</label>
+              <input type="date" id="exportToDate" class="form-control form-control-sm">
+            </div>
+          </div>
+          <div class="d-flex gap-2 flex-wrap">
+            <button id="exportCSV" class="btn btn-sm btn-outline-primary theme-btn">📄 CSV</button>
+            <button id="exportPDF" class="btn btn-sm btn-outline-primary theme-btn">📑 PDF</button>
+            <button id="exportChart" class="btn btn-sm btn-outline-primary theme-btn">📊 Chart (PNG)</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Log Entry -->
+    <div class="card mt-4" id="quickLogCard">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>⚡ Quick Log Entry</span>
+        <button class="btn btn-link day-toggle" type="button"
+                data-bs-toggle="collapse" data-bs-target="#quicklog-collapse"
+                aria-expanded="false" aria-controls="quicklog-collapse">
+          Toggle
+        </button>
+      </div>
+      <div id="quicklog-collapse" class="collapse">
+        <div class="card-body">
+          <p class="small text-muted-themed mb-3">Quickly log work hours with presets and keyboard shortcuts.</p>
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <button class="btn btn-sm btn-outline-success theme-btn w-100" data-quick-log="480">8 Hours</button>
+            </div>
+            <div class="col-6">
+              <button class="btn btn-sm btn-outline-success theme-btn w-100" data-quick-log="360">6 Hours</button>
+            </div>
+            <div class="col-6">
+              <button class="btn btn-sm btn-outline-success theme-btn w-100" data-quick-log="240">4 Hours</button>
+            </div>
+            <div class="col-6">
+              <button class="btn btn-sm btn-outline-success theme-btn w-100" data-quick-log="120">2 Hours</button>
+            </div>
+          </div>
+          <div class="mb-2">
+            <label class="form-label small">Custom Hours:</label>
+            <div class="d-flex gap-2">
+              <input type="number" id="quickLogHours" class="form-control form-control-sm" placeholder="Hours" min="0" max="24">
+              <button id="quickLogApply" class="btn btn-sm btn-success theme-btn">Apply</button>
+            </div>
+          </div>
+          <div class="small text-muted-themed mt-2">
+            <strong>Keyboard Shortcuts:</strong><br>
+            <kbd>Ctrl+1</kbd> = 8h | <kbd>Ctrl+2</kbd> = 6h | <kbd>Ctrl+3</kbd> = 4h
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Voice Notes -->
+    <div class="card mt-4" id="voiceNotesCard">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>🎙️ Voice Notes</span>
+        <button class="btn btn-link day-toggle" type="button"
+                data-bs-toggle="collapse" data-bs-target="#voicenotes-collapse"
+                aria-expanded="false" aria-controls="voicenotes-collapse">
+          Toggle
+        </button>
+      </div>
+      <div id="voicenotes-collapse" class="collapse">
+        <div class="card-body">
+          <p class="small text-muted-themed mb-3">Record audio notes for each work day.</p>
+          <div class="mb-3">
+            <select id="voiceNoteDay" class="form-select form-select-sm mb-2">
+              <option value="sunday">Sunday</option>
+              <option value="monday">Monday</option>
+              <option value="tuesday">Tuesday</option>
+              <option value="wednesday">Wednesday</option>
+              <option value="thursday">Thursday</option>
+            </select>
+            <div class="d-flex gap-2">
+              <button id="voiceRecordBtn" class="btn btn-sm btn-danger theme-btn">🔴 Record</button>
+              <button id="voiceStopBtn" class="btn btn-sm btn-secondary theme-btn" disabled>⏹ Stop</button>
+            </div>
+          </div>
+          <div id="voiceRecordingStatus" class="small text-muted-themed mb-2"></div>
+          <div id="voiceNotesList">
+            <!-- Voice notes list will be shown here -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Budget & Billing Tracker -->
+    <div class="card mt-4" id="budgetCard">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>💰 Budget & Billing Tracker</span>
+        <button class="btn btn-link day-toggle" type="button"
+                data-bs-toggle="collapse" data-bs-target="#budget-collapse"
+                aria-expanded="false" aria-controls="budget-collapse">
+          Toggle
+        </button>
+      </div>
+      <div id="budget-collapse" class="collapse">
+        <div class="card-body">
+          <p class="small text-muted-themed mb-3">Track earnings and billable hours.</p>
+          <div class="mb-3">
+            <label class="form-label small">Hourly Rate ($)</label>
+            <input type="number" id="hourlyRate" class="form-control form-control-sm" value="0" min="0" step="0.01">
+          </div>
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <div class="text-center p-2 border rounded">
+                <div class="small text-muted-themed">This Week</div>
+                <div class="fw-bold" id="weeklyEarnings">$0.00</div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="text-center p-2 border rounded">
+                <div class="small text-muted-themed">This Month</div>
+                <div class="fw-bold" id="monthlyEarnings">$0.00</div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <label class="form-label small">Mark Hours as:</label>
+            <div class="btn-group w-100" role="group">
+              <input type="radio" class="btn-check" name="billableType" id="billable" value="billable" checked>
+              <label class="btn btn-outline-success btn-sm" for="billable">💵 Billable</label>
+              <input type="radio" class="btn-check" name="billableType" id="nonBillable" value="nonBillable">
+              <label class="btn btn-outline-secondary btn-sm" for="nonBillable">📋 Non-Billable</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Wellness & Break Reminders -->
+    <div class="card mt-4" id="wellnessCard">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>🧘 Wellness & Break Reminders</span>
+        <button class="btn btn-link day-toggle" type="button"
+                data-bs-toggle="collapse" data-bs-target="#wellness-collapse"
+                aria-expanded="false" aria-controls="wellness-collapse">
+          Toggle
+        </button>
+      </div>
+      <div id="wellness-collapse" class="collapse">
+        <div class="card-body">
+          <p class="small text-muted-themed mb-3">Stay healthy with wellness reminders.</p>
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="stretchReminder" checked>
+            <label class="form-check-label small" for="stretchReminder">
+              🤸 Stretch Break (every 60 min)
+            </label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="eyeRestReminder" checked>
+            <label class="form-check-label small" for="eyeRestReminder">
+              👁️ Eye Rest - 20-20-20 Rule (every 20 min)
+            </label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="hydrationReminder" checked>
+            <label class="form-check-label small" for="hydrationReminder">
+              💧 Hydration Reminder (every 90 min)
+            </label>
+          </div>
+          <div class="mt-3">
+            <div class="small text-muted-themed">Today's Wellness Stats:</div>
+            <div class="small">Stretch Breaks: <span id="stretchCount">0</span></div>
+            <div class="small">Eye Rests: <span id="eyeRestCount">0</span></div>
+            <div class="small">Hydration: <span id="hydrationCount">0</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+      </div>
+    </div>
+    <!-- END SECTION: Advanced Features -->
+        </div>
+      </div>
+    </div>
+    <!-- END TAB: ADVANCED -->
+
+        <!-- WEEKLY SUMMARY -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center mt-4">
+      <div class="d-flex gap-2 mb-2 mb-sm-0">
+        <span id="totalWorked" class="pill" title="Total time you have worked this week."></span>
+        <span id="weeklyStatus" class="pill"
+              title="If you see ‘Over by X’, it means you have worked X minutes more than the weekly target. If it says ‘X left’, that’s how many minutes you still need to work."></span>
+        <span id="todayPlan" class="pill"
+              title="Shows how much you should work on the next unfilled day to stay on track with the weekly target."></span>
+      </div>
+      <button id="resetBtn" class="btn btn-outline-light btn-sm theme-btn">Reset Week</button>
+        </div>
+
+      </div>
+      <!-- END CONTENT CONTAINER -->
+    </main>
+    <!-- END APP MAIN -->
+  </div>
+  <!-- END APP LAYOUT -->
+
+  <!-- Floating Settings Gear (Dropdown) -->
+  <div class="dropdown">
+    <button class="btn btn-outline-light btn-sm theme-btn floating-settings dropdown-toggle"
+            type="button"
+            id="settingsDropdown"
+            data-bs-toggle="dropdown"
+            aria-expanded="false">
+      ⚙️
+    </button>
+
+    <div class="dropdown-menu dropdown-menu-end p-3"
+         aria-labelledby="settingsDropdown"
+         style="min-width: 240px; background: var(--card); color: var(--text); border: 1px solid rgba(255,255,255,0.15);">
+      <label for="themeSelect" class="form-label mb-1">Theme</label>
+      <select id="themeSelect" class="form-select mb-3">
+        <option value="auto">Auto (System)</option>
+        <optgroup label="Modern Professional">
+          <option value="nord">Nord</option>
+          <option value="dracula">Dracula</option>
+          <option value="tokyoNight">Tokyo Night</option>
+          <option value="monokai">Monokai</option>
+          <option value="solarizedDark">Solarized Dark</option>
+        </optgroup>
+        <optgroup label="Refined Originals">
+          <option value="cyberDark">Cyber Dark</option>
+          <option value="minimalLight">Minimal Light</option>
+          <option value="oceanBlue">Ocean Blue</option>
+          <option value="forestGreen">Forest Green</option>
+          <option value="purpleHaze">Purple Haze</option>
+        </optgroup>
+      </select>
+
+      <label for="modeSelect" class="form-label mb-1">Mode</label>
+      <select id="modeSelect" class="form-select mb-3">
+        <option value="normal">Normal</option>
+        <option value="ramadan">Ramadan</option>
+      </select>
+
+      <label for="fontSelect" class="form-label mb-1">Font</label>
+      <select id="fontSelect" class="form-select mb-3">
+        <option value="Inter">Inter (Modern)</option>
+        <option value="Poppins">Poppins (Friendly)</option>
+        <option value="Space Grotesk">Space Grotesk (Tech)</option>
+        <option value="JetBrains Mono">JetBrains Mono (Code)</option>
+        <option value="Orbitron">Orbitron (Futuristic)</option>
+        <option value="Roboto">Roboto (Classic)</option>
+        <option value="System">System Default</option>
+      </select>
+      
+      <hr class="my-3" style="border-color: rgba(255,255,255,0.15);">
+      
+      <label class="form-label mb-2">Work-Life Balance</label>
+      
+      <div class="form-check mb-2">
+        <input class="form-check-input" type="checkbox" id="enableNotifications">
+        <label class="form-check-label" for="enableNotifications">
+          Enable Reminders
+        </label>
+      </div>
+      
+      <label for="breakIntervalSelect" class="form-label mb-1 small">Break Reminder Interval</label>
+      <select id="breakIntervalSelect" class="form-select form-select-sm mb-2">
+        <option value="30">Every 30 minutes</option>
+        <option value="60" selected>Every 60 minutes</option>
+        <option value="90">Every 90 minutes</option>
+        <option value="120">Every 2 hours</option>
+      </select>
+      
+      <div class="form-check mb-2">
+        <input class="form-check-input" type="checkbox" id="enableEndOfDayNotification" checked>
+        <label class="form-check-label small" for="enableEndOfDayNotification">
+          End of day target reminder
+        </label>
+      </div>
+      
+      <hr class="my-3" style="border-color: rgba(255,255,255,0.15);">
+      
+      <label class="form-label mb-2">Data Management</label>
+      <div class="d-grid gap-2">
+        <button id="exportDataBtn" class="btn btn-outline-light btn-sm theme-btn">
+          📥 Export Data
+        </button>
+        <button id="importDataBtn" class="btn btn-outline-light btn-sm theme-btn">
+          📤 Import Data
+        </button>
+        <input type="file" id="importFileInput" accept=".json" style="display: none;">
+      </div>
+    </div>
+  </div>
+
+  <!-- Full-page Firework Overlay -->
+  <div id="fireworkOverlay"></div>
+
+  <!-- User Guide Modal -->
+  <div class="modal fade" id="userGuideModal" tabindex="-1" aria-labelledby="userGuideLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content" style="background:var(--card);color:var(--text);">
+        <div class="modal-header border-0">
+          <h5 class="modal-title" id="userGuideLabel">How to use the Work Time Calculator</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-3">
+            This tool helps you track your working hours from <strong>Sunday to Thursday</strong>.
+            Each day’s target is your configured daily hours, and the weekly target is 5 × that.
+          </p>
+
+          <h6 class="mt-3">1. Basic idea</h6>
+          <ul>
+            <li>Each day = <strong>daily target</strong>, week = <strong>5 × daily target</strong>.</li>
+            <li>You can either:
+              <ul>
+                <li>Enter <strong>Entry</strong> and <strong>Leave</strong> times, or</li>
+                <li>Enter a <strong>total duration</strong> directly (e.g. 08:15).</li>
+              </ul>
+            </li>
+            <li>Any extra or missing minutes are carried over to the next days automatically.</li>
+            <li>Your data is stored locally in your browser (localStorage).</li>
+          </ul>
+
+          <h6 class="mt-3">2. Flex time rules</h6>
+          <ul>
+            <li>If you arrive between <strong>09:00 and 09:15</strong>, it is counted as <strong>09:00</strong>.</li>
+            <li>Anything before <strong>07:00</strong> is treated as if you started at <strong>07:00</strong>.</li>
+            <li>Each day is capped at <strong>9 hours</strong>, even if you stay longer.</li>
+          </ul>
+
+          <h6 class="mt-3">3. Example: rolling balance</h6>
+          <p>Example for how extra time and deficits roll over between days:</p>
+          <ol>
+            <li>
+              <strong>Sunday:</strong> You work from <strong>07:00 to 15:10</strong> → that’s
+              <strong>8h 10m</strong>, so you are <strong>+10 minutes</strong>.
+            </li>
+            <li class="mt-2">
+              <strong>Monday:</strong> Because of the +10 minutes from Sunday, your target becomes
+              <strong>7h 50m</strong> instead of 8h.
+            </li>
+          </ol>
+
+          <h6 class="mt-3">4. What each part of the card means</h6>
+          <ul>
+            <li><strong>Entry / Leave</strong>: your start and end times for the day.</li>
+            <li><strong>Or total work (hh:mm)</strong>: if you just know the total hours, enter it here instead.</li>
+            <li><strong>Hint box</strong>:
+              <ul>
+                <li><em>Today plan</em>: tells you how much you should work to stay on track.</li>
+                <li><em>Today summary</em>: once you’ve worked, shows your actual time vs target (capped at 9h).</li>
+              </ul>
+            </li>
+            <li><strong>Small progress bar</strong>: shows your progress towards the daily target.</li>
+          </ul>
+
+          <h6 class="mt-3">5. Weekly summary pills</h6>
+          <ul>
+            <li><strong>Total</strong>: how much you worked in total this week.</li>
+            <li><strong>X left / Over by X</strong>: how far you are from the weekly target.</li>
+            <li><strong>Today plan</strong>: how much you should work on the next unfilled day.</li>
+          </ul>
+
+          <p class="mt-3 mb-0 small text-muted-themed">
+            Tip: You can change the theme, mode (Normal/Ramadan), and font at any time. All your inputs and preferences are saved in your browser.
+          </p>
+        </div>
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-outline-light btn-sm" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // ========================================
+    // SIDEBAR & TAB NAVIGATION
+    // ========================================
+    
+    // Sidebar toggle functionality
+    const sidebar = document.getElementById('appSidebar');
+    const appMain = document.getElementById('appMain');
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebarClose = document.getElementById('sidebarClose');
+    
+    // Load sidebar state from localStorage
+    try {
+      const sidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+      if (sidebarCollapsed) {
+        sidebar.classList.add('collapsed');
+        appMain.classList.add('sidebar-collapsed');
+      }
+    } catch (e) {
+      console.warn('localStorage not available for sidebar state:', e);
+    }
+    
+    // Toggle sidebar on mobile / desktop
+    menuToggle.addEventListener('click', () => {
+      if (window.innerWidth <= 768) {
+        // Mobile: toggle show class and body overlay
+        sidebar.classList.toggle('show');
+        document.body.classList.toggle('sidebar-open');
+      } else {
+        // Desktop: toggle collapsed
+        sidebar.classList.toggle('collapsed');
+        appMain.classList.toggle('sidebar-collapsed');
+        try {
+          localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+        } catch (e) {
+          console.warn('localStorage not available:', e);
+        }
+      }
+    });
+    
+    // Close sidebar
+    sidebarClose.addEventListener('click', () => {
+      if (window.innerWidth <= 768) {
+        sidebar.classList.remove('show');
+        document.body.classList.remove('sidebar-open');
+      } else {
+        sidebar.classList.add('collapsed');
+        appMain.classList.add('sidebar-collapsed');
+        try {
+          localStorage.setItem('sidebarCollapsed', 'true');
+        } catch (e) {
+          console.warn('localStorage not available:', e);
+        }
+      }
+    });
+    
+    // Click outside sidebar to close on mobile
+    document.addEventListener('click', (e) => {
+      if (window.innerWidth <= 768 && sidebar.classList.contains('show')) {
+        if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+          sidebar.classList.remove('show');
+          document.body.classList.remove('sidebar-open');
+        }
+      }
+    });
+    
+    // Tab switching functionality
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content-wrapper');
+    const navItems = document.querySelectorAll('.nav-item');
+    
+    function switchTab(tabId) {
+      // Update tab buttons
+      tabButtons.forEach(btn => {
+        if (btn.dataset.tab === tabId) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+      
+      // Update tab content
+      tabContents.forEach(content => {
+        if (content.id === `tab-${tabId}`) {
+          content.classList.add('active');
+        } else {
+          content.classList.remove('active');
+        }
+      });
+      
+      // Update sidebar nav
+      navItems.forEach(item => {
+        if (item.dataset.tab === tabId) {
+          item.classList.add('active');
+        } else {
+          item.classList.remove('active');
+        }
+      });
+      
+      // Lazy load yearly calendar only when advanced tab is first viewed
+      if (tabId === 'advanced' && !window.calendarRendered) {
+        setTimeout(() => {
+          renderYearlyCalendar();
+          window.calendarRendered = true;
+        }, 100); // Small delay to let tab switch complete
+      }
+      
+      // Scroll to top smoothly
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      
+      // Save active tab
+      try {
+        localStorage.setItem('activeTab', tabId);
+      } catch (e) {
+        console.warn('localStorage not available:', e);
+      }
+    }
+    
+    // Tab button click handlers
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        switchTab(btn.dataset.tab);
+      });
+    });
+    
+    // Sidebar nav click handlers
+    navItems.forEach(item => {
+      item.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation(); // Prevent event bubbling
+        const tabId = item.dataset.tab;
+        
+        if (!tabId) return; // Safety check
+        
+        // Main is always visible (time entry), other tabs switch content
+        if (tabId !== 'main') {
+          switchTab(tabId);
+        } else {
+          // For main, just ensure we're showing the time entry
+          tabContents.forEach(content => content.classList.remove('active'));
+          // Scroll to top
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        // Close sidebar on mobile
+        if (window.innerWidth <= 768) {
+          sidebar.classList.remove('show');
+          document.body.classList.remove('sidebar-open');
+        }
+      });
+    });
+    
+    // Keyboard shortcuts for tabs (Arrow keys)
+    document.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+        return; // Don't interfere with form inputs
+      }
+      
+      const currentTab = document.querySelector('.tab-btn.active');
+      if (!currentTab) return;
+      
+      const tabList = Array.from(tabButtons);
+      const currentIndex = tabList.indexOf(currentTab);
+      
+      if (e.key === 'ArrowRight' && currentIndex < tabList.length - 1) {
+        e.preventDefault();
+        switchTab(tabList[currentIndex + 1].dataset.tab);
+      } else if (e.key === 'ArrowLeft' && currentIndex > 0) {
+        e.preventDefault();
+        switchTab(tabList[currentIndex - 1].dataset.tab);
+      }
+    });
+    
+    // Restore last active tab on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      try {
+        const savedTab = localStorage.getItem('activeTab');
+        if (savedTab && savedTab !== 'main') {
+          switchTab(savedTab);
+        }
+      } catch (e) {
+        console.warn('localStorage not available:', e);
+      }
+    });
+    
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', (e) => {
+      if (window.innerWidth <= 768) {
+        if (!sidebar.contains(e.target) && !menuToggle.contains(e.target) && sidebar.classList.contains('show')) {
+          sidebar.classList.remove('show');
+        }
+      }
+    });
+    
+    // ========================================
+    // ORIGINAL SCRIPT CONTENT
+    // ========================================
+    
+    const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday"];
+
+    const DAY_MAX = 9*60;          // 9 hours cap
+
+    const MODES = {
+      normal:  { label: 'Normal',  dailyHours: 8 }, // 8h/day
+      ramadan: { label: 'Ramadan', dailyHours: 6 }  // 6h/day
+    };
+
+    const MODE_KEY = 'workTimeCalculatorMode';
+
+    let currentMode   = 'normal';
+    let TARGET_PER_DAY = MODES[currentMode].dailyHours * 60;
+    let WEEKLY_TARGET  = 5 * TARGET_PER_DAY;
+
+    const STORAGE_KEY = 'workTimeCalculator';
+    const THEME_KEY   = 'workTimeCalculatorTheme';
+    const FONT_KEY    = 'workTimeCalculatorFont';
+    const MONTHLY_HISTORY_KEY = 'workTimeCalculatorMonthlyHistory';
+    const STREAKS_KEY = 'workTimeCalculatorStreaks';
+    const NOTIFICATIONS_KEY = 'workTimeCalculatorNotifications';
+
+    const elCards = document.getElementById('cards');
+
+    function buildSelect(idPrefix,label){
+      return `
+        <div class="mb-3">
+          <label class="form-label">${label}</label>
+          <div class="d-flex gap-2">
+            <select id="${idPrefix}-hour" class="form-select">
+              ${Array.from({length:24},(_,h)=>`<option value="${String(h).padStart(2,'0')}">${String(h).padStart(2,'0')}</option>`).join('')}
+            </select>
+            <select id="${idPrefix}-min" class="form-select">
+              ${Array.from({length:60},(_,m)=>`<option value="${String(m).padStart(2,'0')}">${String(m).padStart(2,'0')}</option>`).join('')}
+            </select>
+          </div>
+        </div>`;
+    }
+
+    // Build cards with accordion-style collapse and day delta pill
+    days.forEach(d => {
+      const id = d.toLowerCase();
+      const col = document.createElement('div');
+      col.className = 'col-12'; // 1 card per row on all devices
+      const isFirst = d === "Sunday";
+      col.innerHTML = `
+        <div class="card h-100">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="d-flex flex-column">
+              <button class="btn btn-link day-toggle text-start flex-grow-1" type="button"
+                      data-bs-toggle="collapse" data-bs-target="#${id}-collapse"
+                      aria-expanded="${isFirst ? 'true' : 'false'}" aria-controls="${id}-collapse">
+                ${d}
+              </button>
+              <span id="${id}-delta"
+                    class="pill mt-1"
+                    title="Difference from the daily target for this day, after considering earlier days."></span>
+            </div>
+            <div class="btn-group btn-group-sm ms-2">
+              <button class="btn btn-outline-light entry-btn theme-btn" data-day="${id}">Entry Now</button>
+              <button class="btn btn-outline-light leave-btn theme-btn" data-day="${id}">Leave Now</button>
+            </div>
+          </div>
+          <div id="${id}-collapse" class="collapse ${isFirst ? 'show' : ''}" data-bs-parent="#cards">
+            <div class="card-body">
+              ${buildSelect(id+"-in","Entry")}
+              ${buildSelect(id+"-out","Leave")}
+              ${buildSelect(id+"-dur","Or total work (hh:mm)")}
+
+              <div class="d-flex flex-wrap gap-2 mb-2">
+                <button class="btn btn-outline-light btn-sm theme-btn full-day-btn" data-day="${id}">
+                  Full day
+                </button>
+                <button class="btn btn-outline-light btn-sm theme-btn reset-day-btn" data-day="${id}">
+                  Reset Day
+                </button>
+              </div>
+
+              <div class="small" id="${id}-hint"
+                   title="‘You can work X today’ tells you how much you should work today so your weekly total stays on track."></div>
+              <div class="progress mt-2" style="height:6px;">
+                <div class="progress-bar" id="${id}-progress" role="progressbar"
+                     aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      elCards.appendChild(col);
+    });
+
+    function setNow(prefix, type){
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2,'0');
+      const mm = String(now.getMinutes()).padStart(2,'0');
+
+      document.getElementById(`${prefix}-${type}-hour`).value = hh;
+      document.getElementById(`${prefix}-${type}-min`).value = mm;
+
+      saveData();
+      recalc();
+    }
+
+    // Emoji spawn near click
+    const EMOJIS = ["✨","🔥","💼","⏰","⚡","🎉"];
+
+    function spawnEmojiAt(x, y) {
+      const emoji = document.createElement("span");
+      emoji.className = "emoji-pop";
+      emoji.textContent = EMOJIS[Math.floor(Math.random() * EMOJIS.length)];
+      emoji.style.left = x + "px";
+      emoji.style.top  = y + "px";
+      document.body.appendChild(emoji);
+      setTimeout(() => {
+        emoji.remove();
+      }, 900);
+    }
+
+    document.querySelectorAll('.entry-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const day = btn.dataset.day;
+        spawnEmojiAt(e.clientX, e.clientY);
+        setNow(day, "in");
+      });
+    });
+
+    document.querySelectorAll('.leave-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const day = btn.dataset.day;
+        setNow(day, "out");
+      });
+    });
+
+    // Quick preset: Full day (uses current mode's TARGET_PER_DAY)
+    document.querySelectorAll('.full-day-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const day = btn.dataset.day;
+
+        const totalMinutes = TARGET_PER_DAY;
+        const h = Math.floor(totalMinutes / 60);
+        const m = totalMinutes % 60;
+
+        document.getElementById(`${day}-dur-hour`).value = String(h).padStart(2, '0');
+        document.getElementById(`${day}-dur-min`).value  = String(m).padStart(2, '0');
+
+        document.getElementById(`${day}-in-hour`).value  = "00";
+        document.getElementById(`${day}-in-min`).value   = "00";
+        document.getElementById(`${day}-out-hour`).value = "00";
+        document.getElementById(`${day}-out-min`).value  = "00";
+
+        saveData();
+        recalc();
+      });
+    });
+
+    const selects = Array.from(document.querySelectorAll('select'));
+
+    function loadData() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const data = JSON.parse(saved);
+          selects.forEach(sel => { if (data[sel.id]) sel.value = data[sel.id]; });
+        }
+      } catch (error) { console.log('Error loading saved data:', error); }
+    }
+    function saveData() {
+      try {
+        const data = {};
+        selects.forEach(sel => { data[sel.id] = sel.value; });
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      } catch (error) { console.log('Error saving data:', error); }
+    }
+    function clearData() { localStorage.removeItem(STORAGE_KEY); }
+
+    selects.forEach(sel => sel.addEventListener('change', () => { saveData(); recalc(); }));
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      try {
+        saveWeekToHistory();
+        recordWeeklyOvertime(); // Record overtime before reset
+      } catch (error) {
+        console.log('Error saving week to history:', error);
+      }
+      selects.forEach(s => s.selectedIndex=0);
+      clearData(); 
+      recalc();
+      loadMonthlyHistory();
+    });
+
+    function toMin(hhmm){ if(!hhmm) return null; const [h,m]=hhmm.split(':').map(Number); return h*60+m; }
+    function minToHM(mins){
+      const sign=mins<0?'-':'';
+      const a=Math.abs(mins);
+      return `${sign}${Math.floor(a/60)}h ${a%60}m`;
+    }
+    function minsToHMNoSign(mins){
+      const a=Math.abs(mins);
+      return `${Math.floor(a/60)}h ${a%60}m`;
+    }
+
+    function addMinutes(hhmm,delta){
+      const m=toMin(hhmm);
+      if(m==null)return null;
+      let t=m+delta;
+      const dayChange=Math.floor(t/(24*60));
+      t=((t%(24*60))+(24*60))%(24*60);
+      return {
+        time:`${String(Math.floor(t/60)).padStart(2,'0')}:${String(t%60).padStart(2,'0')}`,
+        dayChange
+      };
+    }
+
+    // Reset specific day
+    document.querySelectorAll('.reset-day-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const day = btn.dataset.day;
+
+        document.getElementById(`${day}-in-hour`).value = "00";
+        document.getElementById(`${day}-in-min`).value = "00";
+        document.getElementById(`${day}-out-hour`).value = "00";
+        document.getElementById(`${day}-out-min`).value = "00";
+        document.getElementById(`${day}-dur-hour`).value = "00";
+        document.getElementById(`${day}-dur-min`).value = "00";
+
+        saveData();
+        recalc();
+      });
+    });
+
+    // Flex start: before 07:00 → 07:00, 09:00–09:15 → 09:00
+    function flexStart(hhmm){
+      if(!hhmm) return hhmm;
+      const m = toMin(hhmm);
+      const seven = 7*60;
+      const nine = 9*60, nineFifteen = 9*60 + 15;
+      if (m < seven) return "07:00";
+      if (m >= nine && m <= nineFifteen) return "09:00";
+      return hhmm;
+    }
+
+    function getValue(prefix){
+      const h=document.getElementById(prefix+"-hour").value;
+      const m=document.getElementById(prefix+"-min").value;
+      return `${h}:${m}`;
+    }
+
+    function getWorked(prefix){
+      const dur=getValue(prefix+"-dur");
+      if(dur!=="00:00"){
+        const mins = toMin(dur);
+        if (mins == null) return null;
+        return Math.min(mins, DAY_MAX);
+      }
+      const tin=getValue(prefix+"-in");
+      const tout=getValue(prefix+"-out");
+      if(tin!=="00:00" && tout!=="00:00"){
+        const mi = toMin(flexStart(tin));
+        const mo = toMin(tout);
+        if (mi == null || mo == null) return null;
+        const raw = mo >= mi ? mo - mi : (24*60 - mi + mo);
+        return Math.min(raw, DAY_MAX);
+      }
+      return null;
+    }
+
+    function bumpPill(el){
+      if(!el) return;
+      el.classList.remove('pill-bump');
+      void el.offsetWidth;
+      el.classList.add('pill-bump');
+    }
+
+    function bumpProgress(el) {
+      if (!el) return;
+      el.classList.remove('progress-firework');
+      void el.offsetWidth;
+      el.classList.add('progress-firework');
+    }
+
+    // Full page firework trigger
+    function triggerFirework() {
+      const overlay = document.getElementById('fireworkOverlay');
+      if (!overlay) return;
+      overlay.classList.remove('show');
+      void overlay.offsetWidth;
+      overlay.classList.add('show');
+      setTimeout(() => {
+        overlay.classList.remove('show');
+      }, 900);
+    }
+
+    // Track last worked values to detect "day just filled"
+    let lastWorked = new Array(days.length).fill(null);
+
+    function recalc(){
+      const worked=[];
+      days.forEach(d=>{worked.push(getWorked(d.toLowerCase()));});
+
+      const justFilled = worked.map((w, idx) =>
+        lastWorked[idx] == null && w != null
+      );
+
+      // Load custom targets for each day
+      const customTargets = loadCustomTargets();
+      const dayTargets = days.map(d => customTargets[d.toLowerCase()]);
+
+      const baseDiffs = worked.map((w, idx) => (w == null ? null : w - dayTargets[idx]));
+      const adjustedDiffs = baseDiffs.slice();
+
+      // Pass 1: earlier positive days cover later negative days
+      for (let j = 0; j < adjustedDiffs.length; j++) {
+        if (adjustedDiffs[j] != null && adjustedDiffs[j] < 0) {
+          let deficit = -adjustedDiffs[j];
+          for (let k = 0; k < j; k++) {
+            if (adjustedDiffs[k] != null && adjustedDiffs[k] > 0) {
+              const use = Math.min(adjustedDiffs[k], deficit);
+              adjustedDiffs[k] -= use;
+              deficit -= use;
+              if (deficit === 0) break;
+            }
+          }
+          adjustedDiffs[j] = deficit === 0 ? 0 : -deficit;
+        }
+      }
+
+      // Pass 2: later positive days cover earlier negative days
+      for (let j = adjustedDiffs.length - 1; j >= 0; j--) {
+        if (adjustedDiffs[j] != null && adjustedDiffs[j] > 0) {
+          let surplus = adjustedDiffs[j];
+          for (let k = j - 1; k >= 0; k--) {
+            if (adjustedDiffs[k] != null && adjustedDiffs[k] < 0) {
+              const use = Math.min(surplus, -adjustedDiffs[k]);
+              adjustedDiffs[k] += use;
+              surplus -= use;
+              if (surplus === 0) break;
+            }
+          }
+          adjustedDiffs[j] = surplus;
+        }
+      }
+
+      days.forEach((d,idx)=>{
+        const prefix=d.toLowerCase();
+        const hint=document.getElementById(`${prefix}-hint`);
+        const progressBar=document.getElementById(`${prefix}-progress`);
+        const deltaEl=document.getElementById(`${prefix}-delta`);
+        const entry=getValue(prefix+"-in");
+        const w=worked[idx];
+        const dayTarget = dayTargets[idx]; // Use custom target for this day
+
+        const plannedBefore = dayTargets.slice(0, idx).reduce((a, b) => a + b, 0);
+        const actualBefore=worked.slice(0,idx).reduce((a,b)=>a+(b||0),0);
+        const balance=actualBefore-plannedBefore;
+        let target=dayTarget-balance;
+        if(target<0) target=0;
+
+        if (w != null) {
+          const diff = w - dayTarget;
+          const targetHours = dayTarget / 60;
+          const diffLabel =
+            diff === 0
+              ? `Exact ${targetHours}h`
+              : diff > 0
+                ? `+${minsToHMNoSign(diff)} vs ${targetHours}h`
+                : `-${minsToHMNoSign(-diff)} vs ${targetHours}h`;
+
+          hint.innerHTML = `
+            <div class="hint-box">
+              <div class="hint-title">Today summary</div>
+              <div class="hint-row">
+                <span class="hint-label">Worked</span>
+                <span class="hint-value hint-value-strong">${minToHM(w)}</span>
+              </div>
+              <div class="hint-row">
+                <span class="hint-label">Compared to daily target</span>
+                <span class="hint-value">${diffLabel}</span>
+              </div>
+              <div class="hint-subtle">
+                Capped at 9h even if you stayed longer.
+              </div>
+            </div>
+          `;
+          hint.title = "This is your actual worked time for this day (capped at 9 hours).";
+
+          const ratio = Math.min(w / dayTarget, 1);
+          progressBar.style.width = `${ratio * 100}%`;
+          progressBar.setAttribute('aria-valuenow', Math.round(ratio * 100));
+        } else {
+          const startForCalc = entry !== "00:00" ? flexStart(entry) : null;
+          let leaveBlock = '';
+          if (entry !== "00:00") {
+            const res = addMinutes(startForCalc, target);
+            if (res) {
+              const shownStart =
+                startForCalc !== entry
+                  ? `${entry} → <strong>${startForCalc}</strong>`
+                  : `<strong>${startForCalc}</strong>`;
+              leaveBlock = `
+                <div class="hint-row">
+                  <span class="hint-label">If you start at</span>
+                  <span class="hint-value">${shownStart}</span>
+                </div>
+                <div class="hint-row">
+                  <span class="hint-label">Leave by</span>
+                  <span class="hint-value hint-value-strong">${res.time}${res.dayChange ? ` (+${res.dayChange}d)` : ''}</span>
+                </div>
+              `;
+            }
+          }
+
+          hint.innerHTML = `
+            <div class="hint-box">
+              <div class="hint-title">Today plan</div>
+              <div class="hint-row">
+                <span class="hint-label">You can work</span>
+                <span class="hint-value hint-value-strong">${minToHM(target)}</span>
+              </div>
+              ${leaveBlock}
+            </div>
+          `;
+          hint.title = "“You can work X today” tells you how much to work today so your weekly total stays on track.";
+
+          progressBar.style.width = `0%`;
+          progressBar.setAttribute('aria-valuenow', 0);
+        }
+
+        const adjDiff = adjustedDiffs[idx];
+
+        if (w == null || adjDiff == null) {
+          deltaEl.textContent = '';
+          deltaEl.className = 'pill mt-1';
+        } 
+        else if (adjDiff === 0) {
+          deltaEl.textContent = 'Exact time';
+          deltaEl.className = 'pill mt-1';
+        } else if (adjDiff > 0) {
+          deltaEl.textContent = `+${minsToHMNoSign(adjDiff)}`;
+          deltaEl.className = 'pill good mt-1';
+        } else {
+          deltaEl.textContent = `-${minsToHMNoSign(-adjDiff)}`;
+          deltaEl.className = 'pill bad mt-1';
+        }
+
+        if (worked[idx] == null) {
+          deltaEl.style.visibility = "hidden";
+        } else {
+          deltaEl.style.visibility = "visible";
+        }
+
+        if (justFilled[idx]) {
+          bumpProgress(progressBar);
+          bumpPill(deltaEl);
+        }
+      });
+
+      const total=worked.reduce((a,b)=>a+(b||0),0);
+      const rem=WEEKLY_TARGET-total;
+      const totalEl=document.getElementById('totalWorked');
+      totalEl.textContent=`Total: ${minToHM(total)}`;
+      bumpPill(totalEl);
+
+      const status=document.getElementById('weeklyStatus');
+      if(rem>0){
+        status.className='pill warn';
+        status.textContent=`${minToHM(rem)} left`;
+      } else if(rem===0){
+        status.className='pill good';
+        status.textContent='Target met';
+      } else {
+        status.className='pill good';
+        status.textContent=`Over by ${minToHM(-rem)}`;
+      }
+      bumpPill(status);
+
+      const nextIdx=worked.findIndex(v=>v==null);
+      const plan=document.getElementById('todayPlan');
+      if(nextIdx>=0){
+        const plannedBefore=nextIdx*TARGET_PER_DAY;
+        const actualBefore=worked.slice(0,nextIdx).reduce((a,b)=>a+(b||0),0);
+        let t=TARGET_PER_DAY-(actualBefore-plannedBefore);
+        if(t<0) t=0;
+        plan.textContent=`${days[nextIdx]} plan: ${minToHM(t)}`;
+      } else {
+        plan.textContent='All days filled';
+      }
+      bumpPill(plan);
+      updateButtonsState();
+
+      if (justFilled.some(Boolean)) {
+        triggerFirework();
+      }
+
+      lastWorked = worked.slice();
+      
+      // Debounce expensive update operations to improve performance
+      debouncedUpdate();
+    }
+    
+    // Debounce function to prevent excessive updates
+    let updateTimeout;
+    function debouncedUpdate() {
+      clearTimeout(updateTimeout);
+      updateTimeout = setTimeout(() => {
+        const worked = [];
+        days.forEach(d => { worked.push(getWorked(d.toLowerCase())); });
+        updateAnalytics(worked);
+        updateStreaks();
+        updateOvertime();
+        updateComparisonChart();
+      }, 300); // Wait 300ms after last input
+    }
+
+    function updateAnalytics(worked) {
+      const filledDays = worked.filter(w => w != null);
+      
+      // Load custom targets
+      const customTargets = loadCustomTargets();
+      const dayTargets = days.map(d => customTargets[d.toLowerCase()]);
+      
+      // Average Daily Hours
+      const avgDailyEl = document.getElementById('avgDailyHours');
+      if (filledDays.length > 0) {
+        const avg = filledDays.reduce((a, b) => a + b, 0) / filledDays.length;
+        avgDailyEl.textContent = minToHM(Math.round(avg));
+      } else {
+        avgDailyEl.textContent = '--';
+      }
+      
+      // Most Productive Day
+      const mostProductiveEl = document.getElementById('mostProductiveDay');
+      if (filledDays.length > 0) {
+        let maxIdx = -1;
+        let maxWork = -1;
+        worked.forEach((w, idx) => {
+          if (w != null && w > maxWork) {
+            maxWork = w;
+            maxIdx = idx;
+          }
+        });
+        if (maxIdx >= 0) {
+          mostProductiveEl.textContent = `${days[maxIdx]} (${minToHM(maxWork)})`;
+        } else {
+          mostProductiveEl.textContent = '--';
+        }
+      } else {
+        mostProductiveEl.textContent = '--';
+      }
+      
+      // Consistency Score (based on how close each day is to its target)
+      const consistencyEl = document.getElementById('consistencyScore');
+      if (filledDays.length > 0) {
+        let totalDeviation = 0;
+        let filledIndices = [];
+        worked.forEach((w, idx) => {
+          if (w != null) {
+            totalDeviation += Math.abs(w - dayTargets[idx]);
+            filledIndices.push(idx);
+          }
+        });
+        const avgDeviation = totalDeviation / filledDays.length;
+        // Calculate average target for filled days
+        const avgTarget = filledIndices.reduce((sum, idx) => sum + dayTargets[idx], 0) / filledIndices.length;
+        // Score: 100% when avgDeviation is 0, decreasing as deviation increases
+        const score = Math.max(0, Math.round(100 - (avgDeviation / avgTarget) * 100));
+        consistencyEl.textContent = `${score}%`;
+      } else {
+        consistencyEl.textContent = '--';
+      }
+      
+      // Insights & Recommendations
+      const insightsEl = document.getElementById('analyticsInsights');
+      if (filledDays.length === 0) {
+        insightsEl.innerHTML = '<p class="mb-1">Fill in your work hours to see personalized insights.</p>';
+      } else {
+        let insights = [];
+        
+        // Check overshooting/undershooting
+        const overshoots = [];
+        const undershoots = [];
+        worked.forEach((w, idx) => {
+          if (w != null) {
+            const diff = w - dayTargets[idx];
+            if (diff > 30) {
+              overshoots.push(days[idx]);
+            } else if (diff < -30) {
+              undershoots.push(days[idx]);
+            }
+          }
+        });
+        
+        if (overshoots.length > 0) {
+          insights.push(`✅ You exceeded targets on: <strong>${overshoots.join(', ')}</strong>`);
+        }
+        
+        if (undershoots.length > 0) {
+          insights.push(`⚠️ You were below target on: <strong>${undershoots.join(', ')}</strong>`);
+        }
+        
+        // Consistency advice
+        let totalDeviation = 0;
+        let filledIndices = [];
+        worked.forEach((w, idx) => {
+          if (w != null) {
+            totalDeviation += Math.abs(w - dayTargets[idx]);
+            filledIndices.push(idx);
+          }
+        });
+        const avgDeviation = totalDeviation / filledDays.length;
+        if (avgDeviation < 30) {
+          insights.push('💯 Excellent consistency! You\'re maintaining steady work hours.');
+        } else if (avgDeviation > 60) {
+          insights.push('📌 Tip: Try to maintain more consistent daily hours for better work-life balance.');
+        }
+        
+        // Weekly target progress
+        const total = worked.reduce((a, b) => a + (b || 0), 0);
+        const remaining = WEEKLY_TARGET - total;
+        const unfilledDays = worked.filter(w => w == null).length;
+        
+        if (remaining > 0 && unfilledDays > 0) {
+          const perDayNeeded = Math.ceil(remaining / unfilledDays);
+          insights.push(`🎯 To meet weekly target: Work <strong>${minToHM(perDayNeeded)}</strong> per remaining day.`);
+        } else if (remaining <= 0) {
+          insights.push('🎉 Congratulations! You\'ve met or exceeded your weekly target.');
+        }
+        
+        if (insights.length === 0) {
+          insights.push('📊 Keep tracking your hours for more insights.');
+        }
+        
+        insightsEl.innerHTML = insights.map(i => `<p class="mb-1">${i}</p>`).join('');
+      }
+    }
+
+    function updateButtonsState() {
+      days.forEach(d => {
+        const id = d.toLowerCase();
+        const entry = getValue(id + '-in');
+        const leaveBtn = document.querySelector(`.leave-btn[data-day="${id}"]`);
+        if (leaveBtn) {
+          leaveBtn.disabled = (entry === '00:00');
+        }
+      });
+    }
+
+    const themes = {
+      // Modern Professional Themes
+      nord: { 
+        "--bg":"#2e3440","--card":"#3b4252","--text":"#eceff4","--accent":"#88c0d0",
+        "--warn":"#ebcb8b","--error":"#bf616a","--muted":"#d8dee9","--secondary-text":"#81a1c1",
+        "--select-bg":"#434c5e","--select-text":"#eceff4","--select-border":"#4c566a" 
+      },
+      dracula: { 
+        "--bg":"#282a36","--card":"#44475a","--text":"#f8f8f2","--accent":"#50fa7b",
+        "--warn":"#f1fa8c","--error":"#ff5555","--muted":"#f8f8f2","--secondary-text":"#6272a4",
+        "--select-bg":"#44475a","--select-text":"#f8f8f2","--select-border":"#6272a4" 
+      },
+      monokai: { 
+        "--bg":"#272822","--card":"#3e3d32","--text":"#f8f8f2","--accent":"#a6e22e",
+        "--warn":"#e6db74","--error":"#f92672","--muted":"#f8f8f2","--secondary-text":"#75715e",
+        "--select-bg":"#3e3d32","--select-text":"#f8f8f2","--select-border":"#75715e" 
+      },
+      solarizedDark: { 
+        "--bg":"#002b36","--card":"#073642","--text":"#839496","--accent":"#2aa198",
+        "--warn":"#b58900","--error":"#dc322f","--muted":"#93a1a1","--secondary-text":"#586e75",
+        "--select-bg":"#073642","--select-text":"#839496","--select-border":"#586e75" 
+      },
+      tokyoNight: { 
+        "--bg":"#1a1b26","--card":"#24283b","--text":"#c0caf5","--accent":"#7aa2f7",
+        "--warn":"#e0af68","--error":"#f7768e","--muted":"#a9b1d6","--secondary-text":"#565f89",
+        "--select-bg":"#24283b","--select-text":"#c0caf5","--select-border":"#414868" 
+      },
+      // Refined Original Themes
+      cyberDark: { 
+        "--bg":"#0f172a","--card":"#1e293b","--text":"#e2e8f0","--accent":"#10b981",
+        "--warn":"#f59e0b","--error":"#ef4444","--muted":"#cbd5e1","--secondary-text":"#94a3b8",
+        "--select-bg":"#1e293b","--select-text":"#e2e8f0","--select-border":"#475569" 
+      },
+      minimalLight: { 
+        "--bg":"#f8fafc","--card":"#ffffff","--text":"#0f172a","--accent":"#10b981",
+        "--warn":"#f59e0b","--error":"#ef4444","--muted":"#475569","--secondary-text":"#64748b",
+        "--select-bg":"#ffffff","--select-text":"#0f172a","--select-border":"#cbd5e1" 
+      },
+      oceanBlue: { 
+        "--bg":"#0c4a6e","--card":"#075985","--text":"#e0f2fe","--accent":"#38bdf8",
+        "--warn":"#fbbf24","--error":"#f87171","--muted":"#bae6fd","--secondary-text":"#7dd3fc",
+        "--select-bg":"#0e7490","--select-text":"#e0f2fe","--select-border":"#22d3ee" 
+      },
+      forestGreen: { 
+        "--bg":"#14532d","--card":"#166534","--text":"#dcfce7","--accent":"#4ade80",
+        "--warn":"#facc15","--error":"#f87171","--muted":"#bbf7d0","--secondary-text":"#86efac",
+        "--select-bg":"#15803d","--select-text":"#dcfce7","--select-border":"#22c55e" 
+      },
+      purpleHaze: { 
+        "--bg":"#581c87","--card":"#6b21a8","--text":"#f3e8ff","--accent":"#c084fc",
+        "--warn":"#fbbf24","--error":"#f87171","--muted":"#e9d5ff","--secondary-text":"#d8b4fe",
+        "--select-bg":"#7e22ce","--select-text":"#f3e8ff","--select-border":"#a855f7" 
+      }
+    };
+
+    const fontSelect = document.getElementById('fontSelect');
+    fontSelect.addEventListener('change', e => {
+      const chosenFont = e.target.value;
+      if (chosenFont === 'System') {
+        document.documentElement.style.setProperty('--font', '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif');
+      } else {
+        document.documentElement.style.setProperty('--font', `'${chosenFont}', sans-serif`);
+      }
+      localStorage.setItem(FONT_KEY, chosenFont);
+    });
+
+    const themeSelect = document.getElementById('themeSelect');
+    
+    function applyTheme(themeName) {
+      let actualTheme = themeName;
+      
+      // Handle auto theme
+      if (themeName === 'auto') {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        actualTheme = prefersDark ? 'nord' : 'minimalLight';
+      }
+      
+      const theme = themes[actualTheme];
+      if (theme) {
+        for(const key in theme){
+          document.documentElement.style.setProperty(key, theme[key]);
+        }
+      }
+    }
+    
+    themeSelect.addEventListener('change', e => {
+      const themeName = e.target.value;
+      applyTheme(themeName);
+      localStorage.setItem(THEME_KEY, themeName);
+    });
+    
+    // Listen for system theme changes when in auto mode
+    const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    darkModeMediaQuery.addEventListener('change', () => {
+      const currentTheme = localStorage.getItem(THEME_KEY);
+      if (!currentTheme || currentTheme === 'auto') {
+        applyTheme('auto');
+      }
+    });
+
+    const modeSelect = document.getElementById('modeSelect');
+
+    function applyMode(modeName) {
+      if (!MODES[modeName]) modeName = 'normal';
+      currentMode   = modeName;
+      TARGET_PER_DAY = MODES[modeName].dailyHours * 60;
+      WEEKLY_TARGET  = 5 * TARGET_PER_DAY;
+      localStorage.setItem(MODE_KEY, modeName);
+    }
+
+    modeSelect.addEventListener('change', e => {
+      const modeName = e.target.value;
+      applyMode(modeName);
+      recalc();
+    });
+
+    function loadPreferences(){
+      const savedTheme = localStorage.getItem(THEME_KEY);
+      const themeToLoad = savedTheme || 'auto';
+      
+      if(themeSelect){
+        themeSelect.value = themeToLoad;
+      }
+      applyTheme(themeToLoad);
+
+      const savedFont = localStorage.getItem(FONT_KEY);
+      if(savedFont){
+        fontSelect.value = savedFont;
+        if (savedFont === 'System') {
+          document.documentElement.style.setProperty('--font', '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif');
+        } else {
+          document.documentElement.style.setProperty('--font', `'${savedFont}', sans-serif`);
+        }
+      }
+
+      const savedMode = localStorage.getItem(MODE_KEY);
+      const modeName  = savedMode && MODES[savedMode] ? savedMode : 'normal';
+      if (modeSelect) {
+        modeSelect.value = modeName;
+      }
+      applyMode(modeName);
+    }
+
+    function updateClock(){
+      const el = document.getElementById('liveClock');
+      if(!el) return;
+      const now = new Date();
+      const opts = { hour: '2-digit', minute: '2-digit', second: '2-digit' };
+      el.textContent = now.toLocaleTimeString([], opts);
+    }
+
+    // Hide gear when User Guide is open, show when closed
+    document.addEventListener('DOMContentLoaded', () => {
+      const userGuideModalEl = document.getElementById('userGuideModal');
+      const settingsBtn = document.querySelector('.floating-settings');
+      if (userGuideModalEl && settingsBtn) {
+        userGuideModalEl.addEventListener('show.bs.modal', () => {
+          settingsBtn.classList.add('d-none');
+        });
+        userGuideModalEl.addEventListener('hidden.bs.modal', () => {
+          settingsBtn.classList.remove('d-none');
+        });
+      }
+    });
+
+    // === WORK-LIFE BALANCE NOTIFICATIONS ===
+    let notificationInterval = null;
+    let lastBreakNotification = Date.now();
+    let lastEndOfDayCheck = null; // Track last date we checked for end of day
+    
+    function initNotifications() {
+      const enableCheckbox = document.getElementById('enableNotifications');
+      const breakIntervalSelect = document.getElementById('breakIntervalSelect');
+      const endOfDayCheckbox = document.getElementById('enableEndOfDayNotification');
+      
+      // Load saved preferences
+      const savedPrefs = loadNotificationPreferences();
+      if (enableCheckbox) enableCheckbox.checked = savedPrefs.enabled;
+      if (breakIntervalSelect) breakIntervalSelect.value = savedPrefs.breakInterval;
+      if (endOfDayCheckbox) endOfDayCheckbox.checked = savedPrefs.endOfDay;
+      
+      // Request permission if enabled
+      if (savedPrefs.enabled && 'Notification' in window) {
+        if (Notification.permission === 'default') {
+          Notification.requestPermission();
+        }
+      }
+      
+      // Event listeners
+      if (enableCheckbox) {
+        enableCheckbox.addEventListener('change', () => {
+          const enabled = enableCheckbox.checked;
+          saveNotificationPreferences();
+          
+          if (enabled) {
+            requestNotificationPermission();
+            startNotificationTimer();
+          } else {
+            stopNotificationTimer();
+          }
+        });
+      }
+      
+      if (breakIntervalSelect) {
+        breakIntervalSelect.addEventListener('change', () => {
+          saveNotificationPreferences();
+          if (enableCheckbox && enableCheckbox.checked) {
+            stopNotificationTimer();
+            startNotificationTimer();
+          }
+        });
+      }
+      
+      if (endOfDayCheckbox) {
+        endOfDayCheckbox.addEventListener('change', saveNotificationPreferences);
+      }
+      
+      // Start timer if enabled
+      if (savedPrefs.enabled) {
+        startNotificationTimer();
+      }
+    }
+    
+    function loadNotificationPreferences() {
+      try {
+        const saved = localStorage.getItem(NOTIFICATIONS_KEY);
+        if (saved) {
+          return JSON.parse(saved);
+        }
+      } catch (error) {
+        console.log('Error loading notification preferences:', error);
+      }
+      return {
+        enabled: false,
+        breakInterval: 60,
+        endOfDay: true
+      };
+    }
+    
+    function saveNotificationPreferences() {
+      const enableCheckbox = document.getElementById('enableNotifications');
+      const breakIntervalSelect = document.getElementById('breakIntervalSelect');
+      const endOfDayCheckbox = document.getElementById('enableEndOfDayNotification');
+      
+      const prefs = {
+        enabled: enableCheckbox ? enableCheckbox.checked : false,
+        breakInterval: breakIntervalSelect ? parseInt(breakIntervalSelect.value) : 60,
+        endOfDay: endOfDayCheckbox ? endOfDayCheckbox.checked : true
+      };
+      
+      try {
+        localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(prefs));
+      } catch (error) {
+        console.log('Error saving notification preferences:', error);
+      }
+    }
+    
+    function requestNotificationPermission() {
+      if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission().then(permission => {
+          if (permission === 'granted') {
+            showNotification('Notifications Enabled', '✅ Work-life balance reminders are now active!');
+          }
+        });
+      }
+    }
+    
+    function showNotification(title, body) {
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification(title, {
+          body: body,
+          tag: 'work-calc-notification'
+        });
+      }
+    }
+    
+    function startNotificationTimer() {
+      stopNotificationTimer(); // Clear any existing timer
+      
+      const prefs = loadNotificationPreferences();
+      if (!prefs.enabled) return;
+      
+      const intervalMs = prefs.breakInterval * 60 * 1000;
+      lastBreakNotification = Date.now();
+      
+      notificationInterval = setInterval(() => {
+        checkAndSendNotifications();
+      }, 60000); // Check every minute
+    }
+    
+    function stopNotificationTimer() {
+      if (notificationInterval) {
+        clearInterval(notificationInterval);
+        notificationInterval = null;
+      }
+    }
+    
+    function checkAndSendNotifications() {
+      const prefs = loadNotificationPreferences();
+      if (!prefs.enabled) return;
+      
+      const now = Date.now();
+      const intervalMs = prefs.breakInterval * 60 * 1000;
+      
+      // Check if it's time for a break reminder
+      if (now - lastBreakNotification >= intervalMs) {
+        showNotification(
+          '🧘 Time for a Break!',
+          `You've been working for ${prefs.breakInterval} minutes. Take a short break to refresh.`
+        );
+        lastBreakNotification = now;
+      }
+      
+      // Check end of day notification (once per day between 17:00 and 17:05)
+      if (prefs.endOfDay) {
+        const currentDate = new Date();
+        const currentHour = currentDate.getHours();
+        const currentMinute = currentDate.getMinutes();
+        const today = currentDate.toDateString();
+        
+        // Send notification between 17:00 and 17:05, but only once per day
+        if (currentHour === 17 && currentMinute < 5 && lastEndOfDayCheck !== today) {
+          const worked = [];
+          days.forEach(d => { worked.push(getWorked(d.toLowerCase())); });
+          const total = worked.reduce((a, b) => a + (b || 0), 0);
+          const remaining = WEEKLY_TARGET - total;
+          
+          if (remaining > 0) {
+            showNotification(
+              '📅 End of Day Reminder',
+              `You have ${minToHM(remaining)} remaining to meet your weekly target.`
+            );
+          } else {
+            showNotification(
+              '🎉 Great Work Today!',
+              'You\'ve met your weekly target. Have a great evening!'
+            );
+          }
+          
+          lastEndOfDayCheck = today;
+        }
+      }
+    }
+
+    // === MONTHLY HISTORY FUNCTIONS ===
+    function saveWeekToHistory() {
+      const worked = [];
+      days.forEach(d => { worked.push(getWorked(d.toLowerCase())); });
+      
+      // Only save if there's actual work data
+      const hasData = worked.some(w => w != null && w > 0);
+      if (!hasData) return;
+      
+      const weekData = {
+        timestamp: Date.now(),
+        date: new Date().toISOString(),
+        weekLabel: getWeekLabel(),
+        days: {},
+        total: worked.reduce((a, b) => a + (b || 0), 0),
+        target: WEEKLY_TARGET,
+        mode: currentMode
+      };
+      
+      // Save each day's data
+      days.forEach((d, idx) => {
+        if (worked[idx] != null) {
+          weekData.days[d] = worked[idx];
+        }
+      });
+      
+      // Load existing history
+      let history = [];
+      try {
+        const saved = localStorage.getItem(MONTHLY_HISTORY_KEY);
+        if (saved) {
+          history = JSON.parse(saved);
+        }
+      } catch (error) {
+        console.log('Error loading history:', error);
+      }
+      
+      // Add new week to history (limit to last 8 weeks per month)
+      history.unshift(weekData);
+      if (history.length > 8) {
+        history = history.slice(0, 8);
+      }
+      
+      try {
+        localStorage.setItem(MONTHLY_HISTORY_KEY, JSON.stringify(history));
+      } catch (error) {
+        console.log('Error saving history:', error);
+      }
+    }
+    
+    function getWeekLabel() {
+      const now = new Date();
+      const weekNum = Math.ceil((now.getDate()) / 7);
+      const monthName = now.toLocaleString('default', { month: 'short' });
+      return `${monthName} Week ${weekNum}, ${now.getFullYear()}`;
+    }
+    
+    function loadMonthlyHistory() {
+      const weekSelect = document.getElementById('weekSelect');
+      const displayDiv = document.getElementById('weekHistoryDisplay');
+      
+      if (!weekSelect || !displayDiv) return;
+      
+      try {
+        const saved = localStorage.getItem(MONTHLY_HISTORY_KEY);
+        if (!saved) {
+          displayDiv.innerHTML = '<p class="text-muted-themed small">No historical data available. Complete and reset weeks to build history.</p>';
+          return;
+        }
+        
+        const history = JSON.parse(saved);
+        
+        // Update select dropdown
+        weekSelect.innerHTML = '<option value="current">Current Week</option>';
+        history.forEach((week, idx) => {
+          const option = document.createElement('option');
+          option.value = idx;
+          option.textContent = week.weekLabel;
+          weekSelect.appendChild(option);
+        });
+        
+        // Show current week by default
+        displayCurrentWeek();
+        
+      } catch (error) {
+        console.log('Error loading history:', error);
+        displayDiv.innerHTML = '<p class="text-muted-themed small text-danger">Error loading historical data.</p>';
+      }
+    }
+    
+    function displayCurrentWeek() {
+      const displayDiv = document.getElementById('weekHistoryDisplay');
+      if (!displayDiv) return;
+      
+      const worked = [];
+      days.forEach(d => { worked.push(getWorked(d.toLowerCase())); });
+      const total = worked.reduce((a, b) => a + (b || 0), 0);
+      
+      let html = '<div class="hint-box">';
+      html += '<div class="hint-title">Current Week Progress</div>';
+      
+      days.forEach((d, idx) => {
+        const w = worked[idx];
+        if (w != null) {
+          html += `<div class="hint-row">
+            <span class="hint-label">${d}</span>
+            <span class="hint-value">${minToHM(w)}</span>
+          </div>`;
+        }
+      });
+      
+      html += `<div class="hint-row mt-2" style="border-top: 1px solid rgba(148,163,184,0.25); padding-top: 0.5rem;">
+        <span class="hint-label hint-value-strong">Total</span>
+        <span class="hint-value hint-value-strong">${minToHM(total)}</span>
+      </div>`;
+      html += '</div>';
+      
+      displayDiv.innerHTML = html;
+    }
+    
+    function displayHistoricalWeek(weekIndex) {
+      const displayDiv = document.getElementById('weekHistoryDisplay');
+      if (!displayDiv) return;
+      
+      try {
+        const saved = localStorage.getItem(MONTHLY_HISTORY_KEY);
+        if (!saved) return;
+        
+        const history = JSON.parse(saved);
+        const week = history[weekIndex];
+        
+        if (!week) return;
+        
+        let html = '<div class="hint-box">';
+        html += `<div class="hint-title">${week.weekLabel}</div>`;
+        
+        days.forEach(d => {
+          if (week.days[d] != null) {
+            html += `<div class="hint-row">
+              <span class="hint-label">${d}</span>
+              <span class="hint-value">${minToHM(week.days[d])}</span>
+            </div>`;
+          }
+        });
+        
+        html += `<div class="hint-row mt-2" style="border-top: 1px solid rgba(148,163,184,0.25); padding-top: 0.5rem;">
+          <span class="hint-label hint-value-strong">Total</span>
+          <span class="hint-value hint-value-strong">${minToHM(week.total)}</span>
+        </div>`;
+        html += `<div class="hint-row">
+          <span class="hint-label">Target</span>
+          <span class="hint-value">${minToHM(week.target)}</span>
+        </div>`;
+        
+        const diff = week.total - week.target;
+        const diffClass = diff >= 0 ? 'good' : 'bad';
+        html += `<div class="hint-row">
+          <span class="hint-label">Difference</span>
+          <span class="hint-value ${diffClass}">${diff >= 0 ? '+' : ''}${minToHM(diff)}</span>
+        </div>`;
+        
+        html += '</div>';
+        displayDiv.innerHTML = html;
+        
+      } catch (error) {
+        console.log('Error displaying week:', error);
+      }
+    }
+    
+    // Week selector change handler
+    document.addEventListener('DOMContentLoaded', () => {
+      const weekSelect = document.getElementById('weekSelect');
+      if (weekSelect) {
+        weekSelect.addEventListener('change', (e) => {
+          if (e.target.value === 'current') {
+            displayCurrentWeek();
+          } else {
+            displayHistoricalWeek(parseInt(e.target.value));
+          }
+        });
+      }
+    });
+
+    // === GOAL STREAKS FUNCTIONS ===
+    function loadStreaks() {
+      try {
+        const saved = localStorage.getItem(STREAKS_KEY);
+        if (saved) {
+          return JSON.parse(saved);
+        }
+      } catch (error) {
+        console.log('Error loading streaks:', error);
+      }
+      return {
+        currentStreak: 0,
+        bestStreak: 0,
+        lastCheckDate: null,
+        dailyHistory: []
+      };
+    }
+    
+    function saveStreaks(streaks) {
+      try {
+        localStorage.setItem(STREAKS_KEY, JSON.stringify(streaks));
+      } catch (error) {
+        console.log('Error saving streaks:', error);
+      }
+    }
+    
+    function updateStreaks() {
+      const worked = [];
+      days.forEach(d => { worked.push(getWorked(d.toLowerCase())); });
+      
+      // Load custom targets
+      const customTargets = loadCustomTargets();
+      const dayTargets = days.map(d => customTargets[d.toLowerCase()]);
+      
+      const streaks = loadStreaks();
+      
+      // Calculate current streak from the most recent filled day backwards
+      let consecutiveDays = 0;
+      for (let i = worked.length - 1; i >= 0; i--) {
+        if (worked[i] != null) {
+          const diff = worked[i] - dayTargets[i];
+          // Consider it a success if within -30 minutes of target
+          if (diff >= -30) {
+            consecutiveDays++;
+          } else {
+            // Stop counting when we hit a day that missed the target
+            break;
+          }
+        } else {
+          // Stop at unfilled days
+          break;
+        }
+      }
+      
+      // Update current streak
+      streaks.currentStreak = consecutiveDays;
+      
+      // Update best streak
+      if (streaks.currentStreak > streaks.bestStreak) {
+        streaks.bestStreak = streaks.currentStreak;
+      }
+      
+      saveStreaks(streaks);
+      displayStreaks(streaks, worked, dayTargets);
+    }
+    
+    function displayStreaks(streaks, worked, dayTargets) {
+      const currentStreakEl = document.getElementById('currentStreak');
+      const bestStreakEl = document.getElementById('bestStreak');
+      const weeklyStreakDisplay = document.getElementById('weeklyStreakDisplay');
+      
+      if (currentStreakEl) {
+        const dayText = streaks.currentStreak === 1 ? 'day' : 'days';
+        currentStreakEl.textContent = `${streaks.currentStreak} ${dayText}`;
+      }
+      
+      if (bestStreakEl) {
+        const dayText = streaks.bestStreak === 1 ? 'day' : 'days';
+        bestStreakEl.textContent = `${streaks.bestStreak} ${dayText}`;
+      }
+      
+      if (weeklyStreakDisplay) {
+        let html = '';
+        days.forEach((d, idx) => {
+          const w = worked[idx];
+          let icon = '⚪'; // Not filled
+          let title = 'No data';
+          
+          if (w != null) {
+            const diff = w - dayTargets[idx];
+            if (diff >= -30) {
+              icon = '🔥'; // Met target
+              title = `${d}: Target met`;
+            } else {
+              icon = '❌'; // Missed target
+              title = `${d}: Missed target`;
+            }
+          }
+          
+          html += `<span title="${title}" style="font-size: 1.5rem;">${icon}</span>`;
+        });
+        
+        weeklyStreakDisplay.innerHTML = html;
+      }
+    }
+
+    // === EXPORT/IMPORT FUNCTIONS ===
+    function exportData() {
+      const data = {
+        version: '1.0',
+        exportDate: new Date().toISOString(),
+        currentWeek: localStorage.getItem(STORAGE_KEY),
+        history: localStorage.getItem(MONTHLY_HISTORY_KEY),
+        streaks: localStorage.getItem(STREAKS_KEY),
+        customTargets: localStorage.getItem(CUSTOM_TARGETS_KEY),
+        workNotes: localStorage.getItem(WORK_NOTES_KEY),
+        overtime: localStorage.getItem(OVERTIME_KEY),
+        theme: localStorage.getItem(THEME_KEY),
+        font: localStorage.getItem(FONT_KEY),
+        mode: localStorage.getItem(MODE_KEY),
+        notifications: localStorage.getItem(NOTIFICATIONS_KEY)
+      };
+      
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `workcalc-data-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+    
+    function importData(fileContent) {
+      try {
+        const data = JSON.parse(fileContent);
+        
+        // Validate data structure
+        if (!data.version) {
+          alert('Invalid data format');
+          return;
+        }
+        
+        // Import all data
+        if (data.currentWeek) localStorage.setItem(STORAGE_KEY, data.currentWeek);
+        if (data.history) localStorage.setItem(MONTHLY_HISTORY_KEY, data.history);
+        if (data.streaks) localStorage.setItem(STREAKS_KEY, data.streaks);
+        if (data.customTargets) localStorage.setItem(CUSTOM_TARGETS_KEY, data.customTargets);
+        if (data.workNotes) localStorage.setItem(WORK_NOTES_KEY, data.workNotes);
+        if (data.overtime) localStorage.setItem(OVERTIME_KEY, data.overtime);
+        if (data.theme) localStorage.setItem(THEME_KEY, data.theme);
+        if (data.font) localStorage.setItem(FONT_KEY, data.font);
+        if (data.mode) localStorage.setItem(MODE_KEY, data.mode);
+        if (data.notifications) localStorage.setItem(NOTIFICATIONS_KEY, data.notifications);
+        
+        alert('Data imported successfully! Page will reload.');
+        location.reload();
+        
+      } catch (error) {
+        console.log('Error importing data:', error);
+        alert('Error importing data. Please check the file format.');
+      }
+    }
+    
+    // Export/Import event listeners
+    document.addEventListener('DOMContentLoaded', () => {
+      const exportBtn = document.getElementById('exportDataBtn');
+      const importBtn = document.getElementById('importDataBtn');
+      const importInput = document.getElementById('importFileInput');
+      
+      if (exportBtn) {
+        exportBtn.addEventListener('click', exportData);
+      }
+      
+      if (importBtn && importInput) {
+        importBtn.addEventListener('click', () => {
+          importInput.click();
+        });
+        
+        importInput.addEventListener('change', (e) => {
+          const file = e.target.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+              importData(event.target.result);
+            };
+            reader.readAsText(file);
+          }
+        });
+      }
+    });
+
+    // === CUSTOM DAILY TARGETS FUNCTIONS ===
+    const CUSTOM_TARGETS_KEY = 'workTimeCalculatorCustomTargets';
+    
+    function loadCustomTargets() {
+      const saved = localStorage.getItem(CUSTOM_TARGETS_KEY);
+      if (saved) {
+        return JSON.parse(saved);
+      }
+      // Default: use current mode's daily hours for all days
+      const defaultHours = MODES[currentMode].dailyHours * 60;
+      return {
+        sunday: defaultHours,
+        monday: defaultHours,
+        tuesday: defaultHours,
+        wednesday: defaultHours,
+        thursday: defaultHours
+      };
+    }
+    
+    function saveCustomTargets(targets) {
+      localStorage.setItem(CUSTOM_TARGETS_KEY, JSON.stringify(targets));
+    }
+    
+    function initCustomTargets() {
+      const container = document.getElementById('customTargetsInputs');
+      if (!container) return;
+      
+      const targets = loadCustomTargets();
+      
+      let html = '';
+      days.forEach(d => {
+        const id = d.toLowerCase();
+        const hours = Math.floor(targets[id] / 60);
+        const mins = targets[id] % 60;
+        
+        html += `
+          <div class="col-12">
+            <label class="form-label small">${d}</label>
+            <div class="d-flex gap-2">
+              <input type="number" class="form-control form-control-sm" id="target-${id}-h" 
+                     min="0" max="12" value="${hours}" placeholder="Hours">
+              <input type="number" class="form-control form-control-sm" id="target-${id}-m" 
+                     min="0" max="59" value="${mins}" placeholder="Minutes">
+            </div>
+          </div>
+        `;
+      });
+      
+      container.innerHTML = html;
+      
+      // Apply button
+      const applyBtn = document.getElementById('applyCustomTargets');
+      if (applyBtn) {
+        applyBtn.addEventListener('click', () => {
+          const newTargets = {};
+          let totalTarget = 0;
+          
+          days.forEach(d => {
+            const id = d.toLowerCase();
+            const hours = parseInt(document.getElementById(`target-${id}-h`).value) || 0;
+            const mins = parseInt(document.getElementById(`target-${id}-m`).value) || 0;
+            newTargets[id] = hours * 60 + mins;
+            totalTarget += newTargets[id];
+          });
+          
+          saveCustomTargets(newTargets);
+          WEEKLY_TARGET = totalTarget;
+          recalc();
+          updateAnalytics();
+          updateStreaks();
+          updateOvertime();
+          alert('Custom targets applied successfully!');
+        });
+      }
+      
+      // Reset button
+      const resetBtn = document.getElementById('resetToDefaultTargets');
+      if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+          const defaultHours = MODES[currentMode].dailyHours * 60;
+          const defaultTargets = {
+            sunday: defaultHours,
+            monday: defaultHours,
+            tuesday: defaultHours,
+            wednesday: defaultHours,
+            thursday: defaultHours
+          };
+          saveCustomTargets(defaultTargets);
+          WEEKLY_TARGET = 5 * defaultHours;
+          TARGET_PER_DAY = defaultHours;
+          initCustomTargets();
+          recalc();
+          updateAnalytics();
+          updateStreaks();
+          updateOvertime();
+          alert(`Targets reset to default (${MODES[currentMode].dailyHours}h per day)!`);
+        });
+      }
+      
+      // Presets dropdown
+      const presetsSelect = document.getElementById('targetPresets');
+      if (presetsSelect) {
+        presetsSelect.addEventListener('change', (e) => {
+          const preset = e.target.value;
+          if (!preset) return;
+          
+          let presetTargets = {};
+          switch(preset) {
+            case 'standard':
+              presetTargets = { sunday: 480, monday: 480, tuesday: 480, wednesday: 480, thursday: 480 };
+              break;
+            case '4day':
+              presetTargets = { sunday: 600, monday: 600, tuesday: 600, wednesday: 600, thursday: 0 };
+              break;
+            case 'reducedThu':
+              presetTargets = { sunday: 480, monday: 480, tuesday: 480, wednesday: 480, thursday: 240 };
+              break;
+            case 'flexWeek':
+              presetTargets = { sunday: 360, monday: 480, tuesday: 480, wednesday: 480, thursday: 600 };
+              break;
+          }
+          
+          days.forEach(d => {
+            const id = d.toLowerCase();
+            const hours = Math.floor(presetTargets[id] / 60);
+            const mins = presetTargets[id] % 60;
+            document.getElementById(`target-${id}-h`).value = hours;
+            document.getElementById(`target-${id}-m`).value = mins;
+          });
+          
+          e.target.selectedIndex = 0;
+        });
+      }
+    }
+
+    // === WORK NOTES FUNCTIONS ===
+    const WORK_NOTES_KEY = 'workTimeCalculatorNotes';
+    
+    function loadWorkNotes() {
+      const saved = localStorage.getItem(WORK_NOTES_KEY);
+      return saved ? JSON.parse(saved) : {};
+    }
+    
+    function saveWorkNotes(notes) {
+      localStorage.setItem(WORK_NOTES_KEY, JSON.stringify(notes));
+    }
+    
+    function initWorkNotes() {
+      const container = document.getElementById('notesInputsContainer');
+      if (!container) return;
+      
+      const notes = loadWorkNotes();
+      
+      let html = '';
+      days.forEach(d => {
+        const id = d.toLowerCase();
+        const note = notes[id] || '';
+        
+        html += `
+          <div class="mb-3">
+            <label class="form-label small"><strong>${d}</strong></label>
+            <textarea class="form-control form-control-sm" id="note-${id}" rows="2" 
+                      placeholder="Add notes about what you worked on...">${note}</textarea>
+          </div>
+        `;
+      });
+      
+      container.innerHTML = html;
+      
+      // Auto-save on change
+      days.forEach(d => {
+        const id = d.toLowerCase();
+        const textarea = document.getElementById(`note-${id}`);
+        if (textarea) {
+          textarea.addEventListener('change', () => {
+            const notes = loadWorkNotes();
+            notes[id] = textarea.value;
+            saveWorkNotes(notes);
+          });
+        }
+      });
+    }
+
+    // === OVERTIME TRACKER FUNCTIONS ===
+    const OVERTIME_KEY = 'workTimeCalculatorOvertime';
+    
+    function loadOvertimeData() {
+      const saved = localStorage.getItem(OVERTIME_KEY);
+      return saved ? JSON.parse(saved) : { monthlyTotal: 0, weeks: [] };
+    }
+    
+    function saveOvertimeData(data) {
+      localStorage.setItem(OVERTIME_KEY, JSON.stringify(data));
+    }
+    
+    function updateOvertime() {
+      const worked = [];
+      days.forEach(d => { worked.push(getWorked(d.toLowerCase())); });
+      const totalWorked = worked.reduce((sum, w) => sum + (w || 0), 0);
+      
+      // Weekly overtime
+      const weeklyOvertime = Math.max(0, totalWorked - WEEKLY_TARGET);
+      
+      // Update display
+      const weeklyOvertimeEl = document.getElementById('weeklyOvertime');
+      const monthlyOvertimeEl = document.getElementById('monthlyOvertime');
+      const overtimeDetailsEl = document.getElementById('overtimeDetails');
+      
+      if (weeklyOvertimeEl) {
+        const h = Math.floor(weeklyOvertime / 60);
+        const m = weeklyOvertime % 60;
+        weeklyOvertimeEl.textContent = `${h}h ${m}m`;
+        weeklyOvertimeEl.classList.toggle('text-warning', weeklyOvertime > 0);
+      }
+      
+      // Load monthly data
+      const overtimeData = loadOvertimeData();
+      
+      if (monthlyOvertimeEl) {
+        const h = Math.floor(overtimeData.monthlyTotal / 60);
+        const m = overtimeData.monthlyTotal % 60;
+        monthlyOvertimeEl.textContent = `${h}h ${m}m`;
+        monthlyOvertimeEl.classList.toggle('text-warning', overtimeData.monthlyTotal > 0);
+      }
+      
+      if (overtimeDetailsEl) {
+        if (weeklyOvertime > 0) {
+          const h = Math.floor(weeklyOvertime / 60);
+          const m = weeklyOvertime % 60;
+          overtimeDetailsEl.innerHTML = `
+            <p class="mb-1">✅ You've worked <strong>${h}h ${m}m</strong> beyond your weekly target.</p>
+            <p class="mb-0 text-muted-themed small">This overtime will be added to monthly total when you reset the week.</p>
+          `;
+        } else {
+          overtimeDetailsEl.innerHTML = `<p class="mb-1 text-muted-themed">Work beyond your weekly target to see overtime accumulation.</p>`;
+        }
+      }
+    }
+    
+    function recordWeeklyOvertime() {
+      const worked = [];
+      days.forEach(d => { worked.push(getWorked(d.toLowerCase())); });
+      const totalWorked = worked.reduce((sum, w) => sum + (w || 0), 0);
+      const weeklyOvertime = Math.max(0, totalWorked - WEEKLY_TARGET);
+      
+      if (weeklyOvertime > 0) {
+        const overtimeData = loadOvertimeData();
+        overtimeData.monthlyTotal += weeklyOvertime;
+        overtimeData.weeks.push({
+          date: new Date().toISOString(),
+          overtime: weeklyOvertime
+        });
+        
+        // Keep only last 8 weeks
+        if (overtimeData.weeks.length > 8) {
+          overtimeData.weeks = overtimeData.weeks.slice(-8);
+        }
+        
+        saveOvertimeData(overtimeData);
+      }
+    }
+
+    // === WEEKLY COMPARISON CHART FUNCTIONS ===
+    function loadHistoryData() {
+      try {
+        const saved = localStorage.getItem(MONTHLY_HISTORY_KEY);
+        return saved ? JSON.parse(saved) : [];
+      } catch (error) {
+        console.log('Error loading history data:', error);
+        return [];
+      }
+    }
+    
+    function updateComparisonChart() {
+      const chartEl = document.getElementById('comparisonChart');
+      const trendEl = document.getElementById('trendIndicator');
+      if (!chartEl) return;
+      
+      // Get historical data
+      const history = loadHistoryData();
+      const currentWorked = days.reduce((sum, d) => sum + (getWorked(d.toLowerCase()) || 0), 0);
+      
+      const weeks = [];
+      if (history.length > 0) {
+        history.slice(-5).forEach(week => {
+          weeks.push({ label: week.weekLabel, total: week.total });
+        });
+      }
+      
+      // Add current week
+      weeks.push({ label: 'Current', total: currentWorked });
+      
+      if (weeks.length < 2) {
+        chartEl.innerHTML = '<p class="text-muted-themed text-center small">Complete at least one week to see comparison.</p>';
+        if (trendEl) trendEl.textContent = '--';
+        return;
+      }
+      
+      // Calculate trend
+      if (trendEl && weeks.length >= 2) {
+        const prevWeek = weeks[weeks.length - 2].total;
+        const currWeek = weeks[weeks.length - 1].total;
+        const diff = currWeek - prevWeek;
+        const h = Math.floor(Math.abs(diff) / 60);
+        const m = Math.abs(diff) % 60;
+        
+        if (diff > 30) {
+          trendEl.innerHTML = `<span class="text-success">📈 +${h}h ${m}m vs last week</span>`;
+        } else if (diff < -30) {
+          trendEl.innerHTML = `<span class="text-danger">📉 -${h}h ${m}m vs last week</span>`;
+        } else {
+          trendEl.innerHTML = `<span class="text-muted-themed">➡️ Stable (±${m}m)</span>`;
+        }
+      }
+      
+      // Draw simple bar chart
+      const maxTotal = Math.max(...weeks.map(w => w.total), WEEKLY_TARGET);
+      let chartHTML = '<div style="display: flex; align-items: flex-end; gap: 10px; height: 180px;">';
+      
+      weeks.forEach((week, idx) => {
+        const heightPercent = (week.total / maxTotal) * 100;
+        const h = Math.floor(week.total / 60);
+        const m = week.total % 60;
+        const isLast = idx === weeks.length - 1;
+        const color = week.total >= WEEKLY_TARGET ? 'var(--accent)' : 'var(--warn)';
+        
+        chartHTML += `
+          <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
+            <div style="width: 100%; height: ${heightPercent}%; background: ${color}; 
+                        border-radius: 4px; ${isLast ? 'opacity: 0.7; border: 2px dashed var(--text);' : ''}"
+                 title="${week.label}: ${h}h ${m}m"></div>
+            <div class="small text-muted-themed mt-1" style="font-size: 0.7rem;">${week.label.length > 10 ? week.label.substring(0, 8) + '...' : week.label}</div>
+          </div>
+        `;
+      });
+      
+      chartHTML += '</div>';
+      chartEl.innerHTML = chartHTML;
+    }
+
+    // === WEEKLY SUMMARY REPORT FUNCTIONS ===
+    function generateWeeklyReport() {
+      const reportPreview = document.getElementById('reportPreview');
+      const reportContent = document.getElementById('reportContent');
+      const printBtn = document.getElementById('printReport');
+      const shareBtn = document.getElementById('shareReport');
+      
+      if (!reportContent) return;
+      
+      const worked = days.map(d => getWorked(d.toLowerCase()));
+      const totalWorked = worked.reduce((sum, w) => sum + (w || 0), 0);
+      const notes = loadWorkNotes();
+      const streaks = loadStreaks();
+      
+      let html = `
+        <div style="font-family: var(--font); color: var(--text);">
+          <h4 style="text-align: center; margin-bottom: 20px;">📄 Weekly Work Summary Report</h4>
+          <p style="text-align: center; color: var(--muted); margin-bottom: 20px;">
+            ${new Date().toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+          </p>
+          
+          <div style="border-bottom: 2px solid var(--muted); margin: 20px 0;"></div>
+          
+          <h5>📊 Overview</h5>
+          <ul>
+            <li><strong>Total Hours Worked:</strong> ${Math.floor(totalWorked / 60)}h ${totalWorked % 60}m</li>
+            <li><strong>Weekly Target:</strong> ${Math.floor(WEEKLY_TARGET / 60)}h ${WEEKLY_TARGET % 60}m</li>
+            <li><strong>Status:</strong> ${totalWorked >= WEEKLY_TARGET ? '✅ Target Met' : `⚠️ ${Math.floor((WEEKLY_TARGET - totalWorked) / 60)}h ${(WEEKLY_TARGET - totalWorked) % 60}m remaining`}</li>
+            <li><strong>Current Streak:</strong> ${streaks.currentStreak} day(s)</li>
+            <li><strong>Best Streak:</strong> ${streaks.bestStreak} day(s)</li>
+          </ul>
+          
+          <div style="border-bottom: 2px solid var(--muted); margin: 20px 0;"></div>
+          
+          <h5>📅 Daily Breakdown</h5>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr style="border-bottom: 1px solid var(--muted);">
+                <th style="text-align: left; padding: 8px;">Day</th>
+                <th style="text-align: center; padding: 8px;">Hours</th>
+                <th style="text-align: center; padding: 8px;">Status</th>
+                <th style="text-align: left; padding: 8px;">Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+      
+      days.forEach((d, idx) => {
+        const w = worked[idx];
+        const id = d.toLowerCase();
+        const note = notes[id] || '--';
+        const h = w ? Math.floor(w / 60) : 0;
+        const m = w ? w % 60 : 0;
+        const status = w ? (w >= TARGET_PER_DAY - 30 ? '✅' : '⚠️') : '⚪';
+        
+        html += `
+          <tr style="border-bottom: 1px solid rgba(148,163,184,0.3);">
+            <td style="padding: 8px;"><strong>${d}</strong></td>
+            <td style="text-align: center; padding: 8px;">${w ? `${h}h ${m}m` : '--'}</td>
+            <td style="text-align: center; padding: 8px;">${status}</td>
+            <td style="padding: 8px; font-size: 0.85rem;">${note}</td>
+          </tr>
+        `;
+      });
+      
+      html += `
+            </tbody>
+          </table>
+          
+          <div style="border-bottom: 2px solid var(--muted); margin: 20px 0;"></div>
+          
+          <h5>💡 Insights</h5>
+          <div style="background: rgba(148,163,184,0.1); padding: 15px; border-radius: 8px;">
+      `;
+      
+      // Add analytics insights
+      const filledDays = worked.filter(w => w != null);
+      if (filledDays.length > 0) {
+        const avgDaily = filledDays.reduce((sum, w) => sum + w, 0) / filledDays.length;
+        const avgH = Math.floor(avgDaily / 60);
+        const avgM = Math.round(avgDaily % 60);
+        
+        html += `<p>• Average daily hours: <strong>${avgH}h ${avgM}m</strong></p>`;
+        
+        const maxWorked = Math.max(...filledDays);
+        const maxDay = days[worked.indexOf(maxWorked)];
+        html += `<p>• Most productive day: <strong>${maxDay}</strong></p>`;
+        
+        const totalDeviation = filledDays.reduce((sum, w) => sum + Math.abs(w - TARGET_PER_DAY), 0);
+        const avgDeviation = totalDeviation / filledDays.length;
+        const score = Math.max(0, Math.round(100 - (avgDeviation / TARGET_PER_DAY) * 100));
+        html += `<p>• Consistency score: <strong>${score}%</strong></p>`;
+      } else {
+        html += `<p class="text-muted-themed">No work data recorded this week.</p>`;
+      }
+      
+      html += `
+          </div>
+          
+          <div style="margin-top: 30px; text-align: center; color: var(--muted); font-size: 0.85rem;">
+            <p>Generated by WorkCalc on ${new Date().toLocaleString()}</p>
+          </div>
+        </div>
+      `;
+      
+      reportContent.innerHTML = html;
+      reportPreview.style.display = 'block';
+      
+      if (printBtn) {
+        printBtn.disabled = false;
+        printBtn.onclick = () => {
+          window.print();
+        };
+      }
+      
+      if (shareBtn) {
+        shareBtn.disabled = false;
+        shareBtn.onclick = () => {
+          const reportText = reportContent.innerText;
+          if (navigator.share) {
+            navigator.share({
+              title: 'Weekly Work Summary',
+              text: reportText
+            }).catch(() => {});
+          } else {
+            // Copy to clipboard
+            navigator.clipboard.writeText(reportText).then(() => {
+              alert('Report copied to clipboard!');
+            });
+          }
+        };
+      }
+    }
+    
+    // === POMODORO TIMER ===
+    const POMODORO_KEY = 'workTimeCalculatorPomodoro';
+    let pomodoroInterval = null;
+    let pomodoroTimeLeft = 25 * 60; // seconds
+    let pomodoroMode = 'focus'; // 'focus' or 'break'
+    let pomodoroRunning = false;
+    
+    function loadPomodoroData() {
+      const saved = localStorage.getItem(POMODORO_KEY);
+      return saved ? JSON.parse(saved) : { sessions: 0, totalTime: 0 };
+    }
+    
+    function savePomodoroData(data) {
+      localStorage.setItem(POMODORO_KEY, JSON.stringify(data));
+    }
+    
+    function updatePomodoroDisplay() {
+      const mins = Math.floor(pomodoroTimeLeft / 60);
+      const secs = pomodoroTimeLeft % 60;
+      document.getElementById('pomodoroDisplay').textContent = 
+        `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+      
+      const status = pomodoroRunning ? 
+        (pomodoroMode === 'focus' ? '🎯 Focus Session' : '☕ Break Time') : 
+        'Ready to start';
+      document.getElementById('pomodoroStatus').textContent = status;
+      
+      const data = loadPomodoroData();
+      document.getElementById('pomodoroSessions').textContent = data.sessions;
+      document.getElementById('pomodoroTotalTime').textContent = minToHM(data.totalTime);
+    }
+    
+    function initPomodoro() {
+      const startBtn = document.getElementById('pomodoroStart');
+      const pauseBtn = document.getElementById('pomodoroPause');
+      const resetBtn = document.getElementById('pomodoroReset');
+      
+      startBtn.addEventListener('click', () => {
+        if (!pomodoroRunning) {
+          pomodoroRunning = true;
+          startBtn.disabled = true;
+          pauseBtn.disabled = false;
+          
+          pomodoroInterval = setInterval(() => {
+            pomodoroTimeLeft--;
+            updatePomodoroDisplay();
+            
+            if (pomodoroTimeLeft <= 0) {
+              // Session completed
+              if (pomodoroMode === 'focus') {
+                const data = loadPomodoroData();
+                const focusMins = parseInt(document.getElementById('pomodoroFocus').value) || 25;
+                data.sessions++;
+                data.totalTime += focusMins;
+                savePomodoroData(data);
+                
+                alert('✅ Focus session completed! Take a break.');
+                pomodoroMode = 'break';
+                pomodoroTimeLeft = (parseInt(document.getElementById('pomodoroBreak').value) || 5) * 60;
+              } else {
+                alert('☕ Break time over! Ready for another session?');
+                pomodoroMode = 'focus';
+                pomodoroTimeLeft = (parseInt(document.getElementById('pomodoroFocus').value) || 25) * 60;
+                clearInterval(pomodoroInterval);
+                pomodoroRunning = false;
+                startBtn.disabled = false;
+                pauseBtn.disabled = true;
+              }
+              updatePomodoroDisplay();
+            }
+          }, 1000);
+        }
+      });
+      
+      pauseBtn.addEventListener('click', () => {
+        if (pomodoroRunning) {
+          clearInterval(pomodoroInterval);
+          pomodoroRunning = false;
+          startBtn.disabled = false;
+          pauseBtn.disabled = true;
+        }
+      });
+      
+      resetBtn.addEventListener('click', () => {
+        clearInterval(pomodoroInterval);
+        pomodoroRunning = false;
+        pomodoroMode = 'focus';
+        pomodoroTimeLeft = (parseInt(document.getElementById('pomodoroFocus').value) || 25) * 60;
+        startBtn.disabled = false;
+        pauseBtn.disabled = true;
+        updatePomodoroDisplay();
+      });
+      
+      updatePomodoroDisplay();
+    }
+
+    // === ACHIEVEMENTS & BADGES ===
+    const ACHIEVEMENTS_KEY = 'workTimeCalculatorAchievements';
+    
+    const achievementDefinitions = [
+      { id: 'first_week', name: 'First Week', desc: 'Complete your first week', icon: '🎖️', points: 10, check: () => {
+        const history = JSON.parse(localStorage.getItem(MONTHLY_HISTORY_KEY) || '{"weeks":[]}');
+        return history.weeks && history.weeks.length >= 1;
+      }},
+      { id: 'streak_7', name: '7-Day Streak', desc: 'Maintain 7-day streak', icon: '🔥', points: 20, check: () => {
+        const streaks = loadStreaks();
+        return streaks.current >= 7 || streaks.best >= 7;
+      }},
+      { id: 'perfect_week', name: 'Perfect Week', desc: 'Meet target every day', icon: '⭐', points: 15, check: () => {
+        const worked = days.map(d => getWorked(d.toLowerCase()));
+        const customTargets = loadCustomTargets();
+        const allMet = worked.every((w, i) => w != null && w >= customTargets[days[i].toLowerCase()] - 30);
+        return allMet && worked.every(w => w != null);
+      }},
+      { id: 'early_bird', name: 'Early Bird', desc: 'Work 40+ hours this week', icon: '🌅', points: 25, check: () => {
+        const total = days.map(d => getWorked(d.toLowerCase())).reduce((a, b) => a + (b || 0), 0);
+        return total >= 40 * 60;
+      }},
+      { id: 'consistent', name: 'Consistency King', desc: '100% consistency score', icon: '👑', points: 30, check: () => {
+        // Check analytics consistency
+        const worked = days.map(d => getWorked(d.toLowerCase())).filter(w => w != null);
+        if (worked.length === 0) return false;
+        const customTargets = loadCustomTargets();
+        const dayTargets = days.map(d => customTargets[d.toLowerCase()]);
+        const filledDays = worked.filter((_, i) => worked[i] != null);
+        const totalDeviation = filledDays.reduce((sum, w, i) => sum + Math.abs(w - dayTargets[i]), 0);
+        const avgDeviation = totalDeviation / filledDays.length;
+        const score = Math.max(0, Math.round(100 - (avgDeviation / 480) * 100));
+        return score === 100;
+      }}
+    ];
+    
+    function loadAchievements() {
+      const saved = localStorage.getItem(ACHIEVEMENTS_KEY);
+      return saved ? JSON.parse(saved) : { unlocked: [], points: 0 };
+    }
+    
+    function saveAchievements(data) {
+      localStorage.setItem(ACHIEVEMENTS_KEY, JSON.stringify(data));
+    }
+    
+    function updateAchievements() {
+      const data = loadAchievements();
+      
+      achievementDefinitions.forEach(achievement => {
+        if (!data.unlocked.includes(achievement.id) && achievement.check()) {
+          data.unlocked.push(achievement.id);
+          data.points += achievement.points;
+          alert(`🎉 Achievement Unlocked: ${achievement.name}!`);
+        }
+      });
+      
+      saveAchievements(data);
+      
+      // Update display
+      const level = data.points < 50 ? '🥉 Bronze' : data.points < 100 ? '🥈 Silver' : '🥇 Gold';
+      document.getElementById('achievementLevel').textContent = level.split(' ')[1];
+      document.getElementById('achievementPoints').textContent = data.points;
+      const progress = Math.min((data.points % 50) * 2, 100);
+      document.getElementById('achievementProgress').style.width = `${progress}%`;
+      
+      // Render achievements list
+      const list = document.getElementById('achievementsList');
+      list.innerHTML = achievementDefinitions.map(ach => {
+        const unlocked = data.unlocked.includes(ach.id);
+        return `
+          <div class="col-6 col-md-4">
+            <div class="text-center p-2 border rounded ${unlocked ? 'border-success' : 'border-secondary opacity-50'}">
+              <div style="font-size: 2rem;">${ach.icon}</div>
+              <div class="small fw-bold">${ach.name}</div>
+              <div class="small text-muted-themed">${ach.desc}</div>
+              <div class="small ${unlocked ? 'text-success' : 'text-muted-themed'}">${unlocked ? '✅ Unlocked' : `🔒 ${ach.points}pts`}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // === YEARLY CALENDAR HEATMAP ===
+    function initYearlyCalendar() {
+      const yearSelect = document.getElementById('yearSelect');
+      const heatmapDiv = document.getElementById('yearlyHeatmap');
+      
+      // Set current year
+      yearSelect.value = new Date().getFullYear().toString();
+      
+      function renderHeatmap() {
+        const year = parseInt(yearSelect.value);
+        const startDate = new Date(year, 0, 1);
+        const endDate = new Date(year, 11, 31);
+        
+        // Load historical data from monthly history
+        const history = JSON.parse(localStorage.getItem(MONTHLY_HISTORY_KEY) || '{"weeks":[]}');
+        const workDataByDate = {};
+        
+        // Aggregate work data from history
+        history.weeks.forEach(week => {
+          if (week.days) {
+            Object.keys(week.days).forEach(day => {
+              // Try to map to approximate dates (this is a simplified approach)
+              // In a real app, you'd store actual dates in the history
+              if (week.days[day]) {
+                workDataByDate[day] = week.days[day];
+              }
+            });
+          }
+        });
+        
+        let html = '<div style="display: flex; flex-wrap: wrap; gap: 2px;">';
+        let currentDate = new Date(startDate);
+        
+        while (currentDate <= endDate) {
+          const dateStr = currentDate.toISOString().split('T')[0];
+          // Use actual data if available, otherwise 0
+          const hours = workDataByDate[dateStr] ? Math.floor(workDataByDate[dateStr] / 60) : 0;
+          const color = hours === 0 ? '#161b22' : 
+                       hours < 4 ? '#0e4429' : 
+                       hours < 6 ? '#006d32' : 
+                       hours < 8 ? '#26a641' : '#39d353';
+          
+          html += `<div style="width: 10px; height: 10px; background: ${color}; border-radius: 2px;" 
+                        title="${dateStr}: ${hours}h"></div>`;
+          
+          currentDate.setDate(currentDate.getDate() + 1);
+        }
+        
+        html += '</div>';
+        heatmapDiv.innerHTML = html;
+      }
+      
+      yearSelect.addEventListener('change', renderHeatmap);
+      renderHeatmap();
+    }
+
+    // === MULTI-TIMEZONE SUPPORT ===
+    const TIMEZONES_KEY = 'workTimeCalculatorTimezones';
+    
+    function loadTimezones() {
+      const saved = localStorage.getItem(TIMEZONES_KEY);
+      return saved ? JSON.parse(saved) : [
+        { name: 'Local', zone: Intl.DateTimeFormat().resolvedOptions().timeZone }
+      ];
+    }
+    
+    function saveTimezones(timezones) {
+      localStorage.setItem(TIMEZONES_KEY, JSON.stringify(timezones));
+    }
+    
+    function updateTimezones() {
+      const timezones = loadTimezones();
+      const list = document.getElementById('timezoneList');
+      
+      list.innerHTML = timezones.map((tz, i) => {
+        const time = new Date().toLocaleTimeString('en-US', { 
+          timeZone: tz.zone, 
+          hour: '2-digit', 
+          minute: '2-digit',
+          hour12: true
+        });
+        
+        return `
+          <div class="d-flex justify-content-between align-items-center p-2 mb-2 border rounded">
+            <div>
+              <div class="fw-bold">${tz.name}</div>
+              <div class="small text-muted-themed">${tz.zone}</div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <div class="fw-bold">${time}</div>
+              ${i > 0 ? `<button class="btn btn-sm btn-outline-danger" onclick="removeTimezone(${i})">×</button>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    function removeTimezone(index) {
+      const timezones = loadTimezones();
+      timezones.splice(index, 1);
+      saveTimezones(timezones);
+      updateTimezones();
+    }
+    
+    function initTimezones() {
+      document.getElementById('addTimezone').addEventListener('click', () => {
+        const zone = prompt('Enter timezone (e.g., America/New_York, Europe/London):');
+        if (zone) {
+          try {
+            // Test if timezone is valid
+            new Date().toLocaleTimeString('en-US', { timeZone: zone });
+            const timezones = loadTimezones();
+            const name = prompt('Enter a name for this timezone:') || zone;
+            timezones.push({ name, zone });
+            saveTimezones(timezones);
+            updateTimezones();
+          } catch (e) {
+            alert('Invalid timezone! Please use a valid IANA timezone name.');
+          }
+        }
+      });
+      
+      updateTimezones();
+      setInterval(updateTimezones, 60000); // Update every minute
+    }
+
+    // === WORK TEMPLATES ===
+    const TEMPLATES_KEY = 'workTimeCalculatorTemplates';
+    
+    function loadTemplates() {
+      const saved = localStorage.getItem(TEMPLATES_KEY);
+      return saved ? JSON.parse(saved) : [];
+    }
+    
+    function saveTemplates(templates) {
+      localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates));
+    }
+    
+    function updateTemplatesList() {
+      const templates = loadTemplates();
+      const list = document.getElementById('templatesList');
+      
+      if (templates.length === 0) {
+        list.innerHTML = '<p class="small text-muted-themed">No templates saved yet.</p>';
+        return;
+      }
+      
+      list.innerHTML = templates.map((tpl, i) => `
+        <div class="d-flex justify-content-between align-items-center p-2 mb-2 border rounded">
+          <div>
+            <div class="fw-bold">${tpl.name}</div>
+            <div class="small text-muted-themed">Total: ${minToHM(tpl.total)}</div>
+          </div>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-success theme-btn" onclick="applyTemplate(${i})">Apply</button>
+            <button class="btn btn-sm btn-outline-danger theme-btn" onclick="deleteTemplate(${i})">Delete</button>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    function applyTemplate(index) {
+      const templates = loadTemplates();
+      const tpl = templates[index];
+      
+      days.forEach(d => {
+        const dayKey = d.toLowerCase();
+        if (tpl.days[dayKey] !== undefined) {
+          saveWorked(dayKey, tpl.days[dayKey]);
+        }
+      });
+      
+      recalc();
+      alert('✅ Template applied successfully!');
+    }
+    
+    function deleteTemplate(index) {
+      if (confirm('Delete this template?')) {
+        const templates = loadTemplates();
+        templates.splice(index, 1);
+        saveTemplates(templates);
+        updateTemplatesList();
+      }
+    }
+    
+    function initTemplates() {
+      document.getElementById('saveTemplate').addEventListener('click', () => {
+        const name = prompt('Enter a name for this template:');
+        if (name) {
+          const templates = loadTemplates();
+          const templateData = {
+            name,
+            days: {},
+            total: 0
+          };
+          
+          days.forEach(d => {
+            const dayKey = d.toLowerCase();
+            const worked = getWorked(dayKey);
+            if (worked !== null) {
+              templateData.days[dayKey] = worked;
+              templateData.total += worked;
+            }
+          });
+          
+          templates.push(templateData);
+          saveTemplates(templates);
+          updateTemplatesList();
+          alert('✅ Template saved!');
+        }
+      });
+      
+      updateTemplatesList();
+    }
+
+    // === ADVANCED ANALYTICS EXPORT ===
+    function initAnalyticsExport() {
+      // Set default dates
+      const today = new Date();
+      const weekAgo = new Date(today);
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      
+      document.getElementById('exportFromDate').value = weekAgo.toISOString().split('T')[0];
+      document.getElementById('exportToDate').value = today.toISOString().split('T')[0];
+      
+      document.getElementById('exportCSV').addEventListener('click', () => {
+        const csv = generateCSVData();
+        downloadFile(csv, 'analytics.csv', 'text/csv');
+      });
+      
+      document.getElementById('exportPDF').addEventListener('click', () => {
+        alert('📑 PDF export: Would generate a formatted PDF report with charts and data.');
+      });
+      
+      document.getElementById('exportChart').addEventListener('click', () => {
+        alert('📊 Chart export: Would generate a PNG image of your analytics charts.');
+      });
+    }
+    
+    function generateCSVData() {
+      let csv = 'Day,Hours,Target,Status\n';
+      
+      days.forEach(d => {
+        const dayKey = d.toLowerCase();
+        const worked = getWorked(dayKey);
+        const targets = loadCustomTargets();
+        const target = targets[dayKey];
+        const status = worked === null ? 'Not filled' : 
+                      worked >= target - 30 ? 'Met' : 'Missed';
+        
+        csv += `${d},${worked ? (worked/60).toFixed(2) : '0'},${(target/60).toFixed(2)},${status}\n`;
+      });
+      
+      return csv;
+    }
+    
+    function downloadFile(content, filename, type) {
+      const blob = new Blob([content], { type });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // === QUICK LOG ENTRY ===
+    function initQuickLog() {
+      // Quick log buttons
+      document.querySelectorAll('[data-quick-log]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const minutes = parseInt(btn.getAttribute('data-quick-log'));
+          applyQuickLog(minutes);
+        });
+      });
+      
+      // Custom hours
+      document.getElementById('quickLogApply').addEventListener('click', () => {
+        const hours = parseFloat(document.getElementById('quickLogHours').value);
+        if (hours && hours > 0) {
+          applyQuickLog(Math.round(hours * 60));
+        }
+      });
+      
+      // Keyboard shortcuts
+      document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey || e.metaKey) {
+          switch(e.key) {
+            case '1': e.preventDefault(); applyQuickLog(480); break;
+            case '2': e.preventDefault(); applyQuickLog(360); break;
+            case '3': e.preventDefault(); applyQuickLog(240); break;
+          }
+        }
+      });
+    }
+    
+    function applyQuickLog(minutes) {
+      // Find first unfilled day
+      for (let d of days) {
+        const dayKey = d.toLowerCase();
+        if (getWorked(dayKey) === null) {
+          saveWorked(dayKey, minutes);
+          recalc();
+          alert(`✅ Logged ${minToHM(minutes)} to ${d}!`);
+          return;
+        }
+      }
+      alert('⚠️ All days are already filled!');
+    }
+
+    // === VOICE NOTES ===
+    const VOICE_NOTES_KEY = 'workTimeCalculatorVoiceNotes';
+    let mediaRecorder = null;
+    let audioChunks = [];
+    
+    function loadVoiceNotes() {
+      const saved = localStorage.getItem(VOICE_NOTES_KEY);
+      return saved ? JSON.parse(saved) : {};
+    }
+    
+    function saveVoiceNotes(notes) {
+      localStorage.setItem(VOICE_NOTES_KEY, JSON.stringify(notes));
+    }
+    
+    function initVoiceNotes() {
+      const recordBtn = document.getElementById('voiceRecordBtn');
+      const stopBtn = document.getElementById('voiceStopBtn');
+      const status = document.getElementById('voiceRecordingStatus');
+      
+      recordBtn.addEventListener('click', async () => {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          mediaRecorder = new MediaRecorder(stream);
+          audioChunks = [];
+          
+          mediaRecorder.addEventListener('dataavailable', event => {
+            audioChunks.push(event.data);
+          });
+          
+          mediaRecorder.addEventListener('stop', () => {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              const day = document.getElementById('voiceNoteDay').value;
+              const notes = loadVoiceNotes();
+              notes[day] = reader.result;
+              saveVoiceNotes(notes);
+              updateVoiceNotesList();
+              alert('✅ Voice note saved!');
+            };
+            reader.readAsDataURL(audioBlob);
+            
+            stream.getTracks().forEach(track => track.stop());
+          });
+          
+          mediaRecorder.start();
+          recordBtn.disabled = true;
+          stopBtn.disabled = false;
+          status.textContent = '🔴 Recording...';
+        } catch (err) {
+          alert('❌ Microphone access denied or not available.');
+        }
+      });
+      
+      stopBtn.addEventListener('click', () => {
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+          mediaRecorder.stop();
+          recordBtn.disabled = false;
+          stopBtn.disabled = true;
+          status.textContent = '';
+        }
+      });
+      
+      updateVoiceNotesList();
+    }
+    
+    function updateVoiceNotesList() {
+      const notes = loadVoiceNotes();
+      const list = document.getElementById('voiceNotesList');
+      
+      const hasNotes = Object.keys(notes).length > 0;
+      if (!hasNotes) {
+        list.innerHTML = '<p class="small text-muted-themed">No voice notes recorded yet.</p>';
+        return;
+      }
+      
+      list.innerHTML = Object.entries(notes).map(([day, audioData]) => `
+        <div class="p-2 mb-2 border rounded">
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="fw-bold text-capitalize">${day}</div>
+            <button class="btn btn-sm btn-outline-danger" onclick="deleteVoiceNote('${day}')">Delete</button>
+          </div>
+          <audio controls class="w-100 mt-2" style="height: 30px;">
+            <source src="${audioData}" type="audio/webm">
+          </audio>
+        </div>
+      `).join('');
+    }
+    
+    function deleteVoiceNote(day) {
+      const notes = loadVoiceNotes();
+      delete notes[day];
+      saveVoiceNotes(notes);
+      updateVoiceNotesList();
+    }
+
+    // === BUDGET & BILLING TRACKER ===
+    const BUDGET_KEY = 'workTimeCalculatorBudget';
+    
+    function loadBudgetData() {
+      const saved = localStorage.getItem(BUDGET_KEY);
+      return saved ? JSON.parse(saved) : { hourlyRate: 0, monthlyTotal: 0 };
+    }
+    
+    function saveBudgetData(data) {
+      localStorage.setItem(BUDGET_KEY, JSON.stringify(data));
+    }
+    
+    function updateBudget() {
+      const data = loadBudgetData();
+      const rate = parseFloat(document.getElementById('hourlyRate').value) || 0;
+      data.hourlyRate = rate;
+      saveBudgetData(data);
+      
+      // Calculate weekly earnings
+      const weeklyMinutes = days.map(d => getWorked(d.toLowerCase())).reduce((a, b) => a + (b || 0), 0);
+      const weeklyHours = weeklyMinutes / 60;
+      const weeklyEarnings = weeklyHours * rate;
+      document.getElementById('weeklyEarnings').textContent = `$${weeklyEarnings.toFixed(2)}`;
+      
+      // Calculate monthly earnings (mock - would need full month data)
+      const monthlyEarnings = weeklyEarnings * 4;
+      document.getElementById('monthlyEarnings').textContent = `$${monthlyEarnings.toFixed(2)}`;
+    }
+    
+    function initBudget() {
+      const data = loadBudgetData();
+      document.getElementById('hourlyRate').value = data.hourlyRate || 0;
+      
+      document.getElementById('hourlyRate').addEventListener('input', updateBudget);
+      updateBudget();
+    }
+
+    // === WELLNESS & BREAK REMINDERS ===
+    const WELLNESS_KEY = 'workTimeCalculatorWellness';
+    let wellnessIntervals = { stretch: null, eyeRest: null, hydration: null };
+    
+    function loadWellnessData() {
+      const saved = localStorage.getItem(WELLNESS_KEY);
+      const today = new Date().toDateString();
+      const data = saved ? JSON.parse(saved) : { date: today, stretch: 0, eyeRest: 0, hydration: 0 };
+      
+      // Reset counts if it's a new day
+      if (data.date !== today) {
+        data.date = today;
+        data.stretch = 0;
+        data.eyeRest = 0;
+        data.hydration = 0;
+      }
+      
+      return data;
+    }
+    
+    function saveWellnessData(data) {
+      localStorage.setItem(WELLNESS_KEY, JSON.stringify(data));
+    }
+    
+    function updateWellnessDisplay() {
+      const data = loadWellnessData();
+      document.getElementById('stretchCount').textContent = data.stretch;
+      document.getElementById('eyeRestCount').textContent = data.eyeRest;
+      document.getElementById('hydrationCount').textContent = data.hydration;
+    }
+    
+    function startWellnessInterval(type, duration, callback) {
+      // Clear existing interval if any
+      if (wellnessIntervals[type]) {
+        clearInterval(wellnessIntervals[type]);
+      }
+      // Start new interval
+      wellnessIntervals[type] = setInterval(callback, duration);
+    }
+    
+    function stopWellnessInterval(type) {
+      if (wellnessIntervals[type]) {
+        clearInterval(wellnessIntervals[type]);
+        wellnessIntervals[type] = null;
+      }
+    }
+    
+    function initWellness() {
+      updateWellnessDisplay();
+      
+      const wellnessIntervalDurations = {
+        stretch: 60 * 60 * 1000, // 60 minutes
+        eyeRest: 20 * 60 * 1000, // 20 minutes
+        hydration: 90 * 60 * 1000 // 90 minutes
+      };
+      
+      // Setup checkbox event listeners to start/stop intervals
+      document.getElementById('stretchReminder').addEventListener('change', (e) => {
+        if (e.target.checked) {
+          startWellnessInterval('stretch', wellnessIntervalDurations.stretch, () => {
+            const data = loadWellnessData();
+            data.stretch++;
+            saveWellnessData(data);
+            updateWellnessDisplay();
+            
+            if (Notification.permission === 'granted') {
+              new Notification('🤸 Stretch Break!', {
+                body: 'Time to stand up and stretch for a minute.'
+              });
+            }
+          });
+        } else {
+          stopWellnessInterval('stretch');
+        }
+      });
+      
+      document.getElementById('eyeRestReminder').addEventListener('change', (e) => {
+        if (e.target.checked) {
+          startWellnessInterval('eyeRest', wellnessIntervalDurations.eyeRest, () => {
+            const data = loadWellnessData();
+            data.eyeRest++;
+            saveWellnessData(data);
+            updateWellnessDisplay();
+            
+            if (Notification.permission === 'granted') {
+              new Notification('👁️ Eye Rest Time!', {
+                body: 'Look at something 20 feet away for 20 seconds.'
+              });
+            }
+          });
+        } else {
+          stopWellnessInterval('eyeRest');
+        }
+      });
+      
+      document.getElementById('hydrationReminder').addEventListener('change', (e) => {
+        if (e.target.checked) {
+          startWellnessInterval('hydration', wellnessIntervalDurations.hydration, () => {
+            const data = loadWellnessData();
+            data.hydration++;
+            saveWellnessData(data);
+            updateWellnessDisplay();
+            
+            if (Notification.permission === 'granted') {
+              new Notification('💧 Hydration Reminder!', {
+                body: 'Time to drink some water!'
+              });
+            }
+          });
+        } else {
+          stopWellnessInterval('hydration');
+        }
+      });
+      
+      // Start intervals for checked boxes on page load
+      if (document.getElementById('stretchReminder').checked) {
+        document.getElementById('stretchReminder').dispatchEvent(new Event('change'));
+      }
+      if (document.getElementById('eyeRestReminder').checked) {
+        document.getElementById('eyeRestReminder').dispatchEvent(new Event('change'));
+      }
+      if (document.getElementById('hydrationReminder').checked) {
+        document.getElementById('hydrationReminder').dispatchEvent(new Event('change'));
+      }
+    }
+    
+    // Initialize report generation
+    document.addEventListener('DOMContentLoaded', () => {
+      const generateBtn = document.getElementById('generateReport');
+      if (generateBtn) {
+        generateBtn.addEventListener('click', generateWeeklyReport);
+      }
+      
+      // Initialize all new features
+      initCustomTargets();
+      initWorkNotes();
+      updateOvertime();
+      updateComparisonChart();
+      
+      // Initialize 10 new features
+      initPomodoro();
+      updateAchievements();
+      initYearlyCalendar();
+      initTimezones();
+      initTemplates();
+      initAnalyticsExport();
+      initQuickLog();
+      initVoiceNotes();
+      initBudget();
+      initWellness();
+    });
+    
+    // Make functions globally accessible for onclick handlers
+    window.removeTimezone = removeTimezone;
+    window.applyTemplate = applyTemplate;
+    window.deleteTemplate = deleteTemplate;
+    window.deleteVoiceNote = deleteVoiceNote;
+
+    loadData();
+    loadPreferences();
+    recalc();
+    updateClock();
+    setInterval(updateClock, 1000);
+    initNotifications();
+    loadMonthlyHistory();
+  </script>
+</body>
+</html>
