@@ -194,7 +194,7 @@
       border-radius: 999px;
       padding-inline: 10px;
       padding-block: 6px;
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(6px);
       
       white-space: nowrap;
     }
@@ -335,8 +335,8 @@
     .app-sidebar {
       width: 260px;
       background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
-      -webkit-backdrop-filter: blur(10px);
-      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(6px);
+      backdrop-filter: blur(6px);
       border-right: 1px solid rgba(255,255,255,0.1);
       position: fixed;
       left: 0;
@@ -346,6 +346,7 @@
       transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       overflow-y: auto;
       box-shadow: 2px 0 20px rgba(0,0,0,0.3);
+      will-change: transform;
     }
 
     .app-sidebar.collapsed {
@@ -449,11 +450,12 @@
       top: 0;
       z-index: 1040;
       background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%);
-      -webkit-backdrop-filter: blur(15px) saturate(180%);
-      backdrop-filter: blur(15px) saturate(180%);
+      -webkit-backdrop-filter: blur(8px) saturate(150%);
+      backdrop-filter: blur(8px) saturate(150%);
       border-bottom: 1px solid rgba(255,255,255,0.1);
       padding: 1rem 2rem;
       box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      will-change: transform;
     }
 
     .header-content {
@@ -1649,9 +1651,21 @@
       console.warn('localStorage not available for sidebar state:', e);
     }
     
-    // Toggle sidebar on mobile
+    // Toggle sidebar on mobile / desktop
     menuToggle.addEventListener('click', () => {
-      sidebar.classList.toggle('show');
+      if (window.innerWidth <= 768) {
+        // Mobile: toggle show class
+        sidebar.classList.toggle('show');
+      } else {
+        // Desktop: toggle collapsed
+        sidebar.classList.toggle('collapsed');
+        appMain.classList.toggle('sidebar-collapsed');
+        try {
+          localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+        } catch (e) {
+          console.warn('localStorage not available:', e);
+        }
+      }
     });
     
     // Close sidebar
@@ -1698,6 +1712,14 @@
         }
       });
       
+      // Lazy load yearly calendar only when advanced tab is first viewed
+      if (tabId === 'advanced' && !window.calendarRendered) {
+        setTimeout(() => {
+          renderYearlyCalendar();
+          window.calendarRendered = true;
+        }, 100); // Small delay to let tab switch complete
+      }
+      
       // Scroll to top smoothly
       window.scrollTo({ top: 0, behavior: 'smooth' });
       
@@ -1720,19 +1742,28 @@
     navItems.forEach(item => {
       item.addEventListener('click', (e) => {
         e.preventDefault();
+        e.stopPropagation(); // Prevent event bubbling
         const tabId = item.dataset.tab;
+        
+        if (!tabId) return; // Safety check
         
         // Main is always visible (time entry), other tabs switch content
         if (tabId !== 'main') {
           switchTab(tabId);
         } else {
+          // For main, just ensure we're showing the time entry
+          tabContents.forEach(content => content.classList.remove('active'));
           // Scroll to time entry cards
-          document.getElementById('cards').scrollIntoView({ behavior: 'smooth' });
+          const cardsEl = document.getElementById('cards');
+          if (cardsEl) {
+            cardsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
         }
         
         // Close sidebar on mobile
         if (window.innerWidth <= 768) {
-          sidebar.classList.remove('show');
+          sidebar.classList.add('collapsed');
+          appMain.classList.add('sidebar-collapsed');
         }
       });
     });
@@ -2276,10 +2307,23 @@
       }
 
       lastWorked = worked.slice();
-      updateAnalytics(worked);
-      updateStreaks();
-      updateOvertime();
-      updateComparisonChart();
+      
+      // Debounce expensive update operations to improve performance
+      debouncedUpdate();
+    }
+    
+    // Debounce function to prevent excessive updates
+    let updateTimeout;
+    function debouncedUpdate() {
+      clearTimeout(updateTimeout);
+      updateTimeout = setTimeout(() => {
+        const worked = [];
+        days.forEach(d => { worked.push(getWorked(d.toLowerCase())); });
+        updateAnalytics(worked);
+        updateStreaks();
+        updateOvertime();
+        updateComparisonChart();
+      }, 300); // Wait 300ms after last input
     }
 
     function updateAnalytics(worked) {
