@@ -287,33 +287,34 @@
       }
     }
 
-    /* === CLOCK STYLE (theme-aware) === */
+    /* === CLOCK STYLE (theme-aware, centered) === */
     .clock-wrapper {
       display: flex;
-      flex-direction: column;
-      align-items: flex-end;
+      justify-content: center;
+      width: 100%;
     }
     .clock-display {
-  padding: 6px 18px;
-  border-radius: 999px;
+      padding: 8px 24px;
+      border-radius: 999px;
 
-  /* Solid dark pill that works with all themes */
-  background:
-    radial-gradient(circle at 10% 0, rgba(255, 255, 255, 0), transparent 55%),
-    #181a2500;
+      /* Solid dark pill that works with all themes */
+      background:
+        radial-gradient(circle at 10% 0, rgba(255, 255, 255, 0), transparent 55%),
+        #181a2500;
 
-  border: 1px solid rgba(0, 0, 0, 0.11);
+      border: 1px solid rgba(0, 0, 0, 0.11);
 
-  /* Text follows theme accent */
-  color: var(--accent);
+      /* Text follows theme accent */
+      color: var(--accent);
 
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 1.1rem;
-  letter-spacing: 0.08em;
-  min-width: 135px;
-  text-align: center;
-  text-shadow: 0 0 6px rgba(0, 0, 0, 0.182);
-}
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 1.2rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      min-width: 160px;
+      text-align: center;
+      text-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+    }
 
     /* === THEME-AWARE TEXT CLASSES === */
     .text-secondary-themed {
@@ -460,13 +461,21 @@
 
     .header-content {
       display: flex;
-      justify-content: space-between;
+      flex-direction: column;
       align-items: center;
-      flex-wrap: wrap;
-      gap: 1rem;
+      justify-content: center;
+      gap: 0.75rem;
     }
 
     .header-title {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      width: 100%;
+      justify-content: space-between;
+    }
+    
+    .header-left {
       display: flex;
       align-items: center;
       gap: 1rem;
@@ -614,14 +623,17 @@
       background: linear-gradient(90deg, var(--accent) 0%, transparent 100%);
     }
 
-    /* MOBILE RESPONSIVE */
+    /* MOBILE RESPONSIVE - Native-like Experience */
     @media (max-width: 768px) {
       .app-sidebar {
         transform: translateX(-100%);
+        width: 80%;
+        max-width: 300px;
       }
 
       .app-sidebar.show {
         transform: translateX(0);
+        box-shadow: 4px 0 30px rgba(0,0,0,0.5);
       }
 
       .app-main {
@@ -630,6 +642,18 @@
 
       .menu-toggle {
         display: block;
+        background: rgba(255,255,255,0.12);
+        border: 1px solid rgba(255,255,255,0.25);
+        padding: 0.6rem 0.9rem;
+        font-size: 1.4rem;
+        border-radius: 0.6rem;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        -webkit-tap-highlight-color: transparent;
+      }
+      
+      .menu-toggle:active {
+        transform: scale(0.95);
+        background: rgba(255,255,255,0.18);
       }
 
       .feature-grid {
@@ -637,17 +661,91 @@
       }
 
       .content-container {
-        padding: 1rem;
+        padding: 0.75rem;
+      }
+      
+      .app-header {
+        padding: 0.75rem 1rem;
       }
 
       .content-tabs {
         overflow-x: auto;
         flex-wrap: nowrap;
         -webkit-overflow-scrolling: touch;
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE/Edge */
+        padding: 0.4rem;
+      }
+      
+      .content-tabs::-webkit-scrollbar {
+        display: none; /* Chrome/Safari */
+      }
+      
+      .tab-btn {
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+        -webkit-tap-highlight-color: transparent;
+        min-width: fit-content;
+      }
+      
+      .tab-btn:active {
+        transform: scale(0.97);
       }
 
       .header-title h1 {
-        font-size: 1.25rem;
+        font-size: 1.1rem;
+        white-space: nowrap;
+      }
+      
+      .header-title .btn {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.7rem;
+      }
+      
+      .clock-display {
+        font-size: 1rem;
+        padding: 7px 20px;
+        min-width: 140px;
+      }
+      
+      /* Native-like cards */
+      .card {
+        border-radius: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      }
+      
+      /* Better touch targets */
+      .btn {
+        min-height: 44px;
+        -webkit-tap-highlight-color: transparent;
+      }
+      
+      .nav-item {
+        -webkit-tap-highlight-color: transparent;
+        min-height: 48px;
+      }
+      
+      .nav-item:active {
+        transform: translateX(2px);
+      }
+      
+      /* Smooth scrolling */
+      html {
+        scroll-behavior: smooth;
+      }
+      
+      /* Overlay for sidebar */
+      body.sidebar-open::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 1045;
+        -webkit-backdrop-filter: blur(2px);
+        backdrop-filter: blur(2px);
       }
     }
 
@@ -707,8 +805,10 @@
       <header class="app-header">
         <div class="header-content">
           <div class="header-title">
-            <button class="menu-toggle" id="menuToggle">☰</button>
-            <h1>Work Time Calculator (Sun → Thu)</h1>
+            <div class="header-left">
+              <button class="menu-toggle" id="menuToggle">☰</button>
+              <h1>Work Time Calculator (Sun → Thu)</h1>
+            </div>
             <button type="button" class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#userGuideModal">
               User Guide
             </button>
@@ -1654,8 +1754,9 @@
     // Toggle sidebar on mobile / desktop
     menuToggle.addEventListener('click', () => {
       if (window.innerWidth <= 768) {
-        // Mobile: toggle show class
+        // Mobile: toggle show class and body overlay
         sidebar.classList.toggle('show');
+        document.body.classList.toggle('sidebar-open');
       } else {
         // Desktop: toggle collapsed
         sidebar.classList.toggle('collapsed');
@@ -1670,12 +1771,27 @@
     
     // Close sidebar
     sidebarClose.addEventListener('click', () => {
-      sidebar.classList.add('collapsed');
-      appMain.classList.add('sidebar-collapsed');
-      try {
-        localStorage.setItem('sidebarCollapsed', 'true');
-      } catch (e) {
-        console.warn('localStorage not available:', e);
+      if (window.innerWidth <= 768) {
+        sidebar.classList.remove('show');
+        document.body.classList.remove('sidebar-open');
+      } else {
+        sidebar.classList.add('collapsed');
+        appMain.classList.add('sidebar-collapsed');
+        try {
+          localStorage.setItem('sidebarCollapsed', 'true');
+        } catch (e) {
+          console.warn('localStorage not available:', e);
+        }
+      }
+    });
+    
+    // Click outside sidebar to close on mobile
+    document.addEventListener('click', (e) => {
+      if (window.innerWidth <= 768 && sidebar.classList.contains('show')) {
+        if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+          sidebar.classList.remove('show');
+          document.body.classList.remove('sidebar-open');
+        }
       }
     });
     
@@ -1753,17 +1869,14 @@
         } else {
           // For main, just ensure we're showing the time entry
           tabContents.forEach(content => content.classList.remove('active'));
-          // Scroll to time entry cards
-          const cardsEl = document.getElementById('cards');
-          if (cardsEl) {
-            cardsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }
+          // Scroll to top
+          window.scrollTo({ top: 0, behavior: 'smooth' });
         }
         
         // Close sidebar on mobile
         if (window.innerWidth <= 768) {
-          sidebar.classList.add('collapsed');
-          appMain.classList.add('sidebar-collapsed');
+          sidebar.classList.remove('show');
+          document.body.classList.remove('sidebar-open');
         }
       });
     });
