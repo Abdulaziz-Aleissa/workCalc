@@ -3077,13 +3077,30 @@
         const startDate = new Date(year, 0, 1);
         const endDate = new Date(year, 11, 31);
         
+        // Load historical data from monthly history
+        const history = JSON.parse(localStorage.getItem(MONTHLY_HISTORY_KEY) || '{"weeks":[]}');
+        const workDataByDate = {};
+        
+        // Aggregate work data from history
+        history.weeks.forEach(week => {
+          if (week.days) {
+            Object.keys(week.days).forEach(day => {
+              // Try to map to approximate dates (this is a simplified approach)
+              // In a real app, you'd store actual dates in the history
+              if (week.days[day]) {
+                workDataByDate[day] = week.days[day];
+              }
+            });
+          }
+        });
+        
         let html = '<div style="display: flex; flex-wrap: wrap; gap: 2px;">';
         let currentDate = new Date(startDate);
         
         while (currentDate <= endDate) {
           const dateStr = currentDate.toISOString().split('T')[0];
-          // Mock data - in real app, check historical data
-          const hours = Math.random() < 0.7 ? Math.floor(Math.random() * 10) : 0;
+          // Use actual data if available, otherwise 0
+          const hours = workDataByDate[dateStr] ? Math.floor(workDataByDate[dateStr] / 60) : 0;
           const color = hours === 0 ? '#161b22' : 
                        hours < 4 ? '#0e4429' : 
                        hours < 6 ? '#006d32' : 
@@ -3492,6 +3509,7 @@
 
     // === WELLNESS & BREAK REMINDERS ===
     const WELLNESS_KEY = 'workTimeCalculatorWellness';
+    let wellnessIntervals = { stretch: null, eyeRest: null, hydration: null };
     
     function loadWellnessData() {
       const saved = localStorage.getItem(WELLNESS_KEY);
@@ -3520,65 +3538,99 @@
       document.getElementById('hydrationCount').textContent = data.hydration;
     }
     
+    function startWellnessInterval(type, duration, callback) {
+      // Clear existing interval if any
+      if (wellnessIntervals[type]) {
+        clearInterval(wellnessIntervals[type]);
+      }
+      // Start new interval
+      wellnessIntervals[type] = setInterval(callback, duration);
+    }
+    
+    function stopWellnessInterval(type) {
+      if (wellnessIntervals[type]) {
+        clearInterval(wellnessIntervals[type]);
+        wellnessIntervals[type] = null;
+      }
+    }
+    
     function initWellness() {
       updateWellnessDisplay();
       
-      const wellnessIntervals = {
+      const wellnessIntervalDurations = {
         stretch: 60 * 60 * 1000, // 60 minutes
         eyeRest: 20 * 60 * 1000, // 20 minutes
         hydration: 90 * 60 * 1000 // 90 minutes
       };
       
-      // Stretch reminders
-      setInterval(() => {
-        if (document.getElementById('stretchReminder').checked) {
-          const data = loadWellnessData();
-          data.stretch++;
-          saveWellnessData(data);
-          updateWellnessDisplay();
-          
-          if (Notification.permission === 'granted') {
-            new Notification('🤸 Stretch Break!', {
-              body: 'Time to stand up and stretch for a minute.',
-              icon: '🤸'
-            });
-          }
+      // Setup checkbox event listeners to start/stop intervals
+      document.getElementById('stretchReminder').addEventListener('change', (e) => {
+        if (e.target.checked) {
+          startWellnessInterval('stretch', wellnessIntervalDurations.stretch, () => {
+            const data = loadWellnessData();
+            data.stretch++;
+            saveWellnessData(data);
+            updateWellnessDisplay();
+            
+            if (Notification.permission === 'granted') {
+              new Notification('🤸 Stretch Break!', {
+                body: 'Time to stand up and stretch for a minute.'
+              });
+            }
+          });
+        } else {
+          stopWellnessInterval('stretch');
         }
-      }, wellnessIntervals.stretch);
+      });
       
-      // Eye rest reminders (20-20-20 rule)
-      setInterval(() => {
-        if (document.getElementById('eyeRestReminder').checked) {
-          const data = loadWellnessData();
-          data.eyeRest++;
-          saveWellnessData(data);
-          updateWellnessDisplay();
-          
-          if (Notification.permission === 'granted') {
-            new Notification('👁️ Eye Rest Time!', {
-              body: 'Look at something 20 feet away for 20 seconds.',
-              icon: '👁️'
-            });
-          }
+      document.getElementById('eyeRestReminder').addEventListener('change', (e) => {
+        if (e.target.checked) {
+          startWellnessInterval('eyeRest', wellnessIntervalDurations.eyeRest, () => {
+            const data = loadWellnessData();
+            data.eyeRest++;
+            saveWellnessData(data);
+            updateWellnessDisplay();
+            
+            if (Notification.permission === 'granted') {
+              new Notification('👁️ Eye Rest Time!', {
+                body: 'Look at something 20 feet away for 20 seconds.'
+              });
+            }
+          });
+        } else {
+          stopWellnessInterval('eyeRest');
         }
-      }, wellnessIntervals.eyeRest);
+      });
       
-      // Hydration reminders
-      setInterval(() => {
-        if (document.getElementById('hydrationReminder').checked) {
-          const data = loadWellnessData();
-          data.hydration++;
-          saveWellnessData(data);
-          updateWellnessDisplay();
-          
-          if (Notification.permission === 'granted') {
-            new Notification('💧 Hydration Reminder!', {
-              body: 'Time to drink some water!',
-              icon: '💧'
-            });
-          }
+      document.getElementById('hydrationReminder').addEventListener('change', (e) => {
+        if (e.target.checked) {
+          startWellnessInterval('hydration', wellnessIntervalDurations.hydration, () => {
+            const data = loadWellnessData();
+            data.hydration++;
+            saveWellnessData(data);
+            updateWellnessDisplay();
+            
+            if (Notification.permission === 'granted') {
+              new Notification('💧 Hydration Reminder!', {
+                body: 'Time to drink some water!'
+              });
+            }
+          });
+        } else {
+          stopWellnessInterval('hydration');
         }
-      }, wellnessIntervals.hydration);
+      });
+      
+      // Start intervals for checked boxes on page load
+      if (document.getElementById('stretchReminder').checked) {
+        document.getElementById('stretchReminder').dispatchEvent(new Event('change'));
+      }
+      if (document.getElementById('eyeRestReminder').checked) {
+        document.getElementById('eyeRestReminder').dispatchEvent(new Event('change'));
+      }
+      if (document.getElementById('hydrationReminder').checked) {
+        document.getElementById('hydrationReminder').dispatchEvent(new Event('change'));
+      }
     }
     
     // Initialize report generation
