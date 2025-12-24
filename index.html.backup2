@@ -953,8 +953,8 @@
     </div>
     <!-- END TAB: ANALYTICS -->
 
-        <!-- TAB CONTENT: GOALS -->
-        <div class="tab-content-wrapper" id="tab-goals">
+    <!-- TAB CONTENT: GOALS -->
+    <div class="tab-content-wrapper" id="tab-goals">
       <div class="feature-section">
         <h2 class="section-title">🎯 Goals & Progress Tracking</h2>
         <div class="feature-grid feature-grid-3col">
@@ -1005,11 +1005,11 @@
           </div>
         </div>
       </div>
-        </div>
-        <!-- END TAB: GOALS -->
+    </div>
+    <!-- END TAB: GOALS -->
 
-        <!-- TAB CONTENT: CUSTOMIZATION -->
-        <div class="tab-content-wrapper" id="tab-customization">
+    <!-- TAB CONTENT: CUSTOMIZATION -->
+    <div class="tab-content-wrapper" id="tab-customization">
       <div class="feature-section">
         <h2 class="section-title">⚙️ Customization & Planning</h2>
         <div class="feature-grid feature-grid-2col">
@@ -1072,11 +1072,11 @@
     </div>
     <!-- END SECTION: Customization & Planning -->
       </div>
-        </div>
-        <!-- END TAB: CUSTOMIZATION -->
+    </div>
+    <!-- END TAB: CUSTOMIZATION -->
 
-        <!-- TAB CONTENT: REPORTS -->
-        <div class="tab-content-wrapper" id="tab-reports">
+    <!-- TAB CONTENT: REPORTS -->
+    <div class="tab-content-wrapper" id="tab-reports">
       <div class="feature-section">
         <h2 class="section-title">📄 Reports & Data Management</h2>
         <div class="feature-grid feature-grid-3col">
@@ -1177,11 +1177,11 @@
     </div>
     <!-- END SECTION: Reports & Data -->
       </div>
-        </div>
-        <!-- END TAB: REPORTS -->
+    </div>
+    <!-- END TAB: REPORTS -->
 
-        <!-- TAB CONTENT: PRODUCTIVITY -->
-        <div class="tab-content-wrapper" id="tab-productivity">
+    <!-- TAB CONTENT: PRODUCTIVITY -->
+    <div class="tab-content-wrapper" id="tab-productivity">
       <div class="feature-section">
         <h2 class="section-title">⚡ Productivity & Focus Tools</h2>
         <div class="feature-grid feature-grid-2col">
@@ -1267,11 +1267,11 @@
         </div>
       </div>
       </div>
-        </div>
-        <!-- END TAB: PRODUCTIVITY -->
+    </div>
+    <!-- END TAB: PRODUCTIVITY -->
 
-        <!-- TAB CONTENT: ADVANCED -->
-        <div class="tab-content-wrapper" id="tab-advanced">
+    <!-- TAB CONTENT: ADVANCED -->
+    <div class="tab-content-wrapper" id="tab-advanced">
       <div class="feature-section">
         <h2 class="section-title">🚀 Advanced Features</h2>
         <div class="feature-grid feature-grid-3col">
@@ -1558,8 +1558,8 @@
     <!-- END SECTION: Advanced Features -->
         </div>
       </div>
-        </div>
-        <!-- END TAB: ADVANCED -->
+    </div>
+    <!-- END TAB: ADVANCED -->
 
         <!-- WEEKLY SUMMARY -->
         <div class="d-flex flex-wrap justify-content-between align-items-center mt-4">
