@@ -9,6 +9,10 @@
   <!-- Modern Professional Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Orbitron:wght@400;600&family=Share+Tech+Mono&family=Audiowide&display=swap" rel="stylesheet">
   <style>
+    * {
+      box-sizing: border-box;
+    }
+    
     :root {
       --bg:#0f172a; --card:#111827; --muted:#cbd5e1;
       --accent:#22c55e; --warn:#f59e0b; --error:#ef4444; --text:#e5e7eb;
@@ -16,11 +20,21 @@
       --font:'Inter', sans-serif;
       --secondary-text:#94a3b8;
     }
+    
+    html {
+      overflow-x: hidden;
+      max-width: 100%;
+    }
+    
     body {
       background: var(--bg);
       color: var(--text);
       font-family: var(--font);
       transition: background-color 0.3s ease, color 0.3s ease;
+      overflow-x: hidden; /* Prevent horizontal scrolling on mobile */
+      max-width: 100%;
+      margin: 0;
+      padding: 0;
     }
     .card {
       background: var(--card);
@@ -31,6 +45,8 @@
       opacity: 0;
       transform: translateY(10px);
       animation: fadeInUp 0.4s ease forwards;
+      max-width: 100%;
+      overflow-x: hidden;
     }
     .card-header {
       font-weight: 600;
@@ -582,12 +598,14 @@
 
     .content-container {
       padding: 2rem;
+      max-width: 100%;
+      overflow-x: hidden;
     }
 
     /* FEATURE GRID */
     .feature-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 350px), 1fr));
       gap: 1.5rem;
     }
     
@@ -658,10 +676,13 @@
 
       .feature-grid {
         grid-template-columns: 1fr;
+        gap: 1rem;
       }
 
       .content-container {
         padding: 0.75rem;
+        max-width: 100%;
+        overflow-x: hidden;
       }
       
       .app-header {
